@@ -1,0 +1,13 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+*.asset !text !filter !merge !diff
+*.prefab !text !filter !merge !diff
+*.unity !text !filter !merge !diff
+*.controller !text !filter !merge !diff
+*.anim !text !filter !merge !diff
+*.fbx !text !filter !merge !diff
+*.psd !text !filter !merge !diff
+*.tga !text !filter !merge !diff
+*.exr !text !filter !merge !diff
+*.mp4 !text !filter !merge !diff
+*.wav !text !filter !merge !diff
