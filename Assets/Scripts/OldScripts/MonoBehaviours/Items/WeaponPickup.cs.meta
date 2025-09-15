@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f39afe707fda92a41840d18c30846dba
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - weaponItem: {instanceID: 0}
+  - interactionTrigger: {instanceID: 0}
+  - PickupSound: {fileID: 8300000, guid: e2f3eb61d724c65489ea7e922a16c9db, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
