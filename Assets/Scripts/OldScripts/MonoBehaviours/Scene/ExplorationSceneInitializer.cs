@@ -1,9 +1,4 @@
 using UnityEngine;
-using ProyectSecret.Combat.SceneManagement;
-using ProyectSecret.Inventory; // Necesario para ItemDatabase
-using ProyectSecret.MonoBehaviours.Player; // Para PaperMarioPlayerMovement
-using ProyectSecret.Managers; // Para el AudioManager
-using ProyectSecret.Events;   // Necesario para el GameEventBus
 
 /// <summary>
 /// Inicializa la escena de exploración y posiciona al jugador en un punto fijo (estatua) si viene de una derrota en combate.
@@ -68,10 +63,10 @@ public class ExplorationSceneInitializer : MonoBehaviour
         else if (string.IsNullOrEmpty(playerPersistentData.equippedWeaponId))
         {
             // Lógica de primera partida
-            var health = player.GetComponent<ProyectSecret.Components.HealthComponentBehaviour>();
+            var health = player.GetComponent<HealthComponentBehaviour>();
             if (health != null) health.SetToMax();
             
-            var stamina = player.GetComponent<ProyectSecret.Components.StaminaComponentBehaviour>();
+            var stamina = player.GetComponent<StaminaComponentBehaviour>();
             if (stamina != null) stamina.SetToMax();
         }
         else
@@ -98,3 +93,4 @@ public class ExplorationSceneInitializer : MonoBehaviour
         }
     }
 }
+

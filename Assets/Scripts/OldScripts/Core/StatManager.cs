@@ -1,35 +1,30 @@
 using UnityEngine;
-using ProyectSecret.Interfaces;
-using ProyectSecret.Characters;
 
-namespace ProyectSecret.Core
+public enum StatType
 {
-    public enum StatType
-    {
-        Health,
-        Stamina
-    }
+    Health,
+    Stamina
+}
+
+/// <summary>
+/// Centraliza el acceso a todos los componentes de estadísticas del jugador.
+/// </summary>
+public class StatManager : MonoBehaviour
+{
+    // Asigna estos componentes en el Inspector.
+    [SerializeField] private PlayerHealthController healthController;
+    [SerializeField] private PlayerStaminaController staminaController;
 
     /// <summary>
-    /// Centraliza el acceso a todos los componentes de estadísticas del jugador.
+    /// Obtiene el controlador de una estadística específica.
     /// </summary>
-    public class StatManager : MonoBehaviour
+    public IStatController GetStat(StatType type)
     {
-        // Asigna estos componentes en el Inspector.
-        [SerializeField] private PlayerHealthController healthController;
-        [SerializeField] private PlayerStaminaController staminaController;
-
-        /// <summary>
-        /// Obtiene el controlador de una estadística específica.
-        /// </summary>
-        public IStatController GetStat(StatType type)
+        switch (type)
         {
-            switch (type)
-            {
-                case StatType.Health: return healthController?.Health;
-                case StatType.Stamina: return staminaController?.Stamina;
-                default: return null;
-            }
+            case StatType.Health: return healthController?.Health;
+            case StatType.Stamina: return staminaController?.Stamina;
+            default: return null;
         }
     }
 }

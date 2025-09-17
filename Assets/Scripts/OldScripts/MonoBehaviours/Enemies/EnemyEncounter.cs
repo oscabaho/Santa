@@ -1,5 +1,4 @@
 using UnityEngine;
-using ProyectSecret.Managers;
 
 public class EnemyEncounter : MonoBehaviour // Este script estaría en el enemigo en la escena de exploración
 {

@@ -1,8 +1,4 @@
 using UnityEngine;
-using ProyectSecret.Inventory.Items;
-using ProyectSecret.Inventory;
-using ProyectSecret.Audio; // Añadido para usar AudioData
-using ProyectSecret.Interfaces;
 
 /// <summary>
 /// Permite al jugador recoger un arma del suelo e interactuar para equiparla.

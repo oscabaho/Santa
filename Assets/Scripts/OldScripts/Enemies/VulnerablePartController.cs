@@ -1,52 +1,47 @@
 using UnityEngine;
-using ProyectSecret.Interfaces;
 using System.Collections;
-using ProyectSecret.Characters.Enemies;
 using UnityEngine.Pool;
 
-namespace ProyectSecret.Enemies
+public class VulnerablePartController : MonoBehaviour, IDamageable
 {
-    public class VulnerablePartController : MonoBehaviour, IDamageable
+    [SerializeField] private float vulnerableTime = 3f;
+
+    private bool isVulnerable = true;
+    private EnemyHealthController enemyHealth;
+    private IObjectPool<VulnerablePartController> pool;
+
+    /// <summary>
+    /// Inicializa la parte vulnerable con una referencia a la salud del enemigo.
+    /// Debe ser llamado por quien lo instancia.
+    /// </summary>
+    public void Initialize(EnemyHealthController healthController, IObjectPool<VulnerablePartController> objectPool)
     {
-        [SerializeField] private float vulnerableTime = 3f;
+        enemyHealth = healthController;
+        pool = objectPool;
+    }
 
-        private bool isVulnerable = true;
-        private EnemyHealthController enemyHealth;
-        private IObjectPool<VulnerablePartController> pool;
+    private void Start()
+    {
+        // Usamos una corutina para gestionar el ciclo de vida.
+        StartCoroutine(LifecycleRoutine());
+    }
 
-        /// <summary>
-        /// Inicializa la parte vulnerable con una referencia a la salud del enemigo.
-        /// Debe ser llamado por quien lo instancia.
-        /// </summary>
-        public void Initialize(EnemyHealthController healthController, IObjectPool<VulnerablePartController> objectPool)
+    private IEnumerator LifecycleRoutine()
+    {
+        // Esperar el tiempo de vulnerabilidad.
+        yield return new WaitForSeconds(vulnerableTime);
+
+        // Desactivar la vulnerabilidad y destruir el objeto.
+        isVulnerable = false;
+        // En lugar de destruir, lo devolvemos al pool.
+        pool?.Release(this);
+    }
+
+    public void TakeDamage(int amount)
+    {
+        if (isVulnerable && enemyHealth != null)
         {
-            enemyHealth = healthController;
-            pool = objectPool;
-        }
-
-        private void Start()
-        {
-            // Usamos una corutina para gestionar el ciclo de vida.
-            StartCoroutine(LifecycleRoutine());
-        }
-
-        private IEnumerator LifecycleRoutine()
-        {
-            // Esperar el tiempo de vulnerabilidad.
-            yield return new WaitForSeconds(vulnerableTime);
-
-            // Desactivar la vulnerabilidad y destruir el objeto.
-            isVulnerable = false;
-            // En lugar de destruir, lo devolvemos al pool.
-            pool?.Release(this);
-        }
-
-        public void TakeDamage(int amount)
-        {
-            if (isVulnerable && enemyHealth != null)
-            {
-                enemyHealth.TakeDamage(amount);
-            }
+            enemyHealth.TakeDamage(amount);
         }
     }
 }

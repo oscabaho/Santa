@@ -2,11 +2,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(HealthComponentBehaviour))]
+[RequireComponent(typeof(StaminaComponentBehaviour))]
 public class Movement : MonoBehaviour
 {
-        private ActionMap actions;
+    private ActionMap actions;
     private CharacterController characterController;
-        [SerializeField] private Transform mainCameraTransform;
+    [SerializeField] private Transform mainCameraTransform;
 
     public float moveSpeed = 5f;
     public float rotationSpeed = 720f;
@@ -19,9 +21,9 @@ public class Movement : MonoBehaviour
 
     private void Awake()
     {
-                actions = new ActionMap();
+        actions = new ActionMap();
         characterController = GetComponent<CharacterController>();
-                if (mainCameraTransform == null)
+        if (mainCameraTransform == null)
         {
             mainCameraTransform = Camera.main.transform;
         }

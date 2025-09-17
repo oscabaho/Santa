@@ -1,6 +1,4 @@
 using UnityEngine;
-using ProyectSecret.Interfaces;
-using ProyectSecret.UI.Dialogue;
 
 /// <summary>
 /// Componente que se añade a los NPCs o objetos que pueden iniciar una conversación.
