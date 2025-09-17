@@ -32,11 +32,13 @@ public class TurnBasedCombatManager : MonoBehaviour
 
     public void StartCombat(List<GameObject> participants)
     {
-        if (participants == null || participants.Count == 0) return;
+        if (participants == null || participants.Count == 0)
+        {
+            Debug.LogError("StartCombat called with no participants.");
+            return;
+        }
 
-        GameStateManager.StartCombat();
         _playerTurnCounter = 0;
-
         _turnOrder.Clear();
         foreach (var participant in participants)
         {
@@ -49,6 +51,8 @@ public class TurnBasedCombatManager : MonoBehaviour
 
     public void NextTurn()
     {
+        // This is a placeholder for checking win/loss conditions.
+        // For now, we'll just check if the queue is empty.
         if (_turnOrder.Count == 0)
         {
             EndCombat();
@@ -64,7 +68,7 @@ public class TurnBasedCombatManager : MonoBehaviour
         if (_currentCombatant.CompareTag("Player"))
         {
             _playerTurnCounter++;
-            if (_playerTurnCounter > 1 && (_playerTurnCounter -1) % turnsPerAPRestore == 0)
+            if (_playerTurnCounter > 1 && (_playerTurnCounter - 1) % turnsPerAPRestore == 0)
             {
                 var stamina = _currentCombatant.GetComponent<StaminaComponentBehaviour>();
                 if (stamina != null)
@@ -78,7 +82,8 @@ public class TurnBasedCombatManager : MonoBehaviour
 
     private void EndCombat()
     {
-        GameStateManager.EndCombat();
         Debug.Log("Combat has ended.");
+        // Notify the transition manager to switch back to exploration mode.
+        CombatTransitionManager.Instance.EndCombat();
     }
 }

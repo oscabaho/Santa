@@ -1,17 +1,19 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 /// <summary>
 /// This component starts a turn-based combat encounter when the player enters its trigger.
 /// </summary>
 [RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(CombatEncounter))]
 public class CombatTrigger : MonoBehaviour
 {
-    [Header("Combat Participants")]
-    [Tooltip("A list of enemy GameObjects that will participate in this battle.")]
-    [SerializeField] private List<GameObject> enemiesInEncounter;
-
+    private CombatEncounter _encounter;
     private bool _combatHasBeenTriggered = false;
+
+    private void Awake()
+    {
+        _encounter = GetComponent<CombatEncounter>();
+    }
 
     private void Start()
     {
@@ -30,23 +32,17 @@ public class CombatTrigger : MonoBehaviour
             Debug.Log("Player has entered a combat trigger.");
             _combatHasBeenTriggered = true;
 
-            // Compile the list of all combatants.
-            List<GameObject> participants = new List<GameObject>();
-            participants.Add(other.gameObject); // Add the player
-            participants.AddRange(enemiesInEncounter); // Add the enemies
-
-            // Find the TurnBasedCombatManager and start the combat.
-            if (TurnBasedCombatManager.Instance != null)
+            // Use the CombatTransitionManager to start the combat.
+            if (CombatTransitionManager.Instance != null)
             {
-                TurnBasedCombatManager.Instance.StartCombat(participants);
+                CombatTransitionManager.Instance.StartCombat(_encounter);
             }
             else
             {
-                Debug.LogError("A TurnBasedCombatManager is required in the scene to start combat!");
+                Debug.LogError("A CombatTransitionManager is required in the scene to start combat!");
             }
 
-            // For now, we just disable the trigger object. In a real game, you might destroy it
-            // or play an animation before transitioning to a combat scene.
+            // For now, we just disable the trigger object.
             gameObject.SetActive(false);
         }
     }
