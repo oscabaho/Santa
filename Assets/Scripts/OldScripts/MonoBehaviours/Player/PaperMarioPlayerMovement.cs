@@ -1,5 +1,4 @@
 using UnityEngine;
-using ProyectSecret.MonoBehaviours.Player;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(PlayerInputController), typeof(PlayerCameraController))]

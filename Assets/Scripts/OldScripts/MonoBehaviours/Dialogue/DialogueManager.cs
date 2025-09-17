@@ -1,17 +1,14 @@
 using UnityEngine;
 
-namespace ProyectSecret.UI.Dialogue
+public class DialogueManager : MonoBehaviour
 {
-    public class DialogueManager : MonoBehaviour
+    void Start()
     {
-        void Start()
-        {
-            
-        }
+        
+    }
 
-        void Update()
-        {
-            
-        }
+    void Update()
+    {
+        
     }
 }

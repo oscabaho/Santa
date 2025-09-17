@@ -1,6 +1,4 @@
 using UnityEngine;
-using ProyectSecret.Combat.Behaviours;
-using ProyectSecret.MonoBehaviours.Player;
 
 /// <summary>
 /// Controlador de input de ataque para el jugador. Escucha los eventos de input y los traduce en ataques usando AttackComponent.

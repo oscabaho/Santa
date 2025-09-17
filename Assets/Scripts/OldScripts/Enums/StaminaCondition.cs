@@ -1,9 +1,6 @@
-namespace ProyectSecret.Enums
+public enum StaminaCondition
 {
-    public enum StaminaCondition
-    {
-        None,
-        ByTime,
-        Instant
-    }
+    None,
+    ByTime,
+    Instant
 }
