@@ -11,14 +11,14 @@ public class CombatEncounter : MonoBehaviour
     [Tooltip("The parent GameObject that contains the entire pre-staged combat scene.")]
     [SerializeField] private GameObject combatSceneParent;
 
-    [Tooltip("The camera that will be used for this combat encounter.")]
-    [SerializeField] private Camera combatCamera;
+    [Tooltip("The virtual camera that will be used for this combat encounter.")]
+    [SerializeField] private GameObject combatCamera;
 
     [Header("Combatants")]
     [Tooltip("The list of all participants in this battle (player and enemies) that exist within the combat scene.")]
     [SerializeField] private List<GameObject> combatParticipants;
 
     public GameObject CombatSceneParent => combatSceneParent;
-    public Camera CombatCamera => combatCamera;
+    public GameObject CombatCamera => combatCamera;
     public List<GameObject> CombatParticipants => combatParticipants;
 }
