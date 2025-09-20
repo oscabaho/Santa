@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(HealthComponentBehaviour))]
-[RequireComponent(typeof(StaminaComponentBehaviour))]
+[RequireComponent(typeof(ActionPointComponentBehaviour))]
 public class Movement : MonoBehaviour
 {
     private ActionMap actions;

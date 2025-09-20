@@ -8,8 +8,8 @@ public class CombatTransitionManager : MonoBehaviour
     public static CombatTransitionManager Instance { get; private set; }
 
     [Header("Scene References")]
-    [Tooltip("The main camera used for exploration.")]
-    [SerializeField] private Camera mainCamera;
+    [Tooltip("The camera GameObject used for exploration.")]
+    [SerializeField] private GameObject explorationCamera;
     [Tooltip("The player GameObject in the exploration scene.")]
     [SerializeField] private GameObject explorationPlayer;
 
@@ -33,15 +33,21 @@ public class CombatTransitionManager : MonoBehaviour
         GameStateManager.StartCombat();
 
         // Disable exploration elements
-        if (mainCamera != null) mainCamera.gameObject.SetActive(false);
+        if (explorationCamera != null) explorationCamera.SetActive(false);
         if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = false;
 
         // Enable combat elements
-        if (_currentEncounter.CombatCamera != null) _currentEncounter.CombatCamera.gameObject.SetActive(true);
         if (_currentEncounter.CombatSceneParent != null) _currentEncounter.CombatSceneParent.SetActive(true);
 
         // Start the battle logic
-        TurnBasedCombatManager.Instance.StartCombat(_currentEncounter.CombatParticipants);
+        if (TurnBasedCombatManager.Instance != null)
+        {
+            TurnBasedCombatManager.Instance.StartCombat(_currentEncounter.CombatParticipants);
+        }
+        else
+        {
+            Debug.LogError("A TurnBasedCombatManager is required in the scene to start combat!");
+        }
     }
 
     public void EndCombat()
@@ -49,11 +55,10 @@ public class CombatTransitionManager : MonoBehaviour
         if (_currentEncounter == null) return;
 
         // Disable combat elements
-        if (_currentEncounter.CombatCamera != null) _currentEncounter.CombatCamera.gameObject.SetActive(false);
         if (_currentEncounter.CombatSceneParent != null) _currentEncounter.CombatSceneParent.SetActive(false);
 
         // Enable exploration elements
-        if (mainCamera != null) mainCamera.gameObject.SetActive(true);
+        if (explorationCamera != null) explorationCamera.SetActive(true);
         if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = true;
 
         GameStateManager.EndCombat();
