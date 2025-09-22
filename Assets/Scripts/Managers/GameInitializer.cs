@@ -14,7 +14,7 @@ public static class GameInitializer
     public static void InitializeGameSystems()
     {
         // Instanciar managers desde la carpeta Resources si no existen.
-        InstantiateManagerFromResources<AudioManager>(AudioManagerPrefabPath);
+        // InstantiateManagerFromResources<AudioManager>(AudioManagerPrefabPath);
         InstantiateManagerFromResources<GraphicsSettingsManager>(GraphicsManagerPrefabPath);
     }
 

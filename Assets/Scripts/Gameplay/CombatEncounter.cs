@@ -15,10 +15,38 @@ public class CombatEncounter : MonoBehaviour
     [SerializeField] private GameObject combatCamera;
 
     [Header("Combatants")]
-    [Tooltip("The list of all participants in this battle (player and enemies) that exist within the combat scene.")]
-    [SerializeField] private List<GameObject> combatParticipants;
+    [Tooltip("A list of transforms where enemies will be spawned.")]
+    [SerializeField] private List<Transform> enemySpawnPoints;
 
     public GameObject CombatSceneParent => combatSceneParent;
     public GameObject CombatCamera => combatCamera;
-    public List<GameObject> CombatParticipants => combatParticipants;
+    public List<GameObject> CombatParticipants { get; private set; }
+
+    /// <summary>
+    /// Sets up the encounter by spawning enemies and preparing the list of combatants.
+    /// </summary>
+    /// <param name="player">The player GameObject.</param>
+    /// <param name="enemyPrefabs">A list of enemy prefabs to spawn.</param>
+    public void SetupEncounter(GameObject player, List<Enemy> enemyPrefabs)
+    {
+        CombatParticipants = new List<GameObject>();
+        CombatParticipants.Add(player);
+
+        // TODO: Clear previously spawned enemies if any
+
+        for (int i = 0; i < enemyPrefabs.Count; i++)
+        {
+            if (i < enemySpawnPoints.Count)
+            {
+                Enemy enemyPrefab = enemyPrefabs[i];
+                Transform spawnPoint = enemySpawnPoints[i];
+                GameObject enemyInstance = Instantiate(enemyPrefab.gameObject, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+                CombatParticipants.Add(enemyInstance);
+            }
+            else
+            {
+                Debug.LogWarning($"Not enough spawn points for all enemies. Enemy {enemyPrefabs[i].name} was not spawned.");
+            }
+        }
+    }
 }

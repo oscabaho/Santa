@@ -1,86 +1,90 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(HealthComponentBehaviour))]
 [RequireComponent(typeof(ActionPointComponentBehaviour))]
+[RequireComponent(typeof(EnergyComponentBehaviour))]
 public class Movement : MonoBehaviour
 {
-    private ActionMap actions;
-    private CharacterController characterController;
-    [SerializeField] private Transform mainCameraTransform;
+    [Header("Dependencies")]
+    [Tooltip("The InputReader ScriptableObject that provides player input events.")]
+    [SerializeField] private InputReader inputReader;
 
-    public float moveSpeed = 5f;
-    public float rotationSpeed = 720f;
-    public float gravityValue = -9.81f;
-    public float jumpHeight = 1.2f;
+    [Header("Movement Settings")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float rotationSpeed = 720f;
+    [SerializeField] private float gravityValue = -9.81f;
+    [SerializeField] private float jumpHeight = 1.2f;
 
-    private Vector2 moveInput;
-    private Vector3 playerVelocity;
-    private bool isGrounded;
+    private CharacterController _characterController;
+    private Transform _mainCameraTransform;
+
+    private Vector2 _moveInput;
+    private Vector3 _playerVelocity;
+    private bool _isGrounded;
 
     private void Awake()
     {
-        actions = new ActionMap();
-        characterController = GetComponent<CharacterController>();
-        if (mainCameraTransform == null)
-        {
-            mainCameraTransform = Camera.main.transform;
-        }
+        _characterController = GetComponent<CharacterController>();
+        _mainCameraTransform = Camera.main.transform;
 
-        actions.Player.Move.performed += OnMove;
-        actions.Player.Move.canceled += OnMove;
-        actions.Player.Jump.performed += OnJump;
+        if (inputReader == null)
+        {
+            Debug.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
+        }
     }
 
     private void OnEnable()
     {
-        actions.Player.Enable();
-    }
-
-        private void OnDisable()
-    {
-        actions.Player.Disable();
-    }
-
-    private void OnDestroy()
-    {
-        actions.Dispose();
-    }
-
-    private void OnMove(InputAction.CallbackContext context)
-    {
-        moveInput = context.ReadValue<Vector2>();
-    }
-
-    private void OnJump(InputAction.CallbackContext context)
-    {
-        if (isGrounded)
+        if (inputReader != null)
         {
-            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+            inputReader.MoveEvent += OnMove;
+            inputReader.JumpEvent += OnJump;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (inputReader != null)
+        {
+            inputReader.MoveEvent -= OnMove;
+            inputReader.JumpEvent -= OnJump;
+        }
+    }
+
+    private void OnMove(Vector2 moveInput)
+    {
+        _moveInput = moveInput;
+    }
+
+    private void OnJump()
+    {
+        if (_isGrounded)
+        {
+            _playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
         }
     }
 
     private void Update()
     {
-        isGrounded = characterController.isGrounded;
+        _isGrounded = _characterController.isGrounded;
 
-        if (isGrounded && playerVelocity.y < 0)
+        if (_isGrounded && _playerVelocity.y < 0)
         {
-            playerVelocity.y = -2f;
+            _playerVelocity.y = -2f;
         }
 
-        Vector3 forward = mainCameraTransform.forward;
-        Vector3 right = mainCameraTransform.right;
+        Vector3 forward = _mainCameraTransform.forward;
+        Vector3 right = _mainCameraTransform.right;
         forward.y = 0;
         right.y = 0;
         forward.Normalize();
         right.Normalize();
-        Vector3 desiredMoveDirection = (forward * moveInput.y + right * moveInput.x).normalized;
+        Vector3 desiredMoveDirection = (forward * _moveInput.y + right * _moveInput.x).normalized;
 
-        playerVelocity.y += gravityValue * Time.deltaTime;
+        _playerVelocity.y += gravityValue * Time.deltaTime;
 
-        characterController.Move((desiredMoveDirection * moveSpeed + playerVelocity) * Time.deltaTime);
+        _characterController.Move((desiredMoveDirection * moveSpeed + _playerVelocity) * Time.deltaTime);
 
         if (desiredMoveDirection != Vector3.zero)
         {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// This component starts a turn-based combat encounter when the player enters its trigger.
@@ -31,6 +32,10 @@ public class CombatTrigger : MonoBehaviour
         {
             Debug.Log("Player has entered a combat trigger.");
             _combatHasBeenTriggered = true;
+
+            // Get enemies for the current level and set up the encounter
+            List<Enemy> enemies = LevelManager.Instance.GetEnemiesForCurrentLevel();
+            _encounter.SetupEncounter(other.gameObject, enemies);
 
             // Use the CombatTransitionManager to start the combat.
             if (CombatTransitionManager.Instance != null)

@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,9 +13,6 @@ public class TurnBasedCombatManager : MonoBehaviour
     [SerializeField] private int _directAttackAPCost = 1;
     [SerializeField] private int _areaAttackAPCost = 2;
     [SerializeField] private int _specialAttackAPCost = 3;
-
-    [Header("Enemy Settings")]
-    [SerializeField] private float _enemyTurnDelay = 1.5f;
 
     private Queue<GameObject> _turnOrder = new Queue<GameObject>();
     private GameObject _currentCombatant;
@@ -57,7 +53,7 @@ public class TurnBasedCombatManager : MonoBehaviour
             if (apComponent == null)
             {
                 Debug.LogError($"{p.name} is missing an ActionPointComponentBehaviour!", p);
-                continue; // Skip participants without AP
+                continue;
             }
 
             if (p.CompareTag("Player"))
@@ -88,7 +84,7 @@ public class TurnBasedCombatManager : MonoBehaviour
     public void PlayerAttackDirect(GameObject target)
     {
         if (!IsPlayerTurn || target == null) return;
-        if (!_playerAP.ActionPoints.HasEnough(_directAttackAPCost)) 
+        if (!_playerAP.ActionPoints.HasEnough(_directAttackAPCost))
         {
             Debug.Log("Not enough AP for Direct Attack!");
             return;
@@ -148,8 +144,10 @@ public class TurnBasedCombatManager : MonoBehaviour
     private void EndPlayerTurn()
     {
         _isPlayerTurn = false;
-        if (CheckForVictory()) EndCombat();
-        else NextTurn();
+        if (CheckForVictory()) 
+            EndCombat();
+        else 
+            NextTurn();
     }
 
     #endregion
@@ -193,53 +191,31 @@ public class TurnBasedCombatManager : MonoBehaviour
         {
             _isPlayerTurn = false;
             _enemyAP[_currentCombatant]?.Refill();
-            StartCoroutine(EnemyTurn(_currentCombatant));
+            
+            var enemyBrain = _currentCombatant.GetComponent<EnemyBrain>();
+            if (enemyBrain != null)
+            {
+                enemyBrain.TakeTurn(_player);
+            }
+            else
+            {
+                Debug.LogError($"{_currentCombatant.name} is missing an EnemyBrain component!", _currentCombatant);
+                EndEnemyTurn();
+            }
         }
     }
 
-    private IEnumerator EnemyTurn(GameObject enemyGO)
+    public void EndEnemyTurn()
     {
-        Debug.Log($"{enemyGO.name}'s turn.");
-        yield return new WaitForSeconds(_enemyTurnDelay);
-
         var playerHealth = _player.GetComponent<HealthComponentBehaviour>();
-        var enemyData = enemyGO.GetComponent<Enemy>();
-        var enemyAP = _enemyAP[enemyGO];
-
-        if (enemyData != null && enemyAP != null)
+        if (playerHealth != null && playerHealth.CurrentValue <= 0)
         {
-            bool performedAction = false;
-            // 50/50 chance to try area attack first
-            if (Random.value > 0.5f)
-            {
-                if (enemyAP.ActionPoints.HasEnough(enemyData.AreaAttackAPCost))
-                {
-                    Debug.Log($"{enemyData.EnemyName} uses its Area Attack!");
-                    enemyAP.ActionPoints.SpendActionPoints(enemyData.AreaAttackAPCost);
-                    playerHealth.AffectValue(-enemyData.AreaAttackDamage);
-                    performedAction = true;
-                }
-            }
-            
-            // If no action was performed yet, try direct attack
-            if (!performedAction && enemyAP.ActionPoints.HasEnough(enemyData.DirectAttackAPCost))
-            {
-                Debug.Log($"{enemyData.EnemyName} uses its Direct Attack!");
-                enemyAP.ActionPoints.SpendActionPoints(enemyData.DirectAttackAPCost);
-                playerHealth.AffectValue(-enemyData.DirectAttackDamage);
-                performedAction = true;
-            }
-
-            if (!performedAction)
-            {
-                Debug.Log($"{enemyData.EnemyName} does not have enough AP to act.");
-            }
+            EndCombat();
         }
-
-        Debug.Log($"Player health: {playerHealth.CurrentValue}");
-
-        if (playerHealth.CurrentValue <= 0) EndCombat();
-        else NextTurn();
+        else
+        {
+            NextTurn();
+        }
     }
 
     private void EndCombat()
