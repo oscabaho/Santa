@@ -55,13 +55,26 @@ public class UpgradeUI : MonoBehaviour
 
     private void ChooseUpgrade(AbilityUpgrade chosenUpgrade)
     {
+        // 1. Apply the stat upgrade
         UpgradeManager.Instance.ApplyUpgrade(chosenUpgrade);
         upgradePanel.SetActive(false);
 
-        // Now that the upgrade is chosen, we can formally end the combat state.
+        // 2. Liberate the current level (change visuals)
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.LiberateCurrentLevel();
+        }
+
+        // 3. End the combat state (this was already here)
         if (CombatTransitionManager.Instance != null)
         {
             CombatTransitionManager.Instance.EndCombat();
+        }
+
+        // 4. Prepare the next level/area
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.AdvanceToNextLevel();
         }
     }
 }
