@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool; // <-- Añadir
 
-public class VFXManager : MonoBehaviour
+public class VFXManager : MonoBehaviour, IVFXService
 {
-    public static VFXManager Instance { get; private set; }
+    internal static VFXManager Instance { get; private set; }
     
     [System.Serializable]
     public class VfxPoolConfig
@@ -32,8 +32,11 @@ public class VFXManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             InitializePools();
             // Suscribirse al evento para reproducir VFX
-            GameEventBus.Instance?.Subscribe<HitboxImpactEvent>(OnHitboxImpact);
-            GameEventBus.Instance?.Subscribe<PlayVFXRequest>(OnPlayVFXRequest);
+            ServiceLocator.Register<IVFXService>(this);
+            // Subscribe to event bus if available via the IEventBus service
+            var eventBus = ServiceLocator.Get<IEventBus>();
+            eventBus?.Subscribe<HitboxImpactEvent>(OnHitboxImpact);
+            eventBus?.Subscribe<PlayVFXRequest>(OnPlayVFXRequest);
         }
     }
 
@@ -70,10 +73,19 @@ public class VFXManager : MonoBehaviour
     private void OnDestroy()
     {
         // Buena práctica: desuscribirse para evitar errores.
-        if (Instance == this && GameEventBus.Instance != null)
+        if (Instance == this)
         {
-            GameEventBus.Instance.Unsubscribe<HitboxImpactEvent>(OnHitboxImpact);
-            GameEventBus.Instance.Unsubscribe<PlayVFXRequest>(OnPlayVFXRequest);
+            var registered = ServiceLocator.Get<IVFXService>();
+            if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+                ServiceLocator.Unregister<IVFXService>();
+
+            var eventBus = ServiceLocator.Get<IEventBus>();
+            if (eventBus != null)
+            {
+                eventBus.Unsubscribe<HitboxImpactEvent>(OnHitboxImpact);
+                eventBus.Unsubscribe<PlayVFXRequest>(OnPlayVFXRequest);
+            }
+            Instance = null;
         }
     }
 
@@ -169,7 +181,7 @@ public class VFXManager : MonoBehaviour
         // Si no, simplemente se desactiva.
         if (targetObject != null)
         {
-            GameEventBus.Instance.Publish(new VFXCompletedEvent(targetObject));
+            ServiceLocator.Get<IEventBus>()?.Publish(new VFXCompletedEvent(targetObject));
             targetObject.SetActive(false);
         }
     }

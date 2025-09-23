@@ -4,9 +4,9 @@ using System.Collections.Generic;
 /// <summary>
 /// Manages the game's level progression, including visual transformation of areas.
 /// </summary>
-public class LevelManager : MonoBehaviour
+public class LevelManager : MonoBehaviour, ILevelService
 {
-    public static LevelManager Instance { get; private set; }
+    internal static LevelManager Instance { get; private set; }
 
     [Header("Level Configuration")]
     [Tooltip("The list of all levels/areas in the game, in order.")]
@@ -23,7 +23,16 @@ public class LevelManager : MonoBehaviour
         else
         {
             Instance = this;
+            ServiceLocator.Register<ILevelService>(this);
         }
+    }
+
+    private void OnDestroy()
+    {
+        var registered = ServiceLocator.Get<ILevelService>();
+        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+            ServiceLocator.Unregister<ILevelService>();
+        if (Instance == this) Instance = null;
     }
 
     private void Start()

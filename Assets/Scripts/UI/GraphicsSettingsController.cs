@@ -2,29 +2,32 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using System.Collections.Generic;
-using TMPro;
 
 public class GraphicsSettingsController : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private TMP_Dropdown qualityDropdown;
-    [SerializeField] private TMP_Dropdown resolutionDropdown;
+    // Using `Dropdown` as a fallback when TextMeshPro is not available.
+    // If you want prettier dropdowns via TextMeshPro, replace these with `TMP_Dropdown`
+    // and install the TextMeshPro package via the Unity Package Manager.
+    [SerializeField] private Dropdown qualityDropdown;
+    [SerializeField] private Dropdown resolutionDropdown;
     [SerializeField] private Toggle fullscreenToggle;
     [SerializeField] private Toggle vsyncToggle;
 
     private void Start()
     {
-        if (GraphicsSettingsManager.Instance == null)
+        var graphicsService = ServiceLocator.Get<IGraphicsSettingsService>();
+        if (graphicsService == null)
         {
-            Debug.LogError("GraphicsSettingsController: GraphicsSettingsManager no encontrado. El panel de opciones no funcionará.", this);
+            Debug.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionar\u00e1.", this);
             gameObject.SetActive(false);
             return;
         }
 
         SetupQualityDropdown();
-        SetupResolutionDropdown();
+        SetupResolutionDropdown(graphicsService);
         SetupToggles();
-        AddListeners();
+        AddListeners(graphicsService);
     }
 
     private void SetupQualityDropdown()
@@ -35,17 +38,17 @@ public class GraphicsSettingsController : MonoBehaviour
         qualityDropdown.RefreshShownValue();
     }
 
-    private void SetupResolutionDropdown()
+    private void SetupResolutionDropdown(IGraphicsSettingsService graphicsService)
     {
         #if UNITY_STANDALONE
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
-        foreach (var res in GraphicsSettingsManager.Instance.AvailableResolutions)
+        foreach (var res in graphicsService.AvailableResolutions)
         {
             options.Add($"{res.width} x {res.height}");
         }
         resolutionDropdown.AddOptions(options);
-        resolutionDropdown.value = GraphicsSettingsManager.Instance.GetCurrentResolutionIndex();
+        resolutionDropdown.value = graphicsService.GetCurrentResolutionIndex();
         resolutionDropdown.RefreshShownValue();
         #else
         // On mobile, hide the resolution dropdown as it's not needed.
@@ -66,20 +69,23 @@ public class GraphicsSettingsController : MonoBehaviour
         if (vsyncToggle != null) vsyncToggle.isOn = QualitySettings.vSyncCount > 0;
     }
 
-    private void AddListeners()
+    private void AddListeners(IGraphicsSettingsService graphicsService)
     {
+        if (graphicsService == null)
+            return;
+
         if (qualityDropdown != null)
-            qualityDropdown.onValueChanged.AddListener(index => GraphicsSettingsManager.Instance.SetQuality(index));
+            qualityDropdown.onValueChanged.AddListener(index => graphicsService.SetQuality(index));
 
         if (vsyncToggle != null)
-            vsyncToggle.onValueChanged.AddListener(isEnabled => GraphicsSettingsManager.Instance.SetVSync(isEnabled));
+            vsyncToggle.onValueChanged.AddListener(isEnabled => graphicsService.SetVSync(isEnabled));
 
         #if UNITY_STANDALONE
         if (resolutionDropdown != null)
-            resolutionDropdown.onValueChanged.AddListener(index => GraphicsSettingsManager.Instance.SetResolution(index));
+            resolutionDropdown.onValueChanged.AddListener(index => graphicsService.SetResolution(index));
 
         if (fullscreenToggle != null)
-            fullscreenToggle.onValueChanged.AddListener(isFullscreen => GraphicsSettingsManager.Instance.SetFullscreen(isFullscreen));
+            fullscreenToggle.onValueChanged.AddListener(isFullscreen => graphicsService.SetFullscreen(isFullscreen));
         #endif
     }
 }

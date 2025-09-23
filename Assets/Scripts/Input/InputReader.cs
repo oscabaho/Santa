@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [CreateAssetMenu(fileName = "InputReader", menuName = "Santa/Input Reader")]
-public class InputReader : ScriptableObject, ActionMap.IPlayerActions
+public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
 {
     public event System.Action<Vector2> MoveEvent;
     public event System.Action JumpEvent;

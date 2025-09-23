@@ -1,81 +1,56 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
-[RequireComponent(typeof(Enemy))]
+// The EnemyBrain now needs an AbilityHolder to know what it can do.
 [RequireComponent(typeof(ActionPointComponentBehaviour))]
-public class EnemyBrain : MonoBehaviour
+[RequireComponent(typeof(AbilityHolder))]
+public class EnemyBrain : MonoBehaviour, IBrain
 {
-    [SerializeField] private float turnDelay = 1.5f;
-
-    private Enemy _enemyData;
-    private ActionPointComponentBehaviour _actionPoints;
-    private HealthComponentBehaviour _playerHealth;
+    private AbilityHolder _abilityHolder;
 
     private void Awake()
     {
-        _enemyData = GetComponent<Enemy>();
-        _actionPoints = GetComponent<ActionPointComponentBehaviour>();
+        _abilityHolder = GetComponent<AbilityHolder>();
     }
 
-    public void TakeTurn(GameObject player)
+    /// <summary>
+    /// This method is called by the TurnBasedCombatManager during the PLANNING phase.
+    /// The AI decides what action to take and returns its choice without executing it.
+    /// </summary>
+    public PendingAction ChooseAction(
+        PendingAction? playerAction,
+        List<GameObject> allEnemies,
+        List<GameObject> allAllies)
     {
-        if (player == null)
+        // Simple AI: Find a target from the allies list (usually just the player).
+        GameObject target = allAllies.FirstOrDefault(a => a.activeInHierarchy);
+        if (target == null)
         {
-            Debug.LogError("EnemyBrain: Player GameObject is null.", this);
-            EndTurn();
-            return;
-        }
-        _playerHealth = player.GetComponent<HealthComponentBehaviour>();
-        StartCoroutine(TakeTurnCoroutine());
-    }
-
-    private IEnumerator TakeTurnCoroutine()
-    {
-        Debug.Log($"-- {_enemyData.EnemyName}'s turn. --");
-        yield return new WaitForSeconds(turnDelay);
-
-        if (_playerHealth == null)
-        {
-            Debug.LogError("EnemyBrain: Player HealthComponent not found!", this);
-            EndTurn();
-            yield break;
+            return new PendingAction(); // No target, do nothing.
         }
 
-        bool performedAction = false;
-        // 50/50 chance to try area attack first
-        if (Random.value > 0.5f)
+        // Simple AI: Find the most expensive ability it can afford and use it.
+        var ap = GetComponent<ActionPointComponentBehaviour>();
+        Ability chosenAbility = _abilityHolder.Abilities
+            .Where(a => ap.ActionPoints.HasEnough(a.ApCost)) // Find all affordable abilities
+            .OrderByDescending(a => a.ApCost) // Order by most expensive
+            .FirstOrDefault(); // Take the best one, or null if none are affordable
+
+        if (chosenAbility != null)
         {
-            if (_actionPoints.ActionPoints.HasEnough(_enemyData.AreaAttackAPCost))
+            // Package the decision into a PendingAction and return it.
+            return new PendingAction
             {
-                Debug.Log($"{_enemyData.EnemyName} uses its Area Attack!");
-                _actionPoints.ActionPoints.SpendActionPoints(_enemyData.AreaAttackAPCost);
-                _playerHealth.AffectValue(-_enemyData.AreaAttackDamage);
-                performedAction = true;
-            }
+                Ability = chosenAbility,
+                Caster = gameObject,
+                PrimaryTarget = target
+            };
         }
-
-        // If no action was performed yet, try direct attack
-        if (!performedAction && _actionPoints.ActionPoints.HasEnough(_enemyData.DirectAttackAPCost))
+        else
         {
-            Debug.Log($"{_enemyData.EnemyName} uses its Direct Attack!");
-            _actionPoints.ActionPoints.SpendActionPoints(_enemyData.DirectAttackAPCost);
-            _playerHealth.AffectValue(-_enemyData.DirectAttackDamage);
-            performedAction = true;
+            // Return an empty action if no ability can be used.
+            return new PendingAction();
         }
-
-        if (!performedAction)
-        {
-            Debug.Log($"{_enemyData.EnemyName} does not have enough AP to act.");
-        }
-
-        Debug.Log($"Player health is now: {_playerHealth.CurrentValue}");
-
-        EndTurn();
-    }
-
-    private void EndTurn()
-    {
-        // Notify the TurnBasedCombatManager that the turn is over.
-        TurnBasedCombatManager.Instance.EndEnemyTurn();
     }
 }
