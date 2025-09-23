@@ -42,7 +42,7 @@ public class AudioData : ScriptableObject
     /// </summary>
     public void Play()
     {
-        AudioManager.Instance?.PlaySound2D(this);
+        ServiceLocator.Get<IAudioService>()?.PlaySound2D(this);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class AudioData : ScriptableObject
     /// </summary>
     public void PlayAtPoint(Vector3 position)
     {
-        AudioManager.Instance?.PlaySound3D(this, position);
+        ServiceLocator.Get<IAudioService>()?.PlaySound3D(this, position);
     }
 
     public AudioClip GetClip()
