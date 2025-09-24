@@ -25,8 +25,8 @@ public class BoostControl : MonoBehaviour
 
     void Start()
     {
-        factory = FindObjectOfType<SampleFactory>();
-        bottleneckUI = FindObjectOfType<BottleneckUI>();
+        factory = FindFirstObjectByType<SampleFactory>();
+        bottleneckUI = FindFirstObjectByType<BottleneckUI>();
 
         factory.RunTest = false;
         ap = Holder.Instance;

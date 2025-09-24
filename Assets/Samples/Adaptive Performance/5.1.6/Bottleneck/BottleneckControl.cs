@@ -45,8 +45,8 @@ public class BottleneckControl : MonoBehaviour
     IEnumerator Begin()
     {
         yield return new WaitForSeconds(1);
-        factory = FindObjectOfType<SampleFactory>();
-        bottleneckUI = FindObjectOfType<BottleneckUI>();
+        factory = FindFirstObjectByType<SampleFactory>();
+        bottleneckUI = FindFirstObjectByType<BottleneckUI>();
 
         factory.RunTest = false;
         timer = waitTimeBeforeSwitch;
