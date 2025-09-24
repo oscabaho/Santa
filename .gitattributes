@@ -1,5 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Configure Git LFS for large Unity asset types
+# These files will be stored using Git LFS, keeping the main repository small.
 *.psd filter=lfs diff=lfs merge=lfs -text
 *.tga filter=lfs diff=lfs merge=lfs -text
 *.fbx filter=lfs diff=lfs merge=lfs -text
