@@ -5,9 +5,9 @@ using System.Linq;
 /// <summary>
 /// Manages the player's permanent progression by applying and saving ability upgrades.
 /// </summary>
-public class UpgradeManager : MonoBehaviour
+public class UpgradeManager : MonoBehaviour, IUpgradeService
 {
-    public static UpgradeManager Instance { get; private set; }
+    internal static UpgradeManager Instance { get; private set; }
 
     [Header("Upgrade Pool")]
     [Tooltip("A list of all possible upgrades that can be offered to the player.")]
@@ -32,6 +32,7 @@ public class UpgradeManager : MonoBehaviour
             return;
         }
         Instance = this;
+        ServiceLocator.Register<IUpgradeService>(this);
         DontDestroyOnLoad(gameObject);
 
         if (upgradeUI == null)
@@ -40,6 +41,14 @@ public class UpgradeManager : MonoBehaviour
         }
 
         LoadStats();
+    }
+
+    private void OnDestroy()
+    {
+        var registered = ServiceLocator.Get<IUpgradeService>();
+        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+            ServiceLocator.Unregister<IUpgradeService>();
+        if (Instance == this) Instance = null;
     }
 
     /// <summary>
@@ -52,7 +61,7 @@ public class UpgradeManager : MonoBehaviour
         {
             Debug.LogWarning("Not enough unique upgrades available to present a choice.");
             // If we can't offer a choice, just end combat directly.
-            CombatTransitionManager.Instance?.EndCombat();
+            ServiceLocator.Get<ICombatTransitionService>()?.EndCombat();
             return;
         }
         upgradeUI.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);

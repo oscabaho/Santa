@@ -3,78 +3,88 @@ using UnityEngine.UI;
 using System.Linq;
 
 /// <summary>
-/// A temporary UI for debugging combat. It provides buttons to trigger player abilities.
+/// A debug UI for triggering combat abilities. This is now connected to the Ability system.
 /// </summary>
 public class CombatDebugUI : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private GameObject playerTurnPanel; // A parent object for the buttons
+    [SerializeField] private GameObject playerTurnPanel;
     [SerializeField] private Button directAttackButton;
     [SerializeField] private Button areaAttackButton;
     [SerializeField] private Button specialAttackButton;
 
+    [Header("Ability Assets")]
+    [Tooltip("Assign the ScriptableObject for the Direct Attack here.")]
+    [SerializeField] private Ability _directAttackAbility;
+    [Tooltip("Assign the ScriptableObject for the Area Attack here.")]
+    [SerializeField] private Ability _areaAttackAbility;
+    [Tooltip("Assign the ScriptableObject for the Special Attack here.")]
+    [SerializeField] private Ability _specialAttackAbility;
+
     private void Start()
     {
-        if (playerTurnPanel == null || directAttackButton == null || areaAttackButton == null || specialAttackButton == null)
+        if (_directAttackAbility == null || _areaAttackAbility == null || _specialAttackAbility == null)
         {
-            Debug.LogError("A UI element is not assigned in the CombatDebugUI script.", this);
+            Debug.LogError("One or more Ability assets are not assigned in CombatDebugUI.", this);
+            directAttackButton.interactable = false;
+            areaAttackButton.interactable = false;
+            specialAttackButton.interactable = false;
             return;
         }
 
-        directAttackButton.onClick.AddListener(OnDirectAttackPressed);
-        areaAttackButton.onClick.AddListener(OnAreaAttackPressed);
-        specialAttackButton.onClick.AddListener(OnSpecialAttackPressed);
+        directAttackButton.onClick.AddListener(() => RequestAbility(_directAttackAbility));
+        areaAttackButton.onClick.AddListener(() => RequestAbility(_areaAttackAbility));
+        specialAttackButton.onClick.AddListener(() => RequestAbility(_specialAttackAbility));
+
+        playerTurnPanel.SetActive(false);
     }
 
-    private void Update()
+    private void RequestAbility(Ability ability)
     {
-        // This logic controls the visibility of the player's action buttons.
-        // It should only be visible during combat and only on the player's turn.
-        bool isPlayerTurn = GameStateManager.CurrentState == GameStateManager.GameState.Combat &&
-                            TurnBasedCombatManager.Instance != null &&
-                            TurnBasedCombatManager.Instance.IsPlayerTurn;
+        var combatService = ServiceLocator.Get<ICombatService>();
+        if (ability == null || combatService == null) return;
 
-        if (playerTurnPanel.activeSelf != isPlayerTurn)
+        // For this debug UI, we need a primary target for some abilities.
+        // We'll simply pick the first available enemy from the manager's list.
+        // A real UI would have a proper target selection system (e.g., clicking on an enemy).
+        GameObject primaryTarget = combatService.Enemies
+            .FirstOrDefault(enemy => enemy != null && enemy.activeInHierarchy);
+
+        if (primaryTarget == null && (ability.Targeting == TargetingStyle.SingleEnemy || ability.Targeting == TargetingStyle.RandomEnemies))
         {
-            playerTurnPanel.SetActive(isPlayerTurn);
+            Debug.LogWarning("Could not find a valid enemy to target for this debug UI.");
+        }
+
+        combatService.SubmitPlayerAction(ability, primaryTarget);
+    }
+
+    private void OnEnable()
+    {
+        var combatService = ServiceLocator.Get<ICombatService>();
+        if (combatService != null)
+        {
+            combatService.OnPlayerTurnStarted += ShowPlayerTurnPanel;
+            combatService.OnPlayerTurnEnded += HidePlayerTurnPanel;
         }
     }
 
-    public void OnDirectAttackPressed()
+    private void OnDisable()
     {
-        var combatManager = TurnBasedCombatManager.Instance;
-        if (combatManager == null) return;
-
-        // For this debug UI, we just attack the first available enemy.
-        var firstEnemy = FindFirstActiveEnemy();
-        if (firstEnemy != null)
+        var combatService = ServiceLocator.Get<ICombatService>();
+        if (combatService != null)
         {
-            combatManager.PlayerAttackDirect(firstEnemy);
+            combatService.OnPlayerTurnStarted -= ShowPlayerTurnPanel;
+            combatService.OnPlayerTurnEnded -= HidePlayerTurnPanel;
         }
     }
 
-    public void OnAreaAttackPressed()
+    private void ShowPlayerTurnPanel()
     {
-        TurnBasedCombatManager.Instance?.PlayerAttackArea();
+        playerTurnPanel.SetActive(true);
     }
 
-    public void OnSpecialAttackPressed()
+    private void HidePlayerTurnPanel()
     {
-        var combatManager = TurnBasedCombatManager.Instance;
-        if (combatManager == null) return;
-
-        // For this debug UI, we just attack the first available enemy.
-        var firstEnemy = FindFirstActiveEnemy();
-        if (firstEnemy != null)
-        {
-            combatManager.PlayerAttackSpecial(firstEnemy);
-        }
-    }
-
-    private GameObject FindFirstActiveEnemy()
-    {
-        // This is a helper method to find a valid target for single-target attacks.
-        // It relies on finding GameObjects with the "Enemy" tag.
-        return GameObject.FindGameObjectsWithTag("Enemy").FirstOrDefault(e => e.activeInHierarchy);
+        playerTurnPanel.SetActive(false);
     }
 }

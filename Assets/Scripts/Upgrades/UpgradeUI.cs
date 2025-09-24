@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
@@ -10,11 +9,11 @@ public class UpgradeUI : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private GameObject upgradePanel;
     [SerializeField] private Button option1Button;
-    [SerializeField] private TextMeshProUGUI option1NameText;
-    [SerializeField] private TextMeshProUGUI option1DescriptionText;
+    [SerializeField] private Text option1NameText;
+    [SerializeField] private Text option1DescriptionText;
     [SerializeField] private Button option2Button;
-    [SerializeField] private TextMeshProUGUI option2NameText;
-    [SerializeField] private TextMeshProUGUI option2DescriptionText;
+    [SerializeField] private Text option2NameText;
+    [SerializeField] private Text option2DescriptionText;
 
     private AbilityUpgrade _upgrade1;
     private AbilityUpgrade _upgrade2;
@@ -56,25 +55,28 @@ public class UpgradeUI : MonoBehaviour
     private void ChooseUpgrade(AbilityUpgrade chosenUpgrade)
     {
         // 1. Apply the stat upgrade
-        UpgradeManager.Instance.ApplyUpgrade(chosenUpgrade);
+        var upgradeService = ServiceLocator.Get<IUpgradeService>();
+        if (upgradeService != null) upgradeService.ApplyUpgrade(chosenUpgrade);
         upgradePanel.SetActive(false);
 
         // 2. Liberate the current level (change visuals)
-        if (LevelManager.Instance != null)
+        var levelService = ServiceLocator.Get<ILevelService>();
+        if (levelService != null)
         {
-            LevelManager.Instance.LiberateCurrentLevel();
+            levelService.LiberateCurrentLevel();
         }
 
         // 3. End the combat state (this was already here)
-        if (CombatTransitionManager.Instance != null)
+        var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
+        if (combatTransition != null)
         {
-            CombatTransitionManager.Instance.EndCombat();
+            combatTransition.EndCombat();
         }
 
         // 4. Prepare the next level/area
-        if (LevelManager.Instance != null)
+        if (levelService != null)
         {
-            LevelManager.Instance.AdvanceToNextLevel();
+            levelService.AdvanceToNextLevel();
         }
     }
 }

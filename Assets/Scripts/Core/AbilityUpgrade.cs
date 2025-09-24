@@ -1,4 +1,4 @@
-using UnityEngine;
+ using UnityEngine;
 
 // Enum to define which player ability an upgrade affects.
 public enum AbilityType
@@ -40,3 +40,4 @@ public class AbilityUpgrade : ScriptableObject
     [TextArea(3, 5)]
     public string UpgradeDescription;
 }
+
