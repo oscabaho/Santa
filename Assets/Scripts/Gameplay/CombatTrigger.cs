@@ -34,17 +34,25 @@ public class CombatTrigger : MonoBehaviour
             _combatHasBeenTriggered = true;
 
             // Get enemies for the current level and set up the encounter
-            List<Enemy> enemies = LevelManager.Instance.GetEnemiesForCurrentLevel();
+            var levelService = ServiceLocator.Get<ILevelService>();
+            if (levelService == null)
+            {
+                Debug.LogError("CombatTrigger: No ILevelService registered. Cannot start encounter.");
+                return;
+            }
+            List<Enemy> enemies = levelService.GetEnemiesForCurrentLevel();
             _encounter.SetupEncounter(other.gameObject, enemies);
 
-            // Use the CombatTransitionManager to start the combat.
-            if (CombatTransitionManager.Instance != null)
+            // Use the CombatTransitionManager to start the combat via ServiceLocator.
+            var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
+            if (combatTransition != null)
             {
-                CombatTransitionManager.Instance.StartCombat(_encounter);
+                // Pass player, the assembled participants list, and the combat scene parent to avoid Core->Gameplay dependency.
+                combatTransition.StartCombat(other.gameObject, _encounter.CombatParticipants, _encounter.CombatSceneParent);
             }
             else
             {
-                Debug.LogError("A CombatTransitionManager is required in the scene to start combat!");
+                Debug.LogError("A ICombatTransitionService is required in the scene to start combat!");
             }
 
             // For now, we just disable the trigger object.

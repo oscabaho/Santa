@@ -7,13 +7,13 @@ using UnityEngine.Pool;
 /// Gestiona la reproducción de todos los sonidos y música del juego.
 /// Utiliza un pool de objetos para los AudioSources para ser más eficiente.
 /// </summary>
-public class AudioManager : MonoBehaviour
+public class AudioManager : MonoBehaviour, IAudioService
 {
     // Claves para PlayerPrefs, públicas para que otros scripts puedan usarlas.
     public const string MusicVolumeKey = "MusicVolume";
     public const string SfxVolumeKey = "SFXVolume";
 
-    public static AudioManager Instance { get; private set; }
+    internal static AudioManager Instance { get; private set; }
 
     [Header("Pool Configuration")]
     [SerializeField] private PooledAudioSource audioSourcePrefab;
@@ -38,6 +38,9 @@ public class AudioManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Register this instance as the audio service for decoupled access
+        ServiceLocator.Register<IAudioService>(this);
 
         if (audioSourcePrefab == null)
         {
@@ -190,4 +193,12 @@ public class AudioManager : MonoBehaviour
         Destroy(pooledSource.gameObject);
     }
     #endregion
+
+    private void OnDestroy()
+    {
+        var registered = ServiceLocator.Get<IAudioService>();
+        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+            ServiceLocator.Unregister<IAudioService>();
+        if (Instance == this) Instance = null;
+    }
 }

@@ -14,8 +14,22 @@ public static class GameInitializer
     public static void InitializeGameSystems()
     {
         // Instanciar managers desde la carpeta Resources si no existen.
-        // InstantiateManagerFromResources<AudioManager>(AudioManagerPrefabPath);
+        InstantiateManagerFromResources<AudioManager>(AudioManagerPrefabPath);
         InstantiateManagerFromResources<GraphicsSettingsManager>(GraphicsManagerPrefabPath);
+
+        // Small verification: ensure essential services are registered.
+        if (ServiceLocator.Get<IAudioService>() == null)
+        {
+            #if UNITY_EDITOR
+            Debug.LogWarning("GameInitializer: IAudioService not registered after instantiation. Ensure AudioManager prefab has the AudioManager component and registers the service in Awake().");
+            #endif
+        }
+        if (ServiceLocator.Get<IGraphicsSettingsService>() == null)
+        {
+            #if UNITY_EDITOR
+            Debug.LogWarning("GameInitializer: IGraphicsSettingsService not registered after instantiation. Ensure GraphicsSettingsManager prefab exists and registers the service in Awake().");
+            #endif
+        }
     }
 
     /// <summary>
