@@ -1,11 +1,14 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class DialogueScript : MonoBehaviour
 {
-    public TextMeshProUGUI dialogueText;
+    // Using `Text` (Unity UI) as a safe fallback when TextMeshPro isn't available.
+    // If you prefer TextMeshPro, replace this with `TextMeshProUGUI` and ensure
+    // the TextMeshPro package is installed via the Unity Package Manager.
+    public Text dialogueText;
 
     public string[] dialogueLines;
     [SerializeField]private float textSpeed = 0.1f;
@@ -15,14 +18,14 @@ public class DialogueScript : MonoBehaviour
     void Awake()
     {
         dialogueText.text = string.Empty;
-        interactAction = InputSystem.actions.FindAction("Interact");
-        look = InputSystem.actions.FindAction("Look");
+    interactAction = InputSystem.actions.FindAction("Interact");
+    look = InputSystem.actions.FindAction("Look");
         gameObject.SetActive(false);
     }
 
     void Update()
     {
-        if (interactAction.WasPressedThisFrame())
+        if (interactAction != null && interactAction.WasPressedThisFrame())
         {
             if (dialogueText.text == dialogueLines[index])
             {

@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Linq;
 
-public class GraphicsSettingsManager : MonoBehaviour
+public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
 {
-    public static GraphicsSettingsManager Instance { get; private set; }
+    // Keep Instance private/internal to avoid external code depending on it.
+    internal static GraphicsSettingsManager Instance { get; private set; }
 
     public Resolution[] AvailableResolutions { get; private set; }
 
@@ -24,6 +25,18 @@ public class GraphicsSettingsManager : MonoBehaviour
         // For mobile, the list is not needed as we should run at native resolution.
         AvailableResolutions = new Resolution[0];
         #endif
+
+        // Register service for consumers to use via ServiceLocator.
+        ServiceLocator.Register<IGraphicsSettingsService>(this);
+    }
+
+    private void OnDestroy()
+    {
+        // Unregister when destroyed (helpful in editor play/stop cycles).
+        var registered = ServiceLocator.Get<IGraphicsSettingsService>();
+        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+            ServiceLocator.Unregister<IGraphicsSettingsService>();
+        if (Instance == this) Instance = null;
     }
 
     public int GetCurrentResolutionIndex()
