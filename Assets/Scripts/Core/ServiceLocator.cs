@@ -1,41 +1,63 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// Un localizador de servicios muy ligero usado para registrar y obtener interfaces de managers.
-/// Mejora la encapsulación evitando depender de singletons públicos concretos.
+/// A simple static Service Locator for managing global services.
 /// </summary>
 public static class ServiceLocator
 {
     private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
-    private static readonly object _lock = new object();
 
-    public static void Register<TService>(TService implementation) where TService : class
+    /// <summary>
+    /// Registers a service instance.
+    /// </summary>
+    public static void Register<T>(T service)
     {
-        if (implementation == null) throw new ArgumentNullException(nameof(implementation));
-        lock (_lock)
+        var type = typeof(T);
+        if (_services.ContainsKey(type))
         {
-            _services[typeof(TService)] = implementation;
+            #if UNITY_EDITOR
+            Debug.LogWarning($"ServiceLocator: Service of type '{type.Name}' is already registered. Overwriting.");
+            #endif
+            _services[type] = service;
+        }
+        else
+        {
+            _services.Add(type, service);
         }
     }
 
-    public static TService Get<TService>() where TService : class
+    /// <summary>
+    /// Unregisters a service instance.
+    /// </summary>
+    public static void Unregister<T>()
     {
-        lock (_lock)
+        var type = typeof(T);
+        if (_services.ContainsKey(type))
         {
-            if (_services.TryGetValue(typeof(TService), out var impl))
-            {
-                return impl as TService;
-            }
+            _services.Remove(type);
         }
-        return null;
     }
 
-    public static void Unregister<TService>() where TService : class
+    /// <summary>
+    /// Gets a registered service.
+    /// </summary>
+    /// <returns>The service instance, or null if not found.</returns>
+    public static T Get<T>()
     {
-        lock (_lock)
+        var type = typeof(T);
+        if (_services.TryGetValue(type, out var service))
         {
-            _services.Remove(typeof(TService));
+            return (T)service;
         }
+
+        #if UNITY_EDITOR
+        // Don't log an error for the initial request in the initializer, as the service might be about to be created.
+        // The initializer itself should handle warnings if the service is still null after instantiation.
+        // Debug.LogError($"ServiceLocator: Service of type '{type.Name}' not found.");
+        #endif
+
+        return default;
     }
 }

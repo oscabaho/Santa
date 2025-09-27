@@ -16,7 +16,7 @@ public class AdaptiveFrameRateSettings : MonoBehaviour
     void Awake()
     {
 #if UNITY_ADAPTIVE_PERFORMANCE_SAMSUNG_ANDROID
-        AdaptiveVRRO = GameObject.FindObjectOfType<AdaptiveVariableRefreshRate>();
+        AdaptiveVRRO = GameObject.FindFirstObjectByType<AdaptiveVariableRefreshRate>();
         if (!AdaptiveVRRO)
             return;
 
