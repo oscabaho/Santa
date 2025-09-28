@@ -79,6 +79,9 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         {
             Debug.LogError("A ICombatService is required in the scene to start combat!");
         }
+
+        // Switch to combat UI
+        UIManager.Instance.ShowCombatUI();
     }
 
     public void EndCombat()
@@ -103,5 +106,8 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         }
 
         _currentCombatSceneParent = null;
+
+        // Switch to exploration UI
+        UIManager.Instance.ShowExplorationUI();
     }
 }
