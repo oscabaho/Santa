@@ -14,14 +14,13 @@ public class Movement : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float rotationSpeed = 720f;
     [SerializeField] private float gravityValue = -9.81f;
-    [SerializeField] private float jumpHeight = 1.2f;
-
     private CharacterController _characterController;
     private Transform _mainCameraTransform;
 
     private Vector2 _moveInput;
     private Vector3 _playerVelocity;
     private bool _isGrounded;
+    private CombatTrigger _currentCombatTrigger;
 
     private void Awake()
     {
@@ -39,7 +38,7 @@ public class Movement : MonoBehaviour
         if (inputReader != null)
         {
             inputReader.MoveEvent += OnMove;
-            inputReader.JumpEvent += OnJump;
+            inputReader.InteractEvent += OnInteract;
         }
     }
 
@@ -48,7 +47,7 @@ public class Movement : MonoBehaviour
         if (inputReader != null)
         {
             inputReader.MoveEvent -= OnMove;
-            inputReader.JumpEvent -= OnJump;
+            inputReader.InteractEvent -= OnInteract;
         }
     }
 
@@ -57,11 +56,27 @@ public class Movement : MonoBehaviour
         _moveInput = moveInput;
     }
 
-    private void OnJump()
+    private void OnInteract()
     {
-        if (_isGrounded)
+        if (_currentCombatTrigger != null)
         {
-            _playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+            _currentCombatTrigger.StartCombatInteraction();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<CombatTrigger>(out var combatTrigger))
+        {
+            _currentCombatTrigger = combatTrigger;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent<CombatTrigger>(out var combatTrigger) && combatTrigger == _currentCombatTrigger)
+        {
+            _currentCombatTrigger = null;
         }
     }
 

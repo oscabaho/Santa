@@ -60,19 +60,6 @@ public class LevelManager : MonoBehaviour, ILevelService
     }
 
     /// <summary>
-    /// Gets the list of enemies for the current level's combat encounter.
-    /// </summary>
-    public List<Enemy> GetEnemiesForCurrentLevel()
-    {
-        LevelData currentLevel = GetCurrentLevelData();
-        if (currentLevel != null)
-        {
-            return currentLevel.enemies;
-        }
-        return new List<Enemy>();
-    }
-
-    /// <summary>
     /// Called after winning combat to transform the level to its 'liberated' state.
     /// </summary>
     public void LiberateCurrentLevel()

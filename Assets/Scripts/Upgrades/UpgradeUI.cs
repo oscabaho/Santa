@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
@@ -9,11 +10,11 @@ public class UpgradeUI : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private GameObject upgradePanel;
     [SerializeField] private Button option1Button;
-    [SerializeField] private Text option1NameText;
-    [SerializeField] private Text option1DescriptionText;
+    [SerializeField] private TextMeshProUGUI option1NameText;
+    [SerializeField] private TextMeshProUGUI option1DescriptionText;
     [SerializeField] private Button option2Button;
-    [SerializeField] private Text option2NameText;
-    [SerializeField] private Text option2DescriptionText;
+    [SerializeField] private TextMeshProUGUI option2NameText;
+    [SerializeField] private TextMeshProUGUI option2DescriptionText;
 
     private AbilityUpgrade _upgrade1;
     private AbilityUpgrade _upgrade2;

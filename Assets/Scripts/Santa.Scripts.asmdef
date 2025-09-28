@@ -3,7 +3,8 @@
   "references": [
     "Santa.Core",
     "Unity.InputSystem",
-    "Santa.Input"
+    "Santa.Input",
+    "Unity.TextMeshPro"
   ],
   "optionalUnityReferences": [],
   "includePlatforms": [],

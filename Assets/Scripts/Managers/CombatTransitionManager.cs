@@ -37,7 +37,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         if (Instance == this) Instance = null;
     }
 
-    public void StartCombat(GameObject player, List<GameObject> participants, GameObject combatSceneParent)
+    public void StartCombat(GameObject combatSceneParent)
     {
         _currentCombatSceneParent = combatSceneParent;
 
@@ -53,16 +53,27 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
         // Disable exploration elements
         if (explorationCamera != null) explorationCamera.SetActive(false);
-    if (explorationPlayer != null) explorationPlayer.GetComponent<global::Movement>().enabled = false;
+        if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = false;
 
         // Enable combat elements
         if (_currentCombatSceneParent != null) _currentCombatSceneParent.SetActive(true);
+
+        // Get the combatants from the arena AFTER activating the scene
+        CombatArena arena = _currentCombatSceneParent.GetComponent<CombatArena>();
+        if (arena == null)
+        {
+            Debug.LogError("CombatTransitionManager: No CombatArena component found on the CombatSceneParent.");
+            // Also re-enable exploration elements to avoid getting stuck
+            if (explorationCamera != null) explorationCamera.SetActive(true);
+            if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = true;
+            return;
+        }
 
         // Start the battle logic
         var combatService = ServiceLocator.Get<ICombatService>();
         if (combatService != null)
         {
-            combatService.StartCombat(participants);
+            combatService.StartCombat(arena.Combatants);
         }
         else
         {
@@ -79,7 +90,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
         // Enable exploration elements
         if (explorationCamera != null) explorationCamera.SetActive(true);
-    if (explorationPlayer != null) explorationPlayer.GetComponent<global::Movement>().enabled = true;
+        if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = true;
 
         var gameState = ServiceLocator.Get<IGameStateService>();
         if (gameState != null)

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
 {
     public event System.Action<Vector2> MoveEvent;
-    public event System.Action JumpEvent;
+    public event System.Action InteractEvent;
 
     private ActionMap _actionMap;
 
@@ -29,20 +29,13 @@ public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
         MoveEvent?.Invoke(context.ReadValue<Vector2>());
     }
 
-    public void OnJump(InputAction.CallbackContext context)
+    public void OnLook(InputAction.CallbackContext context) { }
+
+    public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            JumpEvent?.Invoke();
+            InteractEvent?.Invoke();
         }
     }
-
-    // The interface requires us to implement all methods, even if they are empty.
-    public void OnLook(InputAction.CallbackContext context) { }
-    public void OnAttack(InputAction.CallbackContext context) { }
-    public void OnInteract(InputAction.CallbackContext context) { }
-    public void OnCrouch(InputAction.CallbackContext context) { }
-    public void OnPrevious(InputAction.CallbackContext context) { }
-    public void OnNext(InputAction.CallbackContext context) { }
-    public void OnSprint(InputAction.CallbackContext context) { }
 }
