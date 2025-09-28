@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class GameEventBus : IEventBus
 {
     private static GameEventBus _instance;
-    public static GameEventBus Instance => _instance ?? (_instance = new GameEventBus());
+    private static GameEventBus Instance => _instance ?? (_instance = new GameEventBus());
 
     // Register the global instance in the ServiceLocator for decoupled access.
     static GameEventBus()

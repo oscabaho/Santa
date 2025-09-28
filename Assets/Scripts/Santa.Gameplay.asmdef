@@ -1,0 +1,19 @@
+{
+  "name": "Santa.Gameplay",
+  "references": [
+    "Unity.InputSystem",
+    "Santa.Input",
+    "Unity.TextMeshPro",
+    "Santa.Core"
+  ],
+  "optionalUnityReferences": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -13,7 +13,7 @@ public class AudioManager : MonoBehaviour, IAudioService
     public const string MusicVolumeKey = "MusicVolume";
     public const string SfxVolumeKey = "SFXVolume";
 
-    internal static AudioManager Instance { get; private set; }
+    private static AudioManager Instance { get; set; }
 
     [Header("Pool Configuration")]
     [SerializeField] private PooledAudioSource audioSourcePrefab;

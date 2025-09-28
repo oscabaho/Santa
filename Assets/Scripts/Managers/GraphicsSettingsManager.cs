@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
 {
-    public static GraphicsSettingsManager Instance { get; private set; }
+    private static GraphicsSettingsManager Instance { get; set; }
 
     /// <summary>
     /// Gets the list of resolutions supported by the current display.

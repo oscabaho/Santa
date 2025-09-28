@@ -1,9 +1,8 @@
-
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class UIManager : MonoBehaviour, IUIManager
 {
-    public static UIManager Instance { get; private set; }
+    private static UIManager Instance { get; set; }
 
     [SerializeField] private GameObject explorationUI;
     [SerializeField] private GameObject combatUI;
@@ -16,6 +15,17 @@ public class UIManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        ServiceLocator.Register<IUIManager>(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            ServiceLocator.Unregister<IUIManager>();
+            Instance = null;
+        }
     }
 
     public void ShowExplorationUI()

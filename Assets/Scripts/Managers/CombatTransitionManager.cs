@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 {
     // Reduce visibility to internal to avoid external code depending on the concrete singleton.
-    internal static CombatTransitionManager Instance { get; private set; }
+    private static CombatTransitionManager Instance { get; set; }
 
     [Header("Scene References")]
     [Tooltip("The camera GameObject used for exploration.")]
@@ -81,7 +81,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         }
 
         // Switch to combat UI
-        UIManager.Instance.ShowCombatUI();
+        ServiceLocator.Get<IUIManager>().ShowCombatUI();
     }
 
     public void EndCombat()
@@ -108,6 +108,6 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentCombatSceneParent = null;
 
         // Switch to exploration UI
-        UIManager.Instance.ShowExplorationUI();
+        ServiceLocator.Get<IUIManager>().ShowExplorationUI();
     }
 }

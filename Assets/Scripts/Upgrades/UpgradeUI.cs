@@ -5,7 +5,7 @@ using TMPro;
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
 /// </summary>
-public class UpgradeUI : MonoBehaviour
+public class UpgradeUI : MonoBehaviour, IUpgradeUI
 {
     [Header("UI Elements")]
     [SerializeField] private GameObject upgradePanel;

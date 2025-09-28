@@ -1,0 +1,18 @@
+{
+    "name": "Santa.Gameplay.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Santa.Gameplay"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

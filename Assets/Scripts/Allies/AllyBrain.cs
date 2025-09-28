@@ -53,18 +53,24 @@ public class AllyBrain : MonoBehaviour, IBrain
         PendingAction? playerAction,
         List<GameObject> allEnemies)
     {
-        var activeEnemies = allEnemies.Where(e => e.activeInHierarchy).ToList();
-        if (!activeEnemies.Any())
+        var activeEnemiesWithHealth = allEnemies
+            .Where(e => e.activeInHierarchy)
+            .Select(e => new { Enemy = e, Health = e.GetComponent<HealthComponentBehaviour>() })
+            .Where(e => e.Health != null)
+            .ToList();
+
+        if (!activeEnemiesWithHealth.Any())
         {
             return null;
         }
 
         // Find the minimum health among all active enemies
-        int minHealth = activeEnemies.Min(e => e.GetComponent<HealthComponentBehaviour>().CurrentValue);
+        int minHealth = activeEnemiesWithHealth.Min(e => e.Health.CurrentValue);
 
         // Get all enemies that are tied for the lowest health
-        var lowestHealthEnemies = activeEnemies
-            .Where(e => e.GetComponent<HealthComponentBehaviour>().CurrentValue == minHealth)
+        var lowestHealthEnemies = activeEnemiesWithHealth
+            .Where(e => e.Health.CurrentValue == minHealth)
+            .Select(e => e.Enemy)
             .ToList();
 
         // If there's only one, that's our target
@@ -94,6 +100,6 @@ public class AllyBrain : MonoBehaviour, IBrain
         }
 
         // Fallback, should not be reached if there are any active enemies
-        return activeEnemies.FirstOrDefault();
+        return activeEnemiesWithHealth.FirstOrDefault()?.Enemy;
     }
 }

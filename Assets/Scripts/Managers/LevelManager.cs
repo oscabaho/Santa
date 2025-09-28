@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// </summary>
 public class LevelManager : MonoBehaviour, ILevelService
 {
-    internal static LevelManager Instance { get; private set; }
+    private static LevelManager Instance { get; set; }
 
     [Header("Level Configuration")]
     [Tooltip("The list of all levels/areas in the game, in order.")]

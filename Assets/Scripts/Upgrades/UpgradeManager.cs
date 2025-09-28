@@ -5,16 +5,19 @@ using System.Linq;
 /// <summary>
 /// Manages the player's permanent progression by applying and saving ability upgrades.
 /// </summary>
-public class UpgradeManager : MonoBehaviour, IUpgradeService
+public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
 {
-    internal static UpgradeManager Instance { get; private set; }
+    private static UpgradeManager Instance { get; set; }
 
     [Header("Upgrade Pool")]
     [Tooltip("A list of all possible upgrades that can be offered to the player.")]
     [SerializeField] private List<AbilityUpgrade> allPossibleUpgrades;
 
     [Header("UI Reference")]
-    [SerializeField] private UpgradeUI upgradeUI;
+    [Tooltip("Assign the GameObject that has the UpgradeUI component here.")]
+    [SerializeField] private MonoBehaviour upgradeUIMonoBehaviour;
+    private IUpgradeUI _upgradeUI;
+
 
     // Player Stats - These will be modified by upgrades.
     // We are centralizing them here for now.
@@ -35,9 +38,10 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService
         ServiceLocator.Register<IUpgradeService>(this);
         DontDestroyOnLoad(gameObject);
 
-        if (upgradeUI == null)
+        _upgradeUI = upgradeUIMonoBehaviour as IUpgradeUI;
+        if (_upgradeUI == null)
         {
-            Debug.LogError("UpgradeUI is not assigned in the UpgradeManager!");
+            Debug.LogError("A component implementing IUpgradeUI is not assigned in the UpgradeManager!");
         }
 
         LoadStats();
@@ -51,20 +55,16 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService
         if (Instance == this) Instance = null;
     }
 
-    /// <summary>
-    /// Called at the end of a victorious battle to start the upgrade process.
-    /// </summary>
     public void PresentUpgradeOptions()
     {
         var randomUpgrades = GetRandomUpgrades(2);
         if (randomUpgrades.Count < 2)
         {
             Debug.LogWarning("Not enough unique upgrades available to present a choice.");
-            // If we can't offer a choice, just end combat directly.
             ServiceLocator.Get<ICombatTransitionService>()?.EndCombat();
             return;
         }
-        upgradeUI.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
+        _upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
     }
 
     private List<AbilityUpgrade> GetRandomUpgrades(int count)
@@ -80,29 +80,24 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService
 
     public void ApplyUpgrade(AbilityUpgrade upgrade)
     {
-        switch (upgrade.StatToUpgrade)
+        if (upgrade.Strategy != null)
         {
-            case UpgradeType.IncreaseDamage:
-                if (upgrade.TargetAbility == AbilityType.DirectAttack)
-                    DirectAttackDamage += (int)upgrade.UpgradeValue;
-                else if (upgrade.TargetAbility == AbilityType.AreaAttack)
-                    AreaAttackDamage += (int)upgrade.UpgradeValue;
-                else if (upgrade.TargetAbility == AbilityType.SpecialAttack)
-                    SpecialAttackDamage += (int)upgrade.UpgradeValue;
-                break;
-
-            case UpgradeType.IncreaseEnergyGain:
-                EnergyGainedPerTurn += (int)upgrade.UpgradeValue;
-                break;
-
-            case UpgradeType.ReduceSpecialMissChance:
-                SpecialAttackMissChance = Mathf.Max(0, SpecialAttackMissChance - upgrade.UpgradeValue);
-                break;
+            upgrade.Strategy.Apply(this);
+            Debug.Log($"Applied upgrade: {upgrade.UpgradeName}. New value saved.");
+            SaveStats();
         }
-
-        Debug.Log($"Applied upgrade: {upgrade.UpgradeName}. New value saved.");
-        SaveStats();
+        else
+        {
+            Debug.LogWarning($"Upgrade '{upgrade.UpgradeName}' has no strategy assigned.");
+        }
     }
+
+    // --- Public Methods for Strategies ---
+    public void IncreaseDirectAttackDamage(int amount) => DirectAttackDamage += amount;
+    public void IncreaseAreaAttackDamage(int amount) => AreaAttackDamage += amount;
+    public void IncreaseSpecialAttackDamage(int amount) => SpecialAttackDamage += amount;
+    public void IncreaseEnergyGainedPerTurn(int amount) => EnergyGainedPerTurn += amount;
+    public void ReduceSpecialAttackMissChance(float amount) => SpecialAttackMissChance = Mathf.Max(0, SpecialAttackMissChance - amount);
 
     private void SaveStats()
     {

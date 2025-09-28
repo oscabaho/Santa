@@ -5,7 +5,7 @@ using UnityEngine.Pool; // <-- Añadir
 
 public class VFXManager : MonoBehaviour, IVFXService
 {
-    internal static VFXManager Instance { get; private set; }
+    private static VFXManager Instance { get; set; }
     
     [System.Serializable]
     public class VfxPoolConfig

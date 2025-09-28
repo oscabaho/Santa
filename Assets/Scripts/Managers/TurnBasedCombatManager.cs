@@ -11,28 +11,24 @@ using System;
 /// </summary>
 public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 {
-    // Reduce visibility to internal to discourage external concrete usage.
-    internal static TurnBasedCombatManager Instance { get; private set; }
-    public event Action OnPlayerTurnStarted; // Fired when the player needs to choose an action
-    public event Action OnPlayerTurnEnded;   // Fired when the player has chosen their action
+    private static TurnBasedCombatManager Instance { get; set; }
+    public event Action OnPlayerTurnStarted;
+    public event Action OnPlayerTurnEnded;
 
-    // Internal State
     private enum CombatState { Planning, Executing }
     private CombatState _currentState;
 
-    // Data Structures
     private readonly List<PendingAction> _pendingActions = new List<PendingAction>();
     private readonly List<GameObject> _combatants = new List<GameObject>();
     private GameObject _player;
-    // Reusable lists to avoid allocations in hot paths
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
     private readonly List<GameObject> _tempEnemies = new List<GameObject>(8);
     private readonly List<GameObject> _tempAllies = new List<GameObject>(8);
     private static readonly System.Random _rng = new System.Random();
 
-    // Public Properties
-    // Public Properties
-    // Returns a reusable list (IReadOnlyList) of enemies to avoid allocations. Callers should not modify the list.
+    // Cache for health components to avoid repeated GetComponent calls
+    private readonly Dictionary<GameObject, HealthComponentBehaviour> _healthComponents = new Dictionary<GameObject, HealthComponentBehaviour>();
+
     public IReadOnlyList<GameObject> Enemies
     {
         get
@@ -73,6 +69,20 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         _combatants.AddRange(participants);
         _player = _combatants.FirstOrDefault(c => c.CompareTag("Player"));
 
+        // Cache all health components at the start of combat
+        _healthComponents.Clear();
+        foreach (var combatant in _combatants)
+        {
+            if (combatant != null)
+            {
+                var health = combatant.GetComponent<HealthComponentBehaviour>();
+                if (health != null)
+                {
+                    _healthComponents[combatant] = health;
+                }
+            }
+        }
+
         if (_player == null)
         {
             Debug.LogError("Combat cannot start without a player!");
@@ -89,20 +99,15 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         _currentState = CombatState.Planning;
         _pendingActions.Clear();
 
-        // Refill AP for all combatants, etc.
         foreach (var combatant in _combatants)
         {
             if(combatant.activeInHierarchy)
                 combatant.GetComponent<ActionPointComponentBehaviour>()?.Refill();
         }
 
-        // Signal UI for player to choose their action
         OnPlayerTurnStarted?.Invoke();
     }
 
-    /// <summary>
-    /// Called by the Player (via UI) to submit their chosen action for the turn.
-    /// </summary>
     public void SubmitPlayerAction(Ability ability, GameObject primaryTarget)
     {
         if (_currentState != CombatState.Planning) return;
@@ -111,7 +116,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (ability == null || !playerAP.ActionPoints.HasEnough(ability.ApCost))
         {
             Debug.LogWarning("Player tried to submit an invalid or unaffordable action.");
-            OnPlayerTurnStarted?.Invoke(); // Re-enable player turn UI
+            OnPlayerTurnStarted?.Invoke();
             return;
         }
 
@@ -125,7 +130,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void TriggerAIPlanning()
     {
-        // Prepare context for the AIs
     PendingAction? playerAction = null;
         for (int i = 0; i < _pendingActions.Count; i++)
         {
@@ -136,7 +140,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             }
         }
 
-        // Build reusable lists for enemies and allies
         _tempEnemies.Clear();
         _tempAllies.Clear();
         for (int i = 0; i < _combatants.Count; i++)
@@ -147,14 +150,13 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             else _tempAllies.Add(c);
         }
 
-        // Have all AI combatants choose and submit their actions
         for (int i = 0; i < _combatants.Count; i++)
         {
             var combatant = _combatants[i];
             if (combatant == null) continue;
             if (combatant != _player && combatant.activeInHierarchy)
             {
-                var brain = combatant.GetComponent<IBrain>(); // Get the brain via interface
+                var brain = combatant.GetComponent<IBrain>();
                 var aiAP = combatant.GetComponent<ActionPointComponentBehaviour>();
 
                 if (brain != null && aiAP != null)
@@ -171,7 +173,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             }
         }
 
-        // All actions are now submitted, begin execution phase
         StartCoroutine(ExecuteTurn());
     }
 
@@ -180,14 +181,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         Debug.Log("--- EXECUTION PHASE ---");
         _currentState = CombatState.Executing;
 
-    // Sort actions by speed (high to low) using a reusable list to avoid allocations
     _sortedActions.Clear();
     _sortedActions.AddRange(_pendingActions);
     _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
 
     foreach (var action in _sortedActions)
         {
-            // Defensive: skip any malformed pending actions
             if (action.Caster == null)
             {
                 Debug.LogWarning("Skipping action: caster is null.");
@@ -200,11 +199,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 continue;
             }
 
-            // Check if caster is still alive before performing the action
-            var casterHealth = action.Caster.GetComponent<HealthComponentBehaviour>();
-            if (casterHealth == null)
+            if (!_healthComponents.TryGetValue(action.Caster, out var casterHealth))
             {
-                Debug.LogWarning($"{action.Caster.name} has no HealthComponentBehaviour; skipping action {action.Ability.AbilityName}.");
+                Debug.LogWarning($"{action.Caster.name} has no cached HealthComponentBehaviour; skipping action {action.Ability.AbilityName}.");
                 continue;
             }
 
@@ -227,10 +224,10 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             if (CheckForDefeat()) { yield break; }
             if (CheckForVictory()) { yield break; }
 
-            yield return new WaitForSeconds(1.0f); // Wait time between actions
+            yield return new WaitForSeconds(1.0f);
         }
 
-        if (_currentState == CombatState.Executing) // Check if combat didn't already end
+        if (_currentState == CombatState.Executing)
         {
             Debug.Log("Execution phase finished.");
             StartNewTurn();
@@ -241,7 +238,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     {
         List<GameObject> finalTargets = new List<GameObject>(4);
 
-        // Build filtered lists without LINQ
         _tempEnemies.Clear();
         _tempAllies.Clear();
         for (int i = 0; i < _combatants.Count; i++)
@@ -269,7 +265,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
                 {
                     finalTargets.Add(action.PrimaryTarget);
-                    // remove primary from potentialTargets by creating a temp list
                     var temp = new List<GameObject>(potentialTargets.Count);
                     for (int i = 0; i < potentialTargets.Count; i++) if (potentialTargets[i] != action.PrimaryTarget) temp.Add(potentialTargets[i]);
                     potentialTargets = temp;
@@ -280,7 +275,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
                 if (additionalTargetsToHit > 0 && potentialTargets.Count > 0)
                 {
-                    // Shuffle potentialTargets in-place using Fisher-Yates with static RNG
                     for (int i = potentialTargets.Count - 1; i > 0; i--)
                     {
                         int j = _rng.Next(i + 1);
@@ -298,7 +292,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private bool CheckForVictory()
     {
-        // Check manually to avoid LINQ allocations
         for (int i = 0; i < _combatants.Count; i++)
         {
             var c = _combatants[i];
@@ -310,8 +303,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private bool CheckForDefeat()
     {
-        var playerHealth = _player.GetComponent<HealthComponentBehaviour>();
-        if (playerHealth != null && playerHealth.CurrentValue <= 0)
+        if (_healthComponents.TryGetValue(_player, out var playerHealth) && playerHealth.CurrentValue <= 0)
         {
             EndCombat(false);
             return true;
@@ -321,7 +313,8 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void EndCombat(bool playerWon)
     {
-        _currentState = CombatState.Planning; // Reset state
+        _currentState = CombatState.Planning;
+        _healthComponents.Clear(); // Clear the cache
         if (playerWon)
         {
             Debug.Log("--- COMBAT ENDED: VICTORY ---");
@@ -336,4 +329,3 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         gameObject.SetActive(false);
     }
 }
-

@@ -1,12 +1,6 @@
  using UnityEngine;
 
-// Enum to define which player ability an upgrade affects.
-public enum AbilityType
-{
-    DirectAttack,
-    AreaAttack,
-    SpecialAttack
-}
+
 
 // Enum to define the nature of the upgrade.
 public enum UpgradeType
@@ -17,20 +11,16 @@ public enum UpgradeType
 }
 
 /// <summary>
-/// A ScriptableObject that defines a single, specific upgrade for a player ability.
+/// A ScriptableObject that defines a single, specific upgrade.
+/// It uses a Strategy pattern where the actual upgrade logic is defined
+/// in a separate UpgradeStrategySO scriptable object.
 /// </summary>
 [CreateAssetMenu(fileName = "NewAbilityUpgrade", menuName = "Santa/Ability Upgrade", order = 0)]
 public class AbilityUpgrade : ScriptableObject
 {
-    [Header("Upgrade Details")]
-    [Tooltip("The ability this upgrade applies to.")]
-    public AbilityType TargetAbility;
-
-    [Tooltip("The type of bonus this upgrade provides.")]
-    public UpgradeType StatToUpgrade;
-
-    [Tooltip("The value of the upgrade (e.g., 5 for +5 damage).")]
-    public float UpgradeValue;
+    [Header("Strategy")]
+    [Tooltip("The strategy that defines what this upgrade does.")]
+    [SerializeField] private UpgradeStrategySO _strategy;
 
     [Header("UI Information")]
     [Tooltip("The name of the upgrade to be displayed in the UI.")]
@@ -39,5 +29,7 @@ public class AbilityUpgrade : ScriptableObject
     [Tooltip("The description shown to the player on the upgrade choice screen.")]
     [TextArea(3, 5)]
     public string UpgradeDescription;
+
+    public UpgradeStrategySO Strategy => _strategy;
 }
 

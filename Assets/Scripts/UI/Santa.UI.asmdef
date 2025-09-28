@@ -1,6 +1,7 @@
 {
     "name": "Santa.UI",
     "references": [
+    "Santa.Gameplay",
     "Santa.Core"
   ],
     "includePlatforms": [],
