@@ -4,7 +4,8 @@
     "Unity.InputSystem",
     "Santa.Input",
     "Unity.TextMeshPro",
-    "Santa.Core"
+    "Santa.Core",
+    "Unity.Cinemachine"
   ],
   "optionalUnityReferences": [],
   "includePlatforms": [],

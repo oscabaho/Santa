@@ -14,9 +14,8 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
     [SerializeField] private List<AbilityUpgrade> allPossibleUpgrades;
 
     [Header("UI Reference")]
-    [Tooltip("Assign the GameObject that has the UpgradeUI component here.")]
-    [SerializeField] private MonoBehaviour upgradeUIMonoBehaviour;
-    private IUpgradeUI _upgradeUI;
+    [Tooltip("Assign the component that implements IUpgradeUI here.")]
+    [SerializeField] private UpgradeUI upgradeUI;
 
 
     // Player Stats - These will be modified by upgrades.
@@ -38,10 +37,9 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         ServiceLocator.Register<IUpgradeService>(this);
         DontDestroyOnLoad(gameObject);
 
-        _upgradeUI = upgradeUIMonoBehaviour as IUpgradeUI;
-        if (_upgradeUI == null)
+        if (upgradeUI == null)
         {
-            Debug.LogError("A component implementing IUpgradeUI is not assigned in the UpgradeManager!");
+            Debug.LogError("The UpgradeUI component is not assigned in the UpgradeManager!");
         }
 
         LoadStats();
@@ -64,7 +62,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
             ServiceLocator.Get<ICombatTransitionService>()?.EndCombat();
             return;
         }
-        _upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
+        upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
     }
 
     private List<AbilityUpgrade> GetRandomUpgrades(int count)
