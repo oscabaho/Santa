@@ -69,6 +69,7 @@ public class Movement : MonoBehaviour
         if (other.TryGetComponent<CombatTrigger>(out var combatTrigger))
         {
             _currentCombatTrigger = combatTrigger;
+            ServiceLocator.Get<IGameplayUIService>()?.ShowActionButton(true);
         }
     }
 
@@ -77,6 +78,7 @@ public class Movement : MonoBehaviour
         if (other.TryGetComponent<CombatTrigger>(out var combatTrigger) && combatTrigger == _currentCombatTrigger)
         {
             _currentCombatTrigger = null;
+            ServiceLocator.Get<IGameplayUIService>()?.ShowActionButton(false);
         }
     }
 
