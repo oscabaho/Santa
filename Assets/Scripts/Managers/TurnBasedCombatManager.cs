@@ -29,6 +29,8 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     // Cache for health components to avoid repeated GetComponent calls
     private readonly Dictionary<GameObject, HealthComponentBehaviour> _healthComponents = new Dictionary<GameObject, HealthComponentBehaviour>();
 
+    public IReadOnlyList<GameObject> AllCombatants => _combatants;
+
     public IReadOnlyList<GameObject> Enemies
     {
         get
@@ -80,6 +82,13 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 {
                     _healthComponents[combatant] = health;
                 }
+
+                // Set initial Action Points for all combatants
+                var ap = combatant.GetComponent<ActionPointComponentBehaviour>();
+                if (ap != null)
+                {
+                    ap.SetValue(100); // Set initial AP to 100
+                }
             }
         }
 
@@ -98,12 +107,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         Debug.Log("--- PLANNING PHASE ---: Starting new turn.");
         _currentState = CombatState.Planning;
         _pendingActions.Clear();
-
-        foreach (var combatant in _combatants)
-        {
-            if(combatant.activeInHierarchy)
-                combatant.GetComponent<ActionPointComponentBehaviour>()?.Refill();
-        }
 
         OnPlayerTurnStarted?.Invoke();
     }
@@ -252,6 +255,11 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         switch (action.Ability.Targeting)
         {
+            case TargetingStyle.Self:
+                if (action.Caster != null)
+                    finalTargets.Add(action.Caster);
+                break;
+
             case TargetingStyle.SingleEnemy:
                 if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
                     finalTargets.Add(action.PrimaryTarget);

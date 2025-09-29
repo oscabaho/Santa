@@ -5,7 +5,8 @@ public enum TargetingStyle
 {
     SingleEnemy,
     AllEnemies,
-    RandomEnemies
+    RandomEnemies,
+    Self
 }
 
 /// <summary>
