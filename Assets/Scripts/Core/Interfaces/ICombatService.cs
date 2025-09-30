@@ -5,6 +5,7 @@ using UnityEngine;
 public interface ICombatService
 {
     void StartCombat(List<GameObject> participants);
+    IReadOnlyList<GameObject> AllCombatants { get; }
     IReadOnlyList<GameObject> Enemies { get; }
     void SubmitPlayerAction(Ability ability, GameObject primaryTarget);
 

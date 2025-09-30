@@ -2,7 +2,8 @@
     "name": "Santa.UI",
     "references": [
     "Santa.Gameplay",
-    "Santa.Core"
+    "Santa.Core",
+    "Unity.TextMeshPro"
   ],
     "includePlatforms": [],
     "excludePlatforms": [],

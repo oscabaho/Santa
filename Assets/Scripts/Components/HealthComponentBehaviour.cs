@@ -13,6 +13,7 @@ public class HealthComponentBehaviour : MonoBehaviour, IStatController
     public int CurrentValue => health.CurrentValue;
     public int MaxValue => health.MaxValue;
     public void AffectValue(int value) => health.AffectValue(value);
+    public void SetValue(int value) => health.SetValue(value);
 
     /// <summary>
     /// Establece la vida al máximo.

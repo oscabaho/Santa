@@ -13,6 +13,7 @@ public class ActionPointComponentBehaviour : MonoBehaviour, IStatController
     public int CurrentValue => actionPoints.CurrentValue;
     public int MaxValue => actionPoints.MaxValue;
     public void AffectValue(int value) => actionPoints.AffectValue(value);
+    public void SetValue(int value) => actionPoints.SetValue(value);
 
     /// <summary>
     /// Rellena los Puntos de Acción al máximo.
