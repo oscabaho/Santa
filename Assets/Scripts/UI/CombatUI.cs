@@ -13,7 +13,6 @@ public class CombatUI : MonoBehaviour
 
     [Header("Player Stat Displays")]
     [SerializeField] private Slider playerHealthSlider;
-    [SerializeField] private TextMeshProUGUI playerHealthText;
     [SerializeField] private TextMeshProUGUI playerAPText;
 
     [Header("Action Buttons")]
@@ -130,7 +129,6 @@ public class CombatUI : MonoBehaviour
     private void UpdateHealthUI(int current, int max)
     {
         if (playerHealthSlider != null) playerHealthSlider.value = (float)current / max;
-        if (playerHealthText != null) playerHealthText.text = $"{current} / {max}";
     }
 
     private void UpdateAPUI(int current, int max)
