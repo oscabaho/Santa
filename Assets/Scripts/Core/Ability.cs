@@ -1,14 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum TargetingStyle
-{
-    SingleEnemy,
-    AllEnemies,
-    RandomEnemies,
-    Self
-}
-
 /// <summary>
 /// Base class for all abilities, implemented as a ScriptableObject.
 /// This allows creating abilities as data assets in the editor.
@@ -21,7 +13,7 @@ public abstract class Ability : ScriptableObject
 
     [Header("Properties")]
     [SerializeField] private int _apCost = 1;
-    [SerializeField] private TargetingStyle _targetingStyle = TargetingStyle.SingleEnemy;
+    [SerializeField] private TargetingStrategy _targeting;
     [Tooltip("Percentage of targets to affect for RandomEnemies style (0.0 to 1.0)")]
     [SerializeField] [Range(0f, 1f)] private float _targetPercentage = 1f;
     [Tooltip("Determines turn order. Higher value = faster action (executes earlier in the turn).")]
@@ -30,7 +22,7 @@ public abstract class Ability : ScriptableObject
     public string AbilityName => _abilityName;
     public string Description => _description;
     public int ApCost => _apCost;
-    public TargetingStyle Targeting => _targetingStyle;
+    public TargetingStrategy Targeting => _targeting;
     public float TargetPercentage => _targetPercentage;
     public int ActionSpeed => _actionSpeed;
 

@@ -143,7 +143,7 @@ public class CombatUI : MonoBehaviour
 
         GameObject primaryTarget = combatService.Enemies.FirstOrDefault(enemy => enemy != null && enemy.activeInHierarchy);
 
-        if (primaryTarget == null && (ability.Targeting == TargetingStyle.SingleEnemy || ability.Targeting == TargetingStyle.RandomEnemies))
+        if (primaryTarget == null && ability.Targeting.RequiresTarget)
         {
             Debug.LogWarning("Could not find a valid enemy to target for this UI.");
         }
