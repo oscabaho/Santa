@@ -143,9 +143,15 @@ public class CombatUI : MonoBehaviour
 
         GameObject primaryTarget = combatService.Enemies.FirstOrDefault(enemy => enemy != null && enemy.activeInHierarchy);
 
-        if (primaryTarget == null && ability.Targeting.RequiresTarget)
+        // A simple way to determine if a target is needed. This could be more robust.
+        bool needsTarget = ability.Targeting.Style == TargetingStyle.SingleEnemy || 
+                           ability.Targeting.Style == TargetingStyle.AllEnemies; // AllEnemies can still use a primary target for some logic
+
+        if (primaryTarget == null && needsTarget)
         {
             Debug.LogWarning("Could not find a valid enemy to target for this UI.");
+            // Optionally, provide feedback to the player here.
+            return; // Stop the action if a required target is missing.
         }
 
         combatService.SubmitPlayerAction(ability, primaryTarget);

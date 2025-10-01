@@ -4,13 +4,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SingleEnemyTargeting", menuName = "Santa/Abilities/Targeting/Single Enemy")]
 public class SingleEnemyTargeting : TargetingStrategy
 {
-    public override bool RequiresTarget => true;
+    public override TargetingStyle Style => TargetingStyle.SingleEnemy;
 
-    public override void FindTargets(PendingAction action, List<GameObject> allies, List<GameObject> enemies, List<GameObject> finalTargets)
+    public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
-        if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
+        if (primaryTarget != null && primaryTarget.activeInHierarchy)
         {
-            finalTargets.Add(action.PrimaryTarget);
+            results.Add(primaryTarget);
         }
     }
 }

@@ -2,6 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Linq;
+
+/// <summary>
 
 /// <summary>
 /// Manages the turn-based combat flow following a Planning/Execution model.
@@ -23,10 +26,8 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private readonly List<GameObject> _combatants = new List<GameObject>();
     private GameObject _player;
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
-    private readonly List<GameObject> _tempEnemies = new List<GameObject>(8);
-    private readonly List<GameObject> _tempAllies = new List<GameObject>(8);
 
-    private ITargetResolver _targetResolver;
+
 
     // Caches for components to avoid repeated GetComponent calls
     private readonly Dictionary<GameObject, HealthComponentBehaviour> _healthComponents = new Dictionary<GameObject, HealthComponentBehaviour>();
@@ -36,19 +37,13 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     public IReadOnlyList<GameObject> AllCombatants => _combatants;
 
-    public IReadOnlyList<GameObject> Enemies
-    {
-        get
-        {
-            _tempEnemies.Clear();
-            for (int i = 0; i < _combatants.Count; i++)
-            {
-                var c = _combatants[i];
-                if (c != null && c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            }
-            return _tempEnemies;
-        }
-    }
+    public IReadOnlyList<GameObject> Enemies => _combatants.Where(c => c != null && c.CompareTag("Enemy")).ToList().AsReadOnly();
+
+    [Header("Dependencies")]
+    [Tooltip("Assign the ActionExecutor component here.")]
+    [SerializeField] private ActionExecutor _actionExecutor;
+    [Tooltip("Assign the AIManager component here.")]
+    [SerializeField] private AIManager _aiManager;
 
     private void Awake()
     {
@@ -58,9 +53,16 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
         Instance = this;
+
+        if (_actionExecutor == null || _aiManager == null)
+        {
+            Debug.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
+            enabled = false;
+            return;
+        }
+
         ServiceLocator.Register<ICombatService>(this);
         _waitOneSecond = new WaitForSeconds(1.0f);
-        _targetResolver = new TargetResolver();
     }
 
     private void OnDestroy()
@@ -157,7 +159,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void TriggerAIPlanning()
     {
-    PendingAction? playerAction = null;
+        PendingAction? playerAction = null;
         for (int i = 0; i < _pendingActions.Count; i++)
         {
             if (_pendingActions[i].Caster != null && _pendingActions[i].Caster.CompareTag("Player"))
@@ -167,38 +169,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             }
         }
 
-        _tempEnemies.Clear();
-        _tempAllies.Clear();
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var c = _combatants[i];
-            if (c == null) continue;
-            if (c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            else _tempAllies.Add(c);
-        }
-
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var combatant = _combatants[i];
-            if (combatant == null) continue;
-            if (combatant != _player && combatant.activeInHierarchy)
-            {
-                _brains.TryGetValue(combatant, out var brain);
-                _apComponents.TryGetValue(combatant, out var aiAP);
-
-                if (brain != null && aiAP != null)
-                {
-                    PendingAction aiAction = brain.ChooseAction(playerAction, _tempEnemies, _tempAllies);
-
-                    if (aiAction.Ability != null && aiAP.ActionPoints.HasEnough(aiAction.Ability.ApCost))
-                    {
-                        aiAP.ActionPoints.SpendActionPoints(aiAction.Ability.ApCost);
-                        _pendingActions.Add(aiAction);
-                        Debug.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
-                    }
-                }
-            }
-        }
+        _aiManager.PlanActions(_combatants, _player, _brains, _apComponents, _pendingActions, playerAction);
 
         StartCoroutine(ExecuteTurn());
     }
@@ -214,41 +185,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         foreach (var action in _sortedActions)
         {
-            if (action.Caster == null)
-            {
-                Debug.LogWarning("Skipping action: caster is null.");
-                continue;
-            }
-
-            if (action.Ability == null)
-            {
-                Debug.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
-                continue;
-            }
-
-            if (!_healthComponents.TryGetValue(action.Caster, out var casterHealth))
-            {
-                Debug.LogWarning($"{action.Caster.name} has no cached HealthComponentBehaviour; skipping action {action.Ability.AbilityName}.");
-                continue;
-            }
-
-            if (casterHealth.CurrentValue <= 0)
-            {
-                Debug.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
-                continue;
-            }
-
-            _reusableTargetList.Clear();
-            _targetResolver.ResolveTargets(action, _combatants, _reusableTargetList);
-            
-            try
-            {
-                action.Ability.Execute(_reusableTargetList, action.Caster);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Exception while executing ability {action.Ability.AbilityName} from {action.Caster.name}: {ex}");
-            }
+            _actionExecutor.Execute(action, _combatants, _healthComponents);
 
             if (CheckForDefeat()) { yield break; }
             if (CheckForVictory()) { yield break; }

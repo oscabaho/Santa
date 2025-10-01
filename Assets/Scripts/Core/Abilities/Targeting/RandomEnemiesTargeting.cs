@@ -5,45 +5,48 @@ using UnityEngine;
 public class RandomEnemiesTargeting : TargetingStrategy
 {
     private readonly System.Random _rng = new System.Random();
-    private readonly List<GameObject> _randomTargetPool = new List<GameObject>(8);
+    private readonly List<GameObject> _enemyPool = new List<GameObject>(8);
 
-    public override bool RequiresTarget => true;
+    public override TargetingStyle Style => TargetingStyle.SingleEnemy; // Or a new style like MultiEnemy if appropriate
 
-    public override void FindTargets(PendingAction action, List<GameObject> allies, List<GameObject> enemies, List<GameObject> finalTargets)
+    public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
-        bool isPlayerSide = action.Caster != null && (action.Caster.CompareTag("Player") || action.Caster.CompareTag("Ally"));
-        List<GameObject> potentialTargets = isPlayerSide ? enemies : allies;
-
-        if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
+        _enemyPool.Clear();
+        foreach (var combatant in allCombatants)
         {
-            finalTargets.Add(action.PrimaryTarget);
-            
-            _randomTargetPool.Clear();
-            for (int i = 0; i < potentialTargets.Count; i++)
+            if (combatant != null && combatant.CompareTag("Enemy"))
             {
-                if (potentialTargets[i] != action.PrimaryTarget)
-                {
-                    _randomTargetPool.Add(potentialTargets[i]);
-                }
+                _enemyPool.Add(combatant);
             }
-            potentialTargets = _randomTargetPool;
         }
 
-        int totalToHit = Mathf.CeilToInt(potentialTargets.Count * action.Ability.TargetPercentage);
-        int additionalTargetsToHit = totalToHit - finalTargets.Count;
-
-        if (additionalTargetsToHit > 0 && potentialTargets.Count > 0)
+        if (primaryTarget != null && primaryTarget.activeInHierarchy && _enemyPool.Contains(primaryTarget))
         {
-            for (int i = potentialTargets.Count - 1; i > 0; i--)
+            results.Add(primaryTarget);
+            _enemyPool.Remove(primaryTarget);
+        }
+
+        if (ability.TargetPercentage <= 0) return;
+
+        // Calculate how many targets to hit in total, based on the original number of enemies
+        int totalToHit = Mathf.CeilToInt((_enemyPool.Count + results.Count) * ability.TargetPercentage);
+        int additionalTargetsToHit = totalToHit - results.Count;
+
+        if (additionalTargetsToHit > 0 && _enemyPool.Count > 0)
+        {
+            // Shuffle the remaining enemy pool
+            for (int i = _enemyPool.Count - 1; i > 0; i--)
             {
                 int j = _rng.Next(i + 1);
-                var tmp = potentialTargets[i];
-                potentialTargets[i] = potentialTargets[j];
-                potentialTargets[j] = tmp;
+                var temp = _enemyPool[i];
+                _enemyPool[i] = _enemyPool[j];
+                _enemyPool[j] = temp;
             }
-            for (int k = 0; k < additionalTargetsToHit && k < potentialTargets.Count; k++)
+
+            // Add the required number of additional targets
+            for (int k = 0; k < additionalTargetsToHit && k < _enemyPool.Count; k++)
             {
-                finalTargets.Add(potentialTargets[k]);
+                results.Add(_enemyPool[k]);
             }
         }
     }

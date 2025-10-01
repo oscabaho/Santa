@@ -4,13 +4,16 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AllEnemiesTargeting", menuName = "Santa/Abilities/Targeting/All Enemies")]
 public class AllEnemiesTargeting : TargetingStrategy
 {
-    public override bool RequiresTarget => false;
+    public override TargetingStyle Style => TargetingStyle.AllEnemies;
 
-    public override void FindTargets(PendingAction action, List<GameObject> allies, List<GameObject> enemies, List<GameObject> finalTargets)
+    public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
-        bool isPlayerSide = action.Caster != null && (action.Caster.CompareTag("Player") || action.Caster.CompareTag("Ally"));
-        List<GameObject> potentialTargets = isPlayerSide ? enemies : allies;
-
-        finalTargets.AddRange(potentialTargets);
+        foreach (var combatant in allCombatants)
+        {
+            if (combatant != null && combatant.CompareTag("Enemy"))
+            {
+                results.Add(combatant);
+            }
+        }
     }
 }
