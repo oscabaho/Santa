@@ -12,7 +12,7 @@ public interface IActionExecutor
     /// <param name="action">The action to execute.</param>
     /// <param name="allCombatants">A read-only list of all combatants.</param>
     /// <param name="healthCache">A cache of health components for performance.</param>
-    void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, HealthComponentBehaviour> healthCache);
+    void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache);
 }
 
 /// <summary>
@@ -22,7 +22,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
 {
     private readonly List<GameObject> _reusableTargetList = new List<GameObject>(8);
 
-    public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, HealthComponentBehaviour> healthCache)
+    public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache)
     {
         if (action.Caster == null)
         {
@@ -38,7 +38,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
 
         if (!healthCache.TryGetValue(action.Caster, out var casterHealth))
         {
-            Debug.LogWarning($"{action.Caster.name} has no cached HealthComponentBehaviour; skipping action {action.Ability.AbilityName}.");
+            Debug.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
             return;
         }
 

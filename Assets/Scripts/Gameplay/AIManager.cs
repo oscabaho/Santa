@@ -13,7 +13,7 @@ public interface IAIManager
         IReadOnlyList<GameObject> allCombatants,
         GameObject player,
         IReadOnlyDictionary<GameObject, IBrain> brainCache,
-        IReadOnlyDictionary<GameObject, ActionPointComponentBehaviour> apCache,
+        IReadOnlyDictionary<GameObject, IActionPointController> apCache,
         List<PendingAction> pendingActions,
         PendingAction? playerAction);
 }
@@ -30,7 +30,7 @@ public class AIManager : MonoBehaviour, IAIManager
         IReadOnlyList<GameObject> allCombatants,
         GameObject player,
         IReadOnlyDictionary<GameObject, IBrain> brainCache,
-        IReadOnlyDictionary<GameObject, ActionPointComponentBehaviour> apCache,
+        IReadOnlyDictionary<GameObject, IActionPointController> apCache,
         List<PendingAction> pendingActions,
         PendingAction? playerAction)
     {
@@ -51,9 +51,9 @@ public class AIManager : MonoBehaviour, IAIManager
             {
                 PendingAction aiAction = brain.ChooseAction(playerAction, _tempEnemies, _tempAllies);
 
-                if (aiAction.Ability != null && aiAP.ActionPoints.HasEnough(aiAction.Ability.ApCost))
+                if (aiAction.Ability != null && aiAP.CurrentValue >= aiAction.Ability.ApCost)
                 {
-                    aiAP.ActionPoints.SpendActionPoints(aiAction.Ability.ApCost);
+                    aiAP.AffectValue(-aiAction.Ability.ApCost);
                     pendingActions.Add(aiAction);
                     Debug.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
                 }

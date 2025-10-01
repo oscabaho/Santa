@@ -14,6 +14,25 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     [SerializeField] private GameObject explorationCamera;
     [Tooltip("The player GameObject in the exploration scene.")]
     [SerializeField] private GameObject explorationPlayer;
+    [Tooltip("The player GameObject used for combat.")]
+    [SerializeField] private GameObject combatPlayer;
+    [Tooltip("The root GameObject for the exploration UI.")]
+    [SerializeField] private GameObject explorationUI;
+    [Tooltip("The root GameObject for the combat UI.")]
+    [SerializeField] private GameObject combatUI;
+
+    // Public accessors for editor scripts
+    public GameObject ExplorationPlayer => explorationPlayer;
+    public GameObject CombatPlayer => combatPlayer;
+    public GameObject ExplorationCamera => explorationCamera;
+    public GameObject ExplorationUI => explorationUI;
+    public GameObject CombatUI => combatUI;
+
+    [Header("Transition Sequences")]
+    [Tooltip("Sequence of tasks to execute when starting combat.")]
+    [SerializeField] private TransitionSequence startCombatSequence;
+    [Tooltip("Sequence of tasks to execute when ending combat.")]
+    [SerializeField] private TransitionSequence endCombatSequence;
 
     private GameObject _currentCombatSceneParent;
 
@@ -40,74 +59,35 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     public void StartCombat(GameObject combatSceneParent)
     {
         _currentCombatSceneParent = combatSceneParent;
-
-        var gameState = ServiceLocator.Get<IGameStateService>();
-        if (gameState != null)
+        var context = BuildTransitionContext();
+        if (startCombatSequence != null)
         {
-            gameState.StartCombat();
+            StartCoroutine(startCombatSequence.Execute(context));
         }
-        else
-        {
-            Debug.LogError("CombatTransitionManager: IGameStateService not available to start combat. Ensure GameStateManager is present and registered.");
-        }
-
-        // Disable exploration elements
-        if (explorationCamera != null) explorationCamera.SetActive(false);
-        if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = false;
-
-        // Enable combat elements
-        if (_currentCombatSceneParent != null) _currentCombatSceneParent.SetActive(true);
-
-        // Get the combatants from the arena AFTER activating the scene
-        CombatArena arena = _currentCombatSceneParent.GetComponent<CombatArena>();
-        if (arena == null)
-        {
-            Debug.LogError("CombatTransitionManager: No CombatArena component found on the CombatSceneParent.");
-            // Also re-enable exploration elements to avoid getting stuck
-            if (explorationCamera != null) explorationCamera.SetActive(true);
-            if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = true;
-            return;
-        }
-
-        // Start the battle logic
-        var combatService = ServiceLocator.Get<ICombatService>();
-        if (combatService != null)
-        {
-            combatService.StartCombat(arena.Combatants);
-        }
-        else
-        {
-            Debug.LogError("A ICombatService is required in the scene to start combat!");
-        }
-
-        // Switch to combat UI
-        ServiceLocator.Get<IUIManager>().ShowCombatUI();
     }
 
     public void EndCombat()
     {
         if (_currentCombatSceneParent == null) return;
 
-        // Disable combat elements
-        _currentCombatSceneParent.SetActive(false);
-
-        // Enable exploration elements
-        if (explorationCamera != null) explorationCamera.SetActive(true);
-        if (explorationPlayer != null) explorationPlayer.GetComponent<Movement>().enabled = true;
-
-        var gameState = ServiceLocator.Get<IGameStateService>();
-        if (gameState != null)
+        var context = BuildTransitionContext();
+        if (endCombatSequence != null)
         {
-            gameState.EndCombat();
-        }
-        else
-        {
-            Debug.LogError("CombatTransitionManager: IGameStateService not available to end combat. Ensure GameStateManager is present and registered.");
+            StartCoroutine(endCombatSequence.Execute(context));
         }
 
         _currentCombatSceneParent = null;
+    }
 
-        // Switch to exploration UI
-        ServiceLocator.Get<IUIManager>().ShowExplorationUI();
+    private TransitionContext BuildTransitionContext()
+    {
+        var context = new TransitionContext();
+        context.AddTarget(TargetId.ExplorationCamera, explorationCamera);
+        context.AddTarget(TargetId.ExplorationPlayer, explorationPlayer);
+        context.AddTarget(TargetId.CombatPlayer, combatPlayer);
+        context.AddTarget(TargetId.ExplorationUI, explorationUI);
+        context.AddTarget(TargetId.CombatUI, combatUI);
+        context.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
+        return context;
     }
 }

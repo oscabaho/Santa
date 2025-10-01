@@ -4,11 +4,13 @@ using UnityEngine;
 /// Componente MonoBehaviour para exponer y gestionar HealthComponent en un GameObject.
 /// </summary>
 [DisallowMultipleComponent]
-public class HealthComponentBehaviour : MonoBehaviour, IStatController
+public class HealthComponentBehaviour : MonoBehaviour, IHealthController
 {
     [SerializeField]
     private HealthComponent health = new HealthComponent();
     public HealthComponent Health { get { return health; } }
+
+    public event System.Action<int, int> OnValueChanged { add => health.OnValueChanged += value; remove => health.OnValueChanged -= value; }
 
     public int CurrentValue => health.CurrentValue;
     public int MaxValue => health.MaxValue;

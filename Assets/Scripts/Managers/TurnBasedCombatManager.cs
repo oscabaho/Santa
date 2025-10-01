@@ -2,14 +2,10 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 /// <summary>
-
-/// <summary>
-/// Manages the turn-based combat flow following a Planning/Execution model.
-/// 1. Planning Phase: All combatants choose their actions.
-/// 2. Execution Phase: All chosen actions are sorted by speed and executed in order.
+/// Manages the turn-based combat flow, delegating state storage to a CombatState object.
+/// This class is responsible for the COMBAT FLOW (Planning -> Executing) and coordinating other services.
 /// </summary>
 public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 {
@@ -17,27 +13,18 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public event Action OnPlayerTurnStarted;
     public event Action OnPlayerTurnEnded;
 
-    private enum CombatState { Planning, Executing }
-    private CombatState _currentState;
+    private enum CombatPhase { Planning, Executing }
+    private CombatPhase _currentPhase;
 
+    private readonly CombatState _combatState = new CombatState();
+    private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
     private WaitForSeconds _waitOneSecond;
 
-    private readonly List<PendingAction> _pendingActions = new List<PendingAction>();
-    private readonly List<GameObject> _combatants = new List<GameObject>();
-    private GameObject _player;
+    // This list is for sorting and is ephemeral to the execution phase, so it stays here.
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
 
-
-
-    // Caches for components to avoid repeated GetComponent calls
-    private readonly Dictionary<GameObject, HealthComponentBehaviour> _healthComponents = new Dictionary<GameObject, HealthComponentBehaviour>();
-    private readonly Dictionary<GameObject, ActionPointComponentBehaviour> _apComponents = new Dictionary<GameObject, ActionPointComponentBehaviour>();
-    private readonly Dictionary<GameObject, IBrain> _brains = new Dictionary<GameObject, IBrain>();
-    private readonly List<GameObject> _reusableTargetList = new List<GameObject>(8);
-
-    public IReadOnlyList<GameObject> AllCombatants => _combatants;
-
-    public IReadOnlyList<GameObject> Enemies => _combatants.Where(c => c != null && c.CompareTag("Enemy")).ToList().AsReadOnly();
+    public IReadOnlyList<GameObject> AllCombatants => _combatState.AllCombatants;
+    public IReadOnlyList<GameObject> Enemies => _combatState.Enemies;
 
     [Header("Dependencies")]
     [Tooltip("Assign the ActionExecutor component here.")]
@@ -76,43 +63,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public void StartCombat(List<GameObject> participants)
     {
         Debug.Log("--- COMBAT STARTED ---");
-        _combatants.Clear();
-        _combatants.AddRange(participants);
+        _combatState.Initialize(participants);
 
-        _player = null;
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            if (_combatants[i] != null && _combatants[i].CompareTag("Player"))
-            {
-                _player = _combatants[i];
-                break;
-            }
-        }
-
-        // Cache all components at the start of combat
-        _healthComponents.Clear();
-        _apComponents.Clear();
-        _brains.Clear();
-        foreach (var combatant in _combatants)
-        {
-            if (combatant != null)
-            {
-                var health = combatant.GetComponent<HealthComponentBehaviour>();
-                if (health != null) _healthComponents[combatant] = health;
-
-                var ap = combatant.GetComponent<ActionPointComponentBehaviour>();
-                if (ap != null)
-                {
-                    _apComponents[combatant] = ap;
-                    ap.SetValue(100); // Set initial AP to 100
-                }
-
-                var brain = combatant.GetComponent<IBrain>();
-                if (brain != null) _brains[combatant] = brain;
-            }
-        }
-
-        if (_player == null)
+        if (_combatState.Player == null)
         {
             Debug.LogError("Combat cannot start without a player!");
             return;
@@ -125,32 +78,32 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private void StartNewTurn()
     {
         Debug.Log("--- PLANNING PHASE ---: Starting new turn.");
-        _currentState = CombatState.Planning;
-        _pendingActions.Clear();
+        _currentPhase = CombatPhase.Planning;
+        _combatState.PendingActions.Clear();
 
         OnPlayerTurnStarted?.Invoke();
     }
 
     public void SubmitPlayerAction(Ability ability, GameObject primaryTarget)
     {
-        if (_currentState != CombatState.Planning) return;
+        if (_currentPhase != CombatPhase.Planning) return;
 
-        if (!_apComponents.TryGetValue(_player, out var playerAP))
+        if (!_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
         {
-            Debug.LogError("Player does not have an ActionPointComponentBehaviour cached!");
+            Debug.LogError("Player does not have an ActionPointComponent cached!");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
-        if (ability == null || !playerAP.ActionPoints.HasEnough(ability.ApCost))
+        if (ability == null || playerAP.CurrentValue < ability.ApCost)
         {
             Debug.LogWarning("Player tried to submit an invalid or unaffordable action.");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
-        playerAP.ActionPoints.SpendActionPoints(ability.ApCost);
-        _pendingActions.Add(new PendingAction { Ability = ability, Caster = _player, PrimaryTarget = primaryTarget });
+        playerAP.AffectValue(-ability.ApCost);
+        _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
         Debug.Log($"Player submitted action: {ability.AbilityName}");
 
         OnPlayerTurnEnded?.Invoke();
@@ -160,16 +113,22 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private void TriggerAIPlanning()
     {
         PendingAction? playerAction = null;
-        for (int i = 0; i < _pendingActions.Count; i++)
+        foreach(var action in _combatState.PendingActions)
         {
-            if (_pendingActions[i].Caster != null && _pendingActions[i].Caster.CompareTag("Player"))
+            if (action.Caster != null && action.Caster.CompareTag("Player"))
             {
-                playerAction = _pendingActions[i];
+                playerAction = action;
                 break;
             }
         }
 
-        _aiManager.PlanActions(_combatants, _player, _brains, _apComponents, _pendingActions, playerAction);
+        _aiManager.PlanActions(
+            _combatState.AllCombatants,
+            _combatState.Player,
+            _combatState.Brains,
+            _combatState.APComponents,
+            _combatState.PendingActions,
+            playerAction);
 
         StartCoroutine(ExecuteTurn());
     }
@@ -177,54 +136,38 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private IEnumerator ExecuteTurn()
     {
         Debug.Log("--- EXECUTION PHASE ---");
-        _currentState = CombatState.Executing;
+        _currentPhase = CombatPhase.Executing;
 
         _sortedActions.Clear();
-        _sortedActions.AddRange(_pendingActions);
+        _sortedActions.AddRange(_combatState.PendingActions);
         _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
 
         foreach (var action in _sortedActions)
         {
-            _actionExecutor.Execute(action, _combatants, _healthComponents);
+            _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
 
-            if (CheckForDefeat()) { yield break; }
-            if (CheckForVictory()) { yield break; }
+            CombatResult result = _winConditionChecker.Check(_combatState);
+            if (result != CombatResult.Ongoing)
+            {
+                EndCombat(result == CombatResult.Victory);
+                yield break; // End the execution loop
+            }
 
             yield return _waitOneSecond;
         }
 
-        if (_currentState == CombatState.Executing)
+        if (_currentPhase == CombatPhase.Executing)
         {
             Debug.Log("Execution phase finished.");
             StartNewTurn();
         }
     }
 
-    private bool CheckForVictory()
-    {
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var c = _combatants[i];
-            if (c != null && c.CompareTag("Enemy") && c.activeInHierarchy) return false;
-        }
-        EndCombat(true);
-        return true;
-    }
-
-    private bool CheckForDefeat()
-    {
-        if (_healthComponents.TryGetValue(_player, out var playerHealth) && playerHealth.CurrentValue <= 0)
-        {
-            EndCombat(false);
-            return true;
-        }
-        return false;
-    }
-
     private void EndCombat(bool playerWon)
     {
-        _currentState = CombatState.Planning;
-        _healthComponents.Clear(); // Clear the cache
+        _currentPhase = CombatPhase.Planning; // Reset for next combat
+        _combatState.Clear();
+
         if (playerWon)
         {
             Debug.Log("--- COMBAT ENDED: VICTORY ---");

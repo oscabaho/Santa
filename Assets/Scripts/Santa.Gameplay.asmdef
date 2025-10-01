@@ -5,7 +5,8 @@
     "Santa.Input",
     "Unity.TextMeshPro",
     "Santa.Core",
-    "Unity.Cinemachine"
+    "Unity.Cinemachine",
+    "Santa.UI"
   ],
   "optionalUnityReferences": [],
   "includePlatforms": [],

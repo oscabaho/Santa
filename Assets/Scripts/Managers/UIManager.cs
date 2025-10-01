@@ -1,11 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour, IUIManager
 {
     private static UIManager Instance { get; set; }
 
-    [SerializeField] private GameObject explorationUI;
-    [SerializeField] private GameObject combatUI;
+    private Dictionary<string, UIPanel> _panels;
 
     private void Awake()
     {
@@ -15,6 +16,9 @@ public class UIManager : MonoBehaviour, IUIManager
             return;
         }
         Instance = this;
+
+        _panels = GetComponentsInChildren<UIPanel>(true)
+            .ToDictionary(panel => panel.PanelId, panel => panel);
 
         ServiceLocator.Register<IUIManager>(this);
     }
@@ -28,15 +32,48 @@ public class UIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void ShowExplorationUI()
+    public void ShowPanel(string panelId)
     {
-        explorationUI.SetActive(true);
-        combatUI.SetActive(false);
+        if (_panels.TryGetValue(panelId, out var panel))
+        {
+            panel.Show();
+        }
+        else
+        {
+            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+        }
     }
 
-    public void ShowCombatUI()
+    public void HidePanel(string panelId)
     {
-        explorationUI.SetActive(false);
-        combatUI.SetActive(true);
+        if (_panels.TryGetValue(panelId, out var panel))
+        {
+            panel.Hide();
+        }
+        else
+        {
+            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+        }
+    }
+
+    public void SwitchToPanel(string panelId)
+    {
+        if (!_panels.ContainsKey(panelId))
+        {
+            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+            return;
+        }
+
+        foreach (var panel in _panels.Values)
+        {
+            if (panel.PanelId == panelId)
+            {
+                panel.Show();
+            }
+            else
+            {
+                panel.Hide();
+            }
+        }
     }
 }

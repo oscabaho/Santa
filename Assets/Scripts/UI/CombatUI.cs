@@ -31,8 +31,8 @@ public class CombatUI : MonoBehaviour
     [Tooltip("Assign the ScriptableObject for the Meditate Ability here.")]
     [SerializeField] private Ability _meditateAbility;
 
-    private HealthComponentBehaviour _playerHealth;
-    private ActionPointComponentBehaviour _playerAP;
+    private IHealthController _playerHealth;
+    private IActionPointController _playerAP;
 
     private void Start()
     {
@@ -96,17 +96,24 @@ public class CombatUI : MonoBehaviour
 
         if (player != null)
         {
-            _playerHealth = player.GetComponent<HealthComponentBehaviour>();
-            _playerAP = player.GetComponent<ActionPointComponentBehaviour>();
+            var registry = player.GetComponent<IComponentRegistry>();
+            if (registry == null)
+            {
+                Debug.LogError("Player is missing an IComponentRegistry implementation.", player);
+                return;
+            }
+
+            _playerHealth = registry.HealthController;
+            _playerAP = registry.ActionPointController;
 
             if (_playerHealth != null)
             {
-                _playerHealth.Health.OnValueChanged += UpdateHealthUI;
+                _playerHealth.OnValueChanged += UpdateHealthUI;
                 UpdateHealthUI(_playerHealth.CurrentValue, _playerHealth.MaxValue);
             }
             if (_playerAP != null)
             {
-                _playerAP.ActionPoints.OnValueChanged += UpdateAPUI;
+                _playerAP.OnValueChanged += UpdateAPUI;
                 UpdateAPUI(_playerAP.CurrentValue, _playerAP.MaxValue);
             }
         }
@@ -116,11 +123,11 @@ public class CombatUI : MonoBehaviour
     {
         if (_playerHealth != null)
         {
-            _playerHealth.Health.OnValueChanged -= UpdateHealthUI;
+            _playerHealth.OnValueChanged -= UpdateHealthUI;
         }
         if (_playerAP != null)
         {
-            _playerAP.ActionPoints.OnValueChanged -= UpdateAPUI;
+            _playerAP.OnValueChanged -= UpdateAPUI;
         }
         _playerHealth = null;
         _playerAP = null;
