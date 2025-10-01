@@ -28,11 +28,3 @@ public class SetGameStateTask : TransitionTask
         yield break;
     }
 }
-
-/// <summary>
-/// Example interface for a game state service. You should implement this in your GameManager.
-/// </summary>
-public interface IGameStateService
-{
-    void SetState(GameState state);
-}

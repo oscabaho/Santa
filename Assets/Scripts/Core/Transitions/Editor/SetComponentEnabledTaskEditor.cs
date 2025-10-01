@@ -57,7 +57,7 @@ public class SetComponentEnabledTaskEditor : Editor
 
     private GameObject FindTargetGameObject(TargetId targetId)
     {
-        var manager = FindObjectOfType<CombatTransitionManager>();
+        var manager = FindFirstObjectByType<CombatTransitionManager>();
         if (manager == null) return null;
 
         switch(targetId)
