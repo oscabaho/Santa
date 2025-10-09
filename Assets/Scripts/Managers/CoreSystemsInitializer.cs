@@ -40,7 +40,7 @@ public class CoreSystemsInitializer : MonoBehaviour
         if (prefab == null)
         {
             #if UNITY_EDITOR
-            Debug.LogWarning($"CoreSystemsInitializer: A manager prefab has not been assigned in the Inspector.");
+            GameLog.LogWarning($"CoreSystemsInitializer: A manager prefab has not been assigned in the Inspector.");
             #endif
             return;
         }
@@ -51,7 +51,7 @@ public class CoreSystemsInitializer : MonoBehaviour
         if (componentType == null || !(typeof(Component).IsAssignableFrom(componentType)))
         {
             #if UNITY_EDITOR
-            Debug.LogError($"CoreSystemsInitializer: Could not find a component type named '{prefab.name}' on the prefab. Ensure the prefab name matches its main component script name.");
+            GameLog.LogError($"CoreSystemsInitializer: Could not find a component type named '{prefab.name}' on the prefab. Ensure the prefab name matches its main component script name.");
             #endif
             return;
         }

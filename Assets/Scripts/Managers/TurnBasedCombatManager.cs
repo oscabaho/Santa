@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Manages the turn-based combat flow, delegating state storage to a CombatState object.
@@ -18,7 +19,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private readonly CombatState _combatState = new CombatState();
     private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
-    private WaitForSeconds _waitOneSecond;
 
     // This list is for sorting and is ephemeral to the execution phase, so it stays here.
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
@@ -43,13 +43,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (_actionExecutor == null || _aiManager == null)
         {
-            Debug.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
+            GameLog.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
             enabled = false;
             return;
         }
 
         ServiceLocator.Register<ICombatService>(this);
-        _waitOneSecond = new WaitForSeconds(1.0f);
     }
 
     private void OnDestroy()
@@ -62,12 +61,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     public void StartCombat(List<GameObject> participants)
     {
-        Debug.Log("--- COMBAT STARTED ---");
+        GameLog.Log("--- COMBAT STARTED ---");
         _combatState.Initialize(participants);
 
         if (_combatState.Player == null)
         {
-            Debug.LogError("Combat cannot start without a player!");
+            GameLog.LogError("Combat cannot start without a player!");
             return;
         }
 
@@ -77,7 +76,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void StartNewTurn()
     {
-        Debug.Log("--- PLANNING PHASE ---: Starting new turn.");
+        GameLog.Log("--- PLANNING PHASE ---: Starting new turn.");
         _currentPhase = CombatPhase.Planning;
         _combatState.PendingActions.Clear();
 
@@ -90,21 +89,21 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (!_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
         {
-            Debug.LogError("Player does not have an ActionPointComponent cached!");
+            GameLog.LogError("Player does not have an ActionPointComponent cached!");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
         if (ability == null || playerAP.CurrentValue < ability.ApCost)
         {
-            Debug.LogWarning("Player tried to submit an invalid or unaffordable action.");
+            GameLog.LogWarning("Player tried to submit an invalid or unaffordable action.");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
         playerAP.AffectValue(-ability.ApCost);
         _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
-        Debug.Log($"Player submitted action: {ability.AbilityName}");
+        GameLog.Log($"Player submitted action: {ability.AbilityName}");
 
         OnPlayerTurnEnded?.Invoke();
         TriggerAIPlanning();
@@ -130,12 +129,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             _combatState.PendingActions,
             playerAction);
 
-        StartCoroutine(ExecuteTurn());
+        _ = ExecuteTurnAsync();
     }
 
-    private IEnumerator ExecuteTurn()
+    private async Task ExecuteTurnAsync()
     {
-        Debug.Log("--- EXECUTION PHASE ---");
+        GameLog.Log("--- EXECUTION PHASE ---");
         _currentPhase = CombatPhase.Executing;
 
         _sortedActions.Clear();
@@ -150,15 +149,15 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             if (result != CombatResult.Ongoing)
             {
                 EndCombat(result == CombatResult.Victory);
-                yield break; // End the execution loop
+                return; // End the execution
             }
 
-            yield return _waitOneSecond;
+            await Task.Delay(1000);
         }
 
         if (_currentPhase == CombatPhase.Executing)
         {
-            Debug.Log("Execution phase finished.");
+            GameLog.Log("Execution phase finished.");
             StartNewTurn();
         }
     }
@@ -170,12 +169,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (playerWon)
         {
-            Debug.Log("--- COMBAT ENDED: VICTORY ---");
+            GameLog.Log("--- COMBAT ENDED: VICTORY ---");
             ServiceLocator.Get<IUpgradeService>()?.PresentUpgradeOptions();
         }
         else
         {
-            Debug.Log("--- COMBAT ENDED: DEFEAT ---");
+            GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
             var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
             if (combatTransition != null) combatTransition.EndCombat();
         }

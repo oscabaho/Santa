@@ -1,0 +1,57 @@
+[
+  {
+    "name": "GameLog",
+    "path": "Assets/Scripts/Core/GameLog.cs",
+    "description": "Lightweight runtime logging wrapper. Enabled in Editor/Development builds or when GAME_LOGS_ENABLED is defined."
+  },
+  {
+    "name": "ServiceLocator",
+    "path": "Assets/Scripts/Core/ServiceLocator.cs",
+    "description": "Simple static Service Locator for registering and retrieving global services."
+  },
+  {
+    "name": "GameStateManager",
+    "path": "Assets/Scripts/Managers/GameStateManager.cs",
+    "description": "Manages the global state of the game (Exploration, Combat) and publishes OnCombatStarted/OnCombatEnded events."
+  },
+  {
+    "name": "CombatTransitionManager",
+    "path": "Assets/Scripts/Core/CombatTransitionManager.cs",
+    "description": "Manages visual transitions between exploration and combat using TransitionSequence tasks."
+  },
+  {
+    "name": "CombatScenePool",
+    "path": "Assets/Scripts/Core/CombatScenePool.cs",
+    "description": "Pool for combat scene prefabs with Addressables support and Resources/fallback instantiation."
+  },
+  {
+    "name": "CombatEncounter",
+    "path": "Assets/Scripts/Gameplay/CombatEncounter.cs",
+    "description": "Component configuring a combat encounter: prefab/address/resource, prewarm and pooling options."
+  },
+  {
+    "name": "CombatTrigger",
+    "path": "Assets/Scripts/Gameplay/CombatTrigger.cs",
+    "description": "Starts a combat encounter when the player interacts; requests instance from pool and kicks off transition."
+  },
+  {
+    "name": "TurnBasedCombatManager",
+    "path": "Assets/Scripts/Managers/TurnBasedCombatManager.cs",
+    "description": "Coordinates the turn-based combat flow (planning -> executing) and related services."
+  },
+  {
+    "name": "CombatUI",
+    "path": "Assets/Scripts/UI/CombatUI.cs",
+    "description": "Manages the combat UI, player stats display and action buttons."
+  },
+  {
+    "name": "GameEventBus",
+    "path": "Assets/Scripts/Core/GameEventBus.cs",
+    "description": "Global event bus for decoupled publish/subscribe of game events."
+  },
+  {
+    "name": "TransitionSequence",
+    "path": "Assets/Scripts/Core/Transitions/TransitionSequence.cs",
+    "description": "ScriptableObject that holds and executes a list of TransitionTask instances as a coroutine."
+  }
+]

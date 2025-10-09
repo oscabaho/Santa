@@ -23,7 +23,7 @@ public class SetGameStateTask : TransitionTask
         }
         else
         {
-            Debug.LogWarning("SetGameStateTask: IGameStateService not found in ServiceLocator.");
+            GameLog.LogWarning("SetGameStateTask: IGameStateService not found in ServiceLocator.");
         }
         yield break;
     }

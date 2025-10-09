@@ -38,7 +38,7 @@ public class PooledAudioSource : MonoBehaviour
     {
         if (audioData == null || audioData.GetClip() == null) // Usar GetClip para validar que haya al menos un clip
         {
-            Debug.LogWarning("Se intentó reproducir un AudioClip nulo. Devolviendo al pool de inmediato.");
+            GameLog.LogWarning("Se intentó reproducir un AudioClip nulo. Devolviendo al pool de inmediato.");
             ReturnToPool();
             return false;
         }

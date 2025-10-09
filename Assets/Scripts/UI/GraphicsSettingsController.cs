@@ -19,7 +19,7 @@ public class GraphicsSettingsController : MonoBehaviour
         var graphicsService = ServiceLocator.Get<IGraphicsSettingsService>();
         if (graphicsService == null)
         {
-            Debug.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionar\u00e1.", this);
+            GameLog.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionar\u00e1.", this);
             gameObject.SetActive(false);
             return;
         }

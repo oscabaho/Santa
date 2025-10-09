@@ -47,7 +47,7 @@ public class GameEventBus : IEventBus
                 catch (Exception ex)
                 {
                     // Ensure one failing subscriber doesn't prevent others from receiving the event.
-                    UnityEngine.Debug.LogError($"GameEventBus: Exception in subscriber for {type.Name}: {ex}");
+                    GameLog.LogError($"GameEventBus: Exception in subscriber for {type.Name}: {ex}");
                 }
             }
         }

@@ -15,7 +15,7 @@ public class DamageAbility : Ability
     {
         if (targets == null) return;
 
-        Debug.Log($"{caster.name} uses {AbilityName}!");
+    GameLog.Log($"{caster.name} uses {AbilityName}!");
 
         foreach (var target in targets)
         {
@@ -25,7 +25,7 @@ public class DamageAbility : Ability
             if (healthComponent != null)
             {
                 healthComponent.AffectValue(-_damage);
-                Debug.Log($"{target.name} takes {_damage} damage.");
+                GameLog.Log($"{target.name} takes {_damage} damage.");
             }
         }
     }

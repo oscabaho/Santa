@@ -26,25 +26,25 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
     {
         if (action.Caster == null)
         {
-            Debug.LogWarning("Skipping action: caster is null.");
+                GameLog.LogWarning("Skipping action: caster is null.");
             return;
         }
 
         if (action.Ability == null)
         {
-            Debug.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
+                GameLog.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
             return;
         }
 
         if (!healthCache.TryGetValue(action.Caster, out var casterHealth))
         {
-            Debug.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
+                GameLog.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
             return;
         }
 
         if (casterHealth.CurrentValue <= 0)
         {
-            Debug.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
+                GameLog.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
             return;
         }
 
@@ -55,7 +55,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
         }
         else
         {
-            Debug.LogWarning($"Ability {action.Ability.AbilityName} has no Targeting strategy assigned!");
+            GameLog.LogWarning($"Ability {action.Ability.AbilityName} has no Targeting strategy assigned!");
         }
 
         try
@@ -64,7 +64,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception while executing ability {action.Ability.AbilityName} from {action.Caster.name}: {ex}");
+            GameLog.LogError($"Exception while executing ability {action.Ability.AbilityName} from {action.Caster.name}: {ex}");
         }
     }
 }

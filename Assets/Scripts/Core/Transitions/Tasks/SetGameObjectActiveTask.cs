@@ -21,7 +21,7 @@ public class SetGameObjectActiveTask : TransitionTask
         }
         else
         {
-            Debug.LogWarning($"SetGameObjectActiveTask: Target '{targetId}' not found in context.");
+            GameLog.LogWarning($"SetGameObjectActiveTask: Target '{targetId}' not found in context.");
         }
         yield break;
     }

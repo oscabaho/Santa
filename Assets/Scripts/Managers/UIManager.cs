@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour, IUIManager
         }
         else
         {
-            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+            GameLog.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
         }
     }
 
@@ -52,7 +52,7 @@ public class UIManager : MonoBehaviour, IUIManager
         }
         else
         {
-            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+            GameLog.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
         }
     }
 
@@ -60,7 +60,7 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (!_panels.ContainsKey(panelId))
         {
-            Debug.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
+            GameLog.LogWarning($"UIManager: Panel with ID '{panelId}' not found.");
             return;
         }
 

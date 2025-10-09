@@ -55,7 +55,7 @@ public class AIManager : MonoBehaviour, IAIManager
                 {
                     aiAP.AffectValue(-aiAction.Ability.ApCost);
                     pendingActions.Add(aiAction);
-                    Debug.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
+                    GameLog.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
                 }
             }
         }

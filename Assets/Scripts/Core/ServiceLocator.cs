@@ -18,7 +18,7 @@ public static class ServiceLocator
         if (_services.ContainsKey(type))
         {
             #if UNITY_EDITOR
-            Debug.LogWarning($"ServiceLocator: Service of type '{type.Name}' is already registered. Overwriting.");
+            GameLog.LogWarning($"ServiceLocator: Service of type '{type.Name}' is already registered. Overwriting.");
             #endif
             _services[type] = service;
         }
@@ -52,11 +52,11 @@ public static class ServiceLocator
             return (T)service;
         }
 
-        #if UNITY_EDITOR
-        // Don't log an error for the initial request in the initializer, as the service might be about to be created.
-        // The initializer itself should handle warnings if the service is still null after instantiation.
-        // Debug.LogError($"ServiceLocator: Service of type '{type.Name}' not found.");
-        #endif
+    #if UNITY_EDITOR
+    // Don't log an error for the initial request in the initializer, as the service might be about to be created.
+    // The initializer itself should handle warnings if the service is still null after instantiation.
+    GameLog.LogError($"ServiceLocator: Service of type '{type.Name}' not found.");
+    #endif
 
         return default;
     }

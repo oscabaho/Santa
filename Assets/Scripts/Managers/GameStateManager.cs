@@ -56,7 +56,7 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         if (CurrentState == GameState.Combat) return;
 
         CurrentState = GameState.Combat;
-        Debug.Log("Game State changed to: Combat");
+        GameLog.Log("Game State changed to: Combat");
         OnCombatStarted?.Invoke();
     }
 
@@ -68,7 +68,35 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         if (CurrentState == GameState.Exploration) return;
 
         CurrentState = GameState.Exploration;
-        Debug.Log("Game State changed to: Exploration");
+        GameLog.Log("Game State changed to: Exploration");
         OnCombatEnded?.Invoke();
+    }
+
+    /// <summary>
+    /// Sets the game state. Fires combat start/end events when transitioning into or out of Combat.
+    /// Implements IGameStateService.SetState.
+    /// </summary>
+    public void SetState(GameState state)
+    {
+        if (CurrentState == state) return;
+
+        var previous = CurrentState;
+
+        if (state == GameState.Combat)
+        {
+            StartCombat();
+            return;
+        }
+
+        if (previous == GameState.Combat)
+        {
+            CurrentState = state;
+            GameLog.Log($"Game State changed to: {state}");
+            OnCombatEnded?.Invoke();
+            return;
+        }
+
+        CurrentState = state;
+        GameLog.Log($"Game State changed to: {state}");
     }
 }

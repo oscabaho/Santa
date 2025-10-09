@@ -39,7 +39,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
 
         if (upgradeUI == null)
         {
-            Debug.LogError("The UpgradeUI component is not assigned in the UpgradeManager!");
+            GameLog.LogError("The UpgradeUI component is not assigned in the UpgradeManager!");
         }
 
         LoadStats();
@@ -58,7 +58,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         var randomUpgrades = GetRandomUpgrades(2);
         if (randomUpgrades.Count < 2)
         {
-            Debug.LogWarning("Not enough unique upgrades available to present a choice.");
+            GameLog.LogWarning("Not enough unique upgrades available to present a choice.");
             ServiceLocator.Get<ICombatTransitionService>()?.EndCombat();
             return;
         }
@@ -81,12 +81,12 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         if (upgrade.Strategy != null)
         {
             upgrade.Strategy.Apply(this);
-            Debug.Log($"Applied upgrade: {upgrade.UpgradeName}. New value saved.");
+            GameLog.Log($"Applied upgrade: {upgrade.UpgradeName}. New value saved.");
             SaveStats();
         }
         else
         {
-            Debug.LogWarning($"Upgrade '{upgrade.UpgradeName}' has no strategy assigned.");
+            GameLog.LogWarning($"Upgrade '{upgrade.UpgradeName}' has no strategy assigned.");
         }
     }
 

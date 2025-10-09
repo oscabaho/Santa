@@ -44,7 +44,7 @@ public class AudioManager : MonoBehaviour, IAudioService
 
         if (audioSourcePrefab == null)
         {
-            Debug.LogError("AudioManager: 'Audio Source Prefab' no está asignado en el Inspector. El sistema de audio no funcionará. Por favor, asigna el prefab de PooledAudioSource.", this);
+            GameLog.LogError("AudioManager: 'Audio Source Prefab' no está asignado en el Inspector. El sistema de audio no funcionará. Por favor, asigna el prefab de PooledAudioSource.", this);
             enabled = false;
             return;
         }

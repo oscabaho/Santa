@@ -38,7 +38,7 @@ public class CombatUI : MonoBehaviour
     {
         if (_directAttackAbility == null || _areaAttackAbility == null || _specialAttackAbility == null)
         {
-            Debug.LogError("One or more Ability assets are not assigned in CombatUI.", this);
+            GameLog.LogError("One or more Ability assets are not assigned in CombatUI.", this);
             directAttackButton.interactable = false;
             areaAttackButton.interactable = false;
             specialAttackButton.interactable = false;
@@ -99,7 +99,7 @@ public class CombatUI : MonoBehaviour
             var registry = player.GetComponent<IComponentRegistry>();
             if (registry == null)
             {
-                Debug.LogError("Player is missing an IComponentRegistry implementation.", player);
+                GameLog.LogError("Player is missing an IComponentRegistry implementation.", player);
                 return;
             }
 
@@ -156,7 +156,7 @@ public class CombatUI : MonoBehaviour
 
         if (primaryTarget == null && needsTarget)
         {
-            Debug.LogWarning("Could not find a valid enemy to target for this UI.");
+            GameLog.LogWarning("Could not find a valid enemy to target for this UI.");
             // Optionally, provide feedback to the player here.
             return; // Stop the action if a required target is missing.
         }

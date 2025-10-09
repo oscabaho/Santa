@@ -22,7 +22,7 @@ public class SetComponentEnabledTask : TransitionTask
         GameObject target = context.GetTarget(targetId);
         if (target == null)
         {
-            Debug.LogWarning($"SetComponentEnabledTask: Target '{targetId}' not found in context.");
+            GameLog.LogWarning($"SetComponentEnabledTask: Target '{targetId}' not found in context.");
             yield break;
         }
 
@@ -35,7 +35,7 @@ public class SetComponentEnabledTask : TransitionTask
         }
         else
         {
-            Debug.LogWarning($"SetComponentEnabledTask: Component '{componentType}' not found on target '{target.name}'.");
+            GameLog.LogWarning($"SetComponentEnabledTask: Component '{componentType}' not found on target '{target.name}'.");
         }
         yield break;
     }

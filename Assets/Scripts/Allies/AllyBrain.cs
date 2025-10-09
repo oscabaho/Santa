@@ -22,7 +22,7 @@ public class AllyBrain : MonoBehaviour, IBrain
 
         if (primaryTarget == null)
         {
-            Debug.Log($"{gameObject.name} could not find a valid target.");
+            GameLog.Log($"{gameObject.name} could not find a valid target.");
             return new PendingAction();
         }
 
@@ -36,7 +36,7 @@ public class AllyBrain : MonoBehaviour, IBrain
 
         if (chosenAbility != null)
         {
-            Debug.Log($"{gameObject.name} decides to use {chosenAbility.AbilityName} on {primaryTarget.name}.");
+            GameLog.Log($"{gameObject.name} decides to use {chosenAbility.AbilityName} on {primaryTarget.name}.");
             return new PendingAction
             {
                 Ability = chosenAbility,
@@ -45,7 +45,7 @@ public class AllyBrain : MonoBehaviour, IBrain
             };
         }
 
-        Debug.Log($"{gameObject.name} cannot afford any abilities.");
+    GameLog.Log($"{gameObject.name} cannot afford any abilities.");
     return new PendingAction();
     }
 
@@ -88,14 +88,14 @@ public class AllyBrain : MonoBehaviour, IBrain
                 GameObject playerTarget = playerAction.Value.PrimaryTarget;
                 if (lowestHealthEnemies.Contains(playerTarget))
                 {
-                    Debug.Log($"{gameObject.name} will focus fire on player's target: {playerTarget.name}");
+                    GameLog.Log($"{gameObject.name} will focus fire on player's target: {playerTarget.name}");
                     return playerTarget; // Focus fire!
                 }
             }
 
             // Rule 2b: Player did not target a tied enemy, or hasn't acted. Choose randomly.
             int randomIndex = Random.Range(0, lowestHealthEnemies.Count);
-            Debug.Log($"{gameObject.name} chooses a random target among tied-health enemies.");
+            GameLog.Log($"{gameObject.name} chooses a random target among tied-health enemies.");
             return lowestHealthEnemies[randomIndex];
         }
 

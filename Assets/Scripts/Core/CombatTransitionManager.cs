@@ -51,7 +51,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private void OnDestroy()
     {
         var registered = ServiceLocator.Get<ICombatTransitionService>();
-        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
+        if ((Object)registered == (Object)this)
             ServiceLocator.Unregister<ICombatTransitionService>();
         if (Instance == this) Instance = null;
     }
@@ -59,6 +59,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     public void StartCombat(GameObject combatSceneParent)
     {
         _currentCombatSceneParent = combatSceneParent;
+    // Instance bookkeeping (pool management is handled by the caller).
         var context = BuildTransitionContext();
         if (startCombatSequence != null)
         {

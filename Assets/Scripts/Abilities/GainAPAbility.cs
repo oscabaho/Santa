@@ -15,7 +15,7 @@ public class GainAPAbility : Ability
             if (apComponent != null)
             {
                 apComponent.AffectValue(amountToGain);
-                Debug.Log($"{target.name} used an ability to gain {amountToGain} AP.");
+                GameLog.Log($"{target.name} used an ability to gain {amountToGain} AP.");
             }
         }
     }

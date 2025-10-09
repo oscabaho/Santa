@@ -27,7 +27,7 @@ public class CombatArena : MonoBehaviour
                 {
                     _combatants.Add(combatantHealth.gameObject);
                 }
-                Debug.Log($"CombatArena lazy-loaded {_combatants.Count} combatants.");
+                GameLog.Log($"CombatArena lazy-loaded {_combatants.Count} combatants.");
             }
             return _combatants;
         }

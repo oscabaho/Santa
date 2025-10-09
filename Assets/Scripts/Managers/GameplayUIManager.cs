@@ -19,7 +19,7 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
         }
         else
         {
-            Debug.LogError("ActionButton GameObject is not assigned in the GameplayUIManager!");
+            GameLog.LogError("ActionButton GameObject is not assigned in the GameplayUIManager!");
         }
     }
 
