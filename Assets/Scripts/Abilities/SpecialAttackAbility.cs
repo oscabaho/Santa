@@ -19,22 +19,22 @@ public class SpecialAttackAbility : Ability
         var energyComponent = caster.GetComponent<EnergyComponentBehaviour>();
         if (energyComponent == null || !energyComponent.Energy.IsFull())
         {
-            Debug.Log("Not enough energy for Special Attack!");
+            GameLog.Log("Not enough energy for Special Attack!");
             return;
         }
 
-        Debug.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
+    GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
         energyComponent.Energy.UseSpecialAttack();
 
         if (Random.value < _missChance)
         {
-            Debug.Log("...but it MISSED!");
+            GameLog.Log("...but it MISSED!");
             return;
         }
 
         if (targets == null) return;
 
-        Debug.Log("It's a direct hit!");
+    GameLog.Log("It's a direct hit!");
         foreach (var target in targets)
         {
             if (target == null) continue;
@@ -43,7 +43,7 @@ public class SpecialAttackAbility : Ability
             if (healthComponent != null)
             { 
                 healthComponent.AffectValue(-_damage);
-                Debug.Log($"{target.name} takes a massive {_damage} damage!");
+                GameLog.Log($"{target.name} takes a massive {_damage} damage!");
             }
         }
     }

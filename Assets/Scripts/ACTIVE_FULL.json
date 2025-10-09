@@ -1,0 +1,2733 @@
+﻿[
+    {
+        "file":  "Abilities/DamageAbility.cs",
+        "classes":  [
+                        {
+                            "name":  "DamageAbility",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Abilities/GainAPAbility.cs",
+        "classes":  [
+                        {
+                            "name":  "GainAPAbility",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Abilities/SpecialAttackAbility.cs",
+        "classes":  [
+                        {
+                            "name":  "SpecialAttackAbility",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Allies/AllyBrain.cs",
+        "classes":  [
+                        {
+                            "name":  "AllyBrain",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  10,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Audio/AudioManager.cs",
+        "classes":  [
+                        {
+                            "name":  "AudioManager",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  32,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Start()",
+                            "line":  55,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void InitializePool()",
+                            "line":  61,
+                            "returnType":  "void",
+                            "methodName":  "InitializePool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlaySound2D(AudioData audioData)",
+                            "line":  74,
+                            "returnType":  "void",
+                            "methodName":  "PlaySound2D",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlaySound3D(AudioData audioData, Vector3 position)",
+                            "line":  80,
+                            "returnType":  "void",
+                            "methodName":  "PlaySound3D",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlayLoopingSoundOnObject(AudioData audioData, GameObject target)",
+                            "line":  87,
+                            "returnType":  "void",
+                            "methodName":  "PlayLoopingSoundOnObject",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void StopLoopingSoundOnObject(GameObject target)",
+                            "line":  111,
+                            "returnType":  "void",
+                            "methodName":  "StopLoopingSoundOnObject",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlayMusic(AudioClip musicClip, bool loop = true)",
+                            "line":  120,
+                            "returnType":  "void",
+                            "methodName":  "PlayMusic",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetVolume(string parameterName, float volume)",
+                            "line":  133,
+                            "returnType":  "void",
+                            "methodName":  "SetVolume",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public float GetVolume(string parameterName)",
+                            "line":  148,
+                            "returnType":  "float",
+                            "methodName":  "GetVolume",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void LoadAndApplyInitialVolumes()",
+                            "line":  159,
+                            "returnType":  "void",
+                            "methodName":  "LoadAndApplyInitialVolumes",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private PooledAudioSource CreatePooledObject()",
+                            "line":  171,
+                            "returnType":  "PooledAudioSource",
+                            "methodName":  "CreatePooledObject",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnTakeFromPool(PooledAudioSource pooledSource)",
+                            "line":  178,
+                            "returnType":  "void",
+                            "methodName":  "OnTakeFromPool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnReturnedToPool(PooledAudioSource pooledSource)",
+                            "line":  183,
+                            "returnType":  "void",
+                            "methodName":  "OnReturnedToPool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroyObject(PooledAudioSource pooledSource)",
+                            "line":  191,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroyObject",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  197,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Audio/PooledAudioSource.cs",
+        "classes":  [
+                        {
+                            "name":  "PooledAudioSource",
+                            "kind":  "class",
+                            "line":  12,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  27,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public bool Play(AudioData audioData, float spatialBlend = 1.0f, bool forceLoop = false)",
+                            "line":  37,
+                            "returnType":  "bool",
+                            "methodName":  "Play",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void Stop()",
+                            "line":  68,
+                            "returnType":  "void",
+                            "methodName":  "Stop",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void ReturnToPool()",
+                            "line":  74,
+                            "returnType":  "void",
+                            "methodName":  "ReturnToPool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private IEnumerator ReturnToPoolWhenFinished()",
+                            "line":  85,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "ReturnToPoolWhenFinished",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/AbilityHolder.cs",
+        "classes":  [
+                        {
+                            "name":  "AbilityHolder",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Components/ActionPointComponent.cs",
+        "classes":  [
+                        {
+                            "name":  "ActionPointComponent",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void SpendActionPoints(int amount)",
+                            "line":  17,
+                            "returnType":  "void",
+                            "methodName":  "SpendActionPoints",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public bool HasEnough(int amount)",
+                            "line":  25,
+                            "returnType":  "bool",
+                            "methodName":  "HasEnough",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void Refill()",
+                            "line":  33,
+                            "returnType":  "void",
+                            "methodName":  "Refill",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/ActionPointComponentBehaviour.cs",
+        "classes":  [
+                        {
+                            "name":  "ActionPointComponentBehaviour",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void Refill()",
+                            "line":  23,
+                            "returnType":  "void",
+                            "methodName":  "Refill",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/EnergyComponent.cs",
+        "classes":  [
+                        {
+                            "name":  "EnergyComponent",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public bool IsFull()",
+                            "line":  13,
+                            "returnType":  "bool",
+                            "methodName":  "IsFull",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void UseSpecialAttack()",
+                            "line":  21,
+                            "returnType":  "void",
+                            "methodName":  "UseSpecialAttack",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/EnergyComponentBehaviour.cs",
+        "classes":  [
+                        {
+                            "name":  "EnergyComponentBehaviour",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void SetToMax()",
+                            "line":  23,
+                            "returnType":  "void",
+                            "methodName":  "SetToMax",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  28,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/HealthComponent.cs",
+        "classes":  [
+                        {
+                            "name":  "HealthComponent",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Components/HealthComponentBehaviour.cs",
+        "classes":  [
+                        {
+                            "name":  "HealthComponentBehaviour",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void SetToMax()",
+                            "line":  23,
+                            "returnType":  "void",
+                            "methodName":  "SetToMax",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  28,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/PlayerComponentRegistry.cs",
+        "classes":  [
+                        {
+                            "name":  "PlayerComponentRegistry",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  12,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Components/StatComponent.cs",
+        "classes":  [
+                        {
+                            "name":  "StatComponent",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void SetToMax()",
+                            "line":  24,
+                            "returnType":  "void",
+                            "methodName":  "SetToMax",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Abilities/Targeting/AllEnemiesTargeting.cs",
+        "classes":  [
+                        {
+                            "name":  "AllEnemiesTargeting",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Abilities/Targeting/RandomEnemiesTargeting.cs",
+        "classes":  [
+                        {
+                            "name":  "RandomEnemiesTargeting",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Abilities/Targeting/SelfTargeting.cs",
+        "classes":  [
+                        {
+                            "name":  "SelfTargeting",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Abilities/Targeting/SingleEnemyTargeting.cs",
+        "classes":  [
+                        {
+                            "name":  "SingleEnemyTargeting",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Abilities/Targeting/TargetingStrategy.cs",
+        "classes":  [
+                        {
+                            "name":  "TargetingStrategy",
+                            "kind":  "class",
+                            "line":  20,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Combat/CombatState.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatState",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void Initialize(List\u003cGameObject\u003e participants)",
+                            "line":  28,
+                            "returnType":  "void",
+                            "methodName":  "Initialize",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void Clear()",
+                            "line":  63,
+                            "returnType":  "void",
+                            "methodName":  "Clear",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Editor/CombatTransitionManagerEditor.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatTransitionManagerEditor",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Events/CombatEvents.cs",
+        "classes":  [
+                        {
+                            "name":  "HitboxImpactEvent",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Events/DayNightEvents.cs",
+        "classes":  [
+                        {
+                            "name":  "DayStartedEvent",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "NightStartedEvent",
+                            "kind":  "class",
+                            "line":  11,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Events/GameEvents.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatVictoryEvent",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "PlayerActionUsedStaminaEvent",
+                            "kind":  "class",
+                            "line":  20,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "PlayerDiedEvent",
+                            "kind":  "class",
+                            "line":  35,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "CharacterDeathEvent",
+                            "kind":  "class",
+                            "line":  48,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "PlayerSpawnedEvent",
+                            "kind":  "class",
+                            "line":  61,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "ItemUsedEvent",
+                            "kind":  "class",
+                            "line":  78,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "InteractableInRangeEvent",
+                            "kind":  "class",
+                            "line":  94,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "InteractableOutOfRangeEvent",
+                            "kind":  "class",
+                            "line":  103,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Events/VFXCompletedEvent.cs",
+        "classes":  [
+                        {
+                            "name":  "VFXCompletedEvent",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Events/VFXEvents.cs",
+        "classes":  [
+                        {
+                            "name":  "PlayVFXRequest",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IActionPointController.cs",
+        "classes":  [
+                        {
+                            "name":  "IActionPointController",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IAudioService.cs",
+        "classes":  [
+                        {
+                            "name":  "IAudioService",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/ICombatService.cs",
+        "classes":  [
+                        {
+                            "name":  "ICombatService",
+                            "kind":  "interface",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/ICombatTransitionService.cs",
+        "classes":  [
+                        {
+                            "name":  "ICombatTransitionService",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IComponentRegistry.cs",
+        "classes":  [
+                        {
+                            "name":  "IComponentRegistry",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IDamageable.cs",
+        "classes":  [
+                        {
+                            "name":  "IDamageable",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IEventBus.cs",
+        "classes":  [
+                        {
+                            "name":  "IEventBus",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IGameplayUIService.cs",
+        "classes":  [
+                        {
+                            "name":  "IGameplayUIService",
+                            "kind":  "interface",
+                            "line":  1,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IGameStateService.cs",
+        "classes":  [
+                        {
+                            "name":  "IGameStateService",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IGraphicsSettingsService.cs",
+        "classes":  [
+                        {
+                            "name":  "IGraphicsSettingsService",
+                            "kind":  "interface",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IHealthController.cs",
+        "classes":  [
+                        {
+                            "name":  "IHealthController",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IInteractable.cs",
+        "classes":  [
+                        {
+                            "name":  "IInteractable",
+                            "kind":  "interface",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/ILevelService.cs",
+        "classes":  [
+                        {
+                            "name":  "ILevelService",
+                            "kind":  "interface",
+                            "line":  1,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IStatController.cs",
+        "classes":  [
+                        {
+                            "name":  "IStatController",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IUIManager.cs",
+        "classes":  [
+                        {
+                            "name":  "IUIManager",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IUpgradeService.cs",
+        "classes":  [
+                        {
+                            "name":  "IUpgradeService",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IUpgradeUI.cs",
+        "classes":  [
+                        {
+                            "name":  "IUpgradeUI",
+                            "kind":  "interface",
+                            "line":  1,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IUsableItem.cs",
+        "classes":  [
+                        {
+                            "name":  "IUsableItem",
+                            "kind":  "interface",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IVFXService.cs",
+        "classes":  [
+                        {
+                            "name":  "IVFXService",
+                            "kind":  "interface",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IWeaponDamager.cs",
+        "classes":  [
+                        {
+                            "name":  "IWeaponDamager",
+                            "kind":  "interface",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Interfaces/IWinConditionChecker.cs",
+        "classes":  [
+                        {
+                            "name":  "IWinConditionChecker",
+                            "kind":  "interface",
+                            "line":  14,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Editor/SetComponentEnabledTaskEditor.cs",
+        "classes":  [
+                        {
+                            "name":  "SetComponentEnabledTaskEditor",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void OnEnable()",
+                            "line":  13,
+                            "returnType":  "void",
+                            "methodName":  "OnEnable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private GameObject FindTargetGameObject(TargetId targetId)",
+                            "line":  58,
+                            "returnType":  "GameObject",
+                            "methodName":  "FindTargetGameObject",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/FadeInTask.cs",
+        "classes":  [
+                        {
+                            "name":  "FadeInTask",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/FullScreenFadeTask.cs",
+        "classes":  [
+                        {
+                            "name":  "FullScreenFadeTask",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private IEnumerator Fade(float from, float to, float dur)",
+                            "line":  31,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "Fade",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void EnsureOverlayExists()",
+                            "line":  51,
+                            "returnType":  "void",
+                            "methodName":  "EnsureOverlayExists",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/HideUIPanelTask.cs",
+        "classes":  [
+                        {
+                            "name":  "HideUIPanelTask",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/SetComponentEnabledTask.cs",
+        "classes":  [
+                        {
+                            "name":  "SetComponentEnabledTask",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/SetGameObjectActiveTask.cs",
+        "classes":  [
+                        {
+                            "name":  "SetGameObjectActiveTask",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/SetGameStateTask.cs",
+        "classes":  [
+                        {
+                            "name":  "SetGameStateTask",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/ShowUIPanelTask.cs",
+        "classes":  [
+                        {
+                            "name":  "ShowUIPanelTask",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/Tasks/SwitchUIPanelTask.cs",
+        "classes":  [
+                        {
+                            "name":  "SwitchUIPanelTask",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/TargetId.cs",
+        "classes":  [
+
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/TransitionContext.cs",
+        "classes":  [
+                        {
+                            "name":  "TransitionContext",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void AddTarget(TargetId id, GameObject obj)",
+                            "line":  11,
+                            "returnType":  "void",
+                            "methodName":  "AddTarget",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public GameObject GetTarget(TargetId id)",
+                            "line":  19,
+                            "returnType":  "GameObject",
+                            "methodName":  "GetTarget",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/TransitionSequence.cs",
+        "classes":  [
+                        {
+                            "name":  "TransitionSequence",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public IEnumerator Execute(TransitionContext context)",
+                            "line":  14,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "Execute",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/Transitions/TransitionTask.cs",
+        "classes":  [
+                        {
+                            "name":  "TransitionTask",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Upgrades/IncreaseDamageStrategy.cs",
+        "classes":  [
+                        {
+                            "name":  "IncreaseDamageStrategy",
+                            "kind":  "class",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Upgrades/IncreaseEnergyGainStrategy.cs",
+        "classes":  [
+                        {
+                            "name":  "IncreaseEnergyGainStrategy",
+                            "kind":  "class",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Upgrades/IUpgradeTarget.cs",
+        "classes":  [
+                        {
+                            "name":  "IUpgradeTarget",
+                            "kind":  "interface",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Upgrades/ReduceSpecialMissChanceStrategy.cs",
+        "classes":  [
+                        {
+                            "name":  "ReduceSpecialMissChanceStrategy",
+                            "kind":  "class",
+                            "line":  4,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Upgrades/UpgradeStrategySO.cs",
+        "classes":  [
+                        {
+                            "name":  "UpgradeStrategySO",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/Ability.cs",
+        "classes":  [
+                        {
+                            "name":  "Ability",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/AbilityType.cs",
+        "classes":  [
+
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/AbilityUpgrade.cs",
+        "classes":  [
+                        {
+                            "name":  "AbilityUpgrade",
+                            "kind":  "class",
+                            "line":  19,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/AudioData.cs",
+        "classes":  [
+                        {
+                            "name":  "AudioData",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void Play()",
+                            "line":  43,
+                            "returnType":  "void",
+                            "methodName":  "Play",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlayAtPoint(Vector3 position)",
+                            "line":  51,
+                            "returnType":  "void",
+                            "methodName":  "PlayAtPoint",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public AudioClip GetClip()",
+                            "line":  56,
+                            "returnType":  "AudioClip",
+                            "methodName":  "GetClip",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public float GetVolume()",
+                            "line":  62,
+                            "returnType":  "float",
+                            "methodName":  "GetVolume",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public float GetPitch()",
+                            "line":  68,
+                            "returnType":  "float",
+                            "methodName":  "GetPitch",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/CombatScenePool.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatScenePool",
+                            "kind":  "class",
+                            "line":  12,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public IEnumerator GetInstanceAsync(string key, System.Action\u003cGameObject\u003e onComplete, CombatEncounter encounter = null)",
+                            "line":  35,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "GetInstanceAsync",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ReleaseInstance(string key, GameObject instance)",
+                            "line":  96,
+                            "returnType":  "void",
+                            "methodName":  "ReleaseInstance",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/CombatTransitionManager.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatTransitionManager",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  39,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  51,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void StartCombat(GameObject combatSceneParent)",
+                            "line":  59,
+                            "returnType":  "void",
+                            "methodName":  "StartCombat",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void EndCombat()",
+                            "line":  70,
+                            "returnType":  "void",
+                            "methodName":  "EndCombat",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private TransitionContext BuildTransitionContext()",
+                            "line":  83,
+                            "returnType":  "TransitionContext",
+                            "methodName":  "BuildTransitionContext",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/GameEventBus.cs",
+        "classes":  [
+                        {
+                            "name":  "GameEventBus",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/GameLog.cs",
+        "classes":  [
+                        {
+                            "name":  "GameLog",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/GameState.cs",
+        "classes":  [
+
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/IBrain.cs",
+        "classes":  [
+                        {
+                            "name":  "IBrain",
+                            "kind":  "interface",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/LevelData.cs",
+        "classes":  [
+                        {
+                            "name":  "LevelData",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/PendingAction.cs",
+        "classes":  [
+                        {
+                            "name":  "PendingAction",
+                            "kind":  "struct",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Core/SceneBootstrapper.cs",
+        "classes":  [
+                        {
+                            "name":  "SceneBootstrapper",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Start()",
+                            "line":  17,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Core/ServiceLocator.cs",
+        "classes":  [
+                        {
+                            "name":  "ServiceLocator",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Dialogue/Conversation.cs",
+        "classes":  [
+                        {
+                            "name":  "Conversation",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  18,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void Interact(GameObject interactor)",
+                            "line":  36,
+                            "returnType":  "void",
+                            "methodName":  "Interact",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Dialogue/DialogueManager.cs",
+        "classes":  [
+                        {
+                            "name":  "DialogueManager",
+                            "kind":  "class",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Dialogue/DialogueScript.cs",
+        "classes":  [
+                        {
+                            "name":  "DialogueScript",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void StartDialogue()",
+                            "line":  42,
+                            "returnType":  "void",
+                            "methodName":  "StartDialogue",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void NextLine()",
+                            "line":  57,
+                            "returnType":  "void",
+                            "methodName":  "NextLine",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Enemies/EnemyBrain.cs",
+        "classes":  [
+                        {
+                            "name":  "EnemyBrain",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  12,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/Combat/DefaultWinConditionChecker.cs",
+        "classes":  [
+                        {
+                            "name":  "DefaultWinConditionChecker",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public CombatResult Check(CombatState combatState)",
+                            "line":  8,
+                            "returnType":  "CombatResult",
+                            "methodName":  "Check",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/ActionExecutor.cs",
+        "classes":  [
+                        {
+                            "name":  "IActionExecutor",
+                            "kind":  "interface",
+                            "line":  7,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "ActionExecutor",
+                            "kind":  "class",
+                            "line":  21,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public void Execute(PendingAction action, IReadOnlyList\u003cGameObject\u003e allCombatants, IReadOnlyDictionary\u003cGameObject, IHealthController\u003e healthCache)",
+                            "line":  25,
+                            "returnType":  "void",
+                            "methodName":  "Execute",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/AIManager.cs",
+        "classes":  [
+                        {
+                            "name":  "IAIManager",
+                            "kind":  "interface",
+                            "line":  7,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "AIManager",
+                            "kind":  "class",
+                            "line":  24,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Gameplay/CombatArena.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatArena",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Gameplay/CombatEncounter.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatEncounter",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Start()",
+                            "line":  39,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public string GetPoolKey()",
+                            "line":  56,
+                            "returnType":  "string",
+                            "methodName":  "GetPoolKey",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public GameObject InstantiateCombatSceneFallback()",
+                            "line":  67,
+                            "returnType":  "GameObject",
+                            "methodName":  "InstantiateCombatSceneFallback",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/CombatScenePool.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatScenePool",
+                            "kind":  "class",
+                            "line":  12,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "public IEnumerator Prewarm(string key, int count, CombatEncounter encounter = null)",
+                            "line":  47,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "Prewarm",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public IEnumerator GetInstanceAsync(string key, System.Action\u003cGameObject\u003e onComplete, CombatEncounter encounter = null)",
+                            "line":  79,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "GetInstanceAsync",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ReleaseInstance(string key, GameObject instance)",
+                            "line":  147,
+                            "returnType":  "void",
+                            "methodName":  "ReleaseInstance",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/CombatTrigger.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatTrigger",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  17,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Start()",
+                            "line":  32,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void StartCombatInteraction()",
+                            "line":  38,
+                            "returnType":  "void",
+                            "methodName":  "StartCombatInteraction",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnCombatEnded()",
+                            "line":  105,
+                            "returnType":  "void",
+                            "methodName":  "OnCombatEnded",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Gameplay/GameLog.cs",
+        "classes":  [
+                        {
+                            "name":  "GameLog",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  "Santa.Gameplay"
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Input/InputReader.cs",
+        "classes":  [
+                        {
+                            "name":  "InputReader",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void OnEnable()",
+                            "line":  12,
+                            "returnType":  "void",
+                            "methodName":  "OnEnable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDisable()",
+                            "line":  22,
+                            "returnType":  "void",
+                            "methodName":  "OnDisable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void OnMove(InputAction.CallbackContext context)",
+                            "line":  27,
+                            "returnType":  "void",
+                            "methodName":  "OnMove",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void OnInteract(InputAction.CallbackContext context)",
+                            "line":  34,
+                            "returnType":  "void",
+                            "methodName":  "OnInteract",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/CoreSystemsInitializer.cs",
+        "classes":  [
+                        {
+                            "name":  "CoreSystemsInitializer",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  14,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void InitializeSystems()",
+                            "line":  28,
+                            "returnType":  "void",
+                            "methodName":  "InitializeSystems",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void InstantiateManager(GameObject prefab)",
+                            "line":  38,
+                            "returnType":  "void",
+                            "methodName":  "InstantiateManager",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/GameplayUIManager.cs",
+        "classes":  [
+                        {
+                            "name":  "GameplayUIManager",
+                            "kind":  "class",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  9,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Start()",
+                            "line":  14,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  26,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ShowActionButton(bool show)",
+                            "line":  36,
+                            "returnType":  "void",
+                            "methodName":  "ShowActionButton",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/GameStateManager.cs",
+        "classes":  [
+                        {
+                            "name":  "GameStateManager",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  22,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  39,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void StartCombat()",
+                            "line":  54,
+                            "returnType":  "void",
+                            "methodName":  "StartCombat",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void EndCombat()",
+                            "line":  66,
+                            "returnType":  "void",
+                            "methodName":  "EndCombat",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetState(GameState state)",
+                            "line":  79,
+                            "returnType":  "void",
+                            "methodName":  "SetState",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/GraphicsSettingsManager.cs",
+        "classes":  [
+                        {
+                            "name":  "GraphicsSettingsManager",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  16,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Start()",
+                            "line":  31,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  36,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void ApplyPlatformSpecificSettings()",
+                            "line":  45,
+                            "returnType":  "void",
+                            "methodName":  "ApplyPlatformSpecificSettings",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetFullscreen(bool isFullscreen)",
+                            "line":  76,
+                            "returnType":  "void",
+                            "methodName":  "SetFullscreen",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public int GetCurrentResolutionIndex()",
+                            "line":  85,
+                            "returnType":  "int",
+                            "methodName":  "GetCurrentResolutionIndex",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetQuality(int qualityIndex)",
+                            "line":  110,
+                            "returnType":  "void",
+                            "methodName":  "SetQuality",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetResolution(int resolutionIndex)",
+                            "line":  119,
+                            "returnType":  "void",
+                            "methodName":  "SetResolution",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SetVSync(bool isVsyncOn)",
+                            "line":  134,
+                            "returnType":  "void",
+                            "methodName":  "SetVSync",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/LevelManager.cs",
+        "classes":  [
+                        {
+                            "name":  "LevelManager",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  17,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  30,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Start()",
+                            "line":  38,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public LevelData GetCurrentLevelData()",
+                            "line":  53,
+                            "returnType":  "LevelData",
+                            "methodName":  "GetCurrentLevelData",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void LiberateCurrentLevel()",
+                            "line":  65,
+                            "returnType":  "void",
+                            "methodName":  "LiberateCurrentLevel",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void AdvanceToNextLevel()",
+                            "line":  86,
+                            "returnType":  "void",
+                            "methodName":  "AdvanceToNextLevel",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SetLevel(int levelIndex)",
+                            "line":  100,
+                            "returnType":  "void",
+                            "methodName":  "SetLevel",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void ActivateGentrifiedVisuals(LevelData levelData)",
+                            "line":  123,
+                            "returnType":  "void",
+                            "methodName":  "ActivateGentrifiedVisuals",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void DeactivateAllVisuals(LevelData levelData)",
+                            "line":  135,
+                            "returnType":  "void",
+                            "methodName":  "DeactivateAllVisuals",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/TurnBasedCombatManager.cs",
+        "classes":  [
+                        {
+                            "name":  "TurnBasedCombatManager",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  35,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  55,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void StartCombat(List\u003cGameObject\u003e participants)",
+                            "line":  63,
+                            "returnType":  "void",
+                            "methodName":  "StartCombat",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void StartNewTurn()",
+                            "line":  78,
+                            "returnType":  "void",
+                            "methodName":  "StartNewTurn",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SubmitPlayerAction(Ability ability, GameObject primaryTarget)",
+                            "line":  87,
+                            "returnType":  "void",
+                            "methodName":  "SubmitPlayerAction",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void TriggerAIPlanning()",
+                            "line":  113,
+                            "returnType":  "void",
+                            "methodName":  "TriggerAIPlanning",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private IEnumerator ExecuteTurn()",
+                            "line":  136,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "ExecuteTurn",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void EndCombat(bool playerWon)",
+                            "line":  166,
+                            "returnType":  "void",
+                            "methodName":  "EndCombat",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Managers/UIManager.cs",
+        "classes":  [
+                        {
+                            "name":  "UIManager",
+                            "kind":  "class",
+                            "line":  5,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  11,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  26,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ShowPanel(string panelId)",
+                            "line":  35,
+                            "returnType":  "void",
+                            "methodName":  "ShowPanel",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void HidePanel(string panelId)",
+                            "line":  47,
+                            "returnType":  "void",
+                            "methodName":  "HidePanel",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void SwitchToPanel(string panelId)",
+                            "line":  59,
+                            "returnType":  "void",
+                            "methodName":  "SwitchToPanel",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "UI/CombatUI.cs",
+        "classes":  [
+                        {
+                            "name":  "CombatUI",
+                            "kind":  "class",
+                            "line":  9,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Start()",
+                            "line":  37,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnEnable()",
+                            "line":  55,
+                            "returnType":  "void",
+                            "methodName":  "OnEnable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDisable()",
+                            "line":  65,
+                            "returnType":  "void",
+                            "methodName":  "OnDisable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnPlayerTurnStarted()",
+                            "line":  76,
+                            "returnType":  "void",
+                            "methodName":  "OnPlayerTurnStarted",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnPlayerTurnEnded()",
+                            "line":  82,
+                            "returnType":  "void",
+                            "methodName":  "OnPlayerTurnEnded",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SubscribeToPlayerEvents()",
+                            "line":  88,
+                            "returnType":  "void",
+                            "methodName":  "SubscribeToPlayerEvents",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void UnsubscribeFromPlayerEvents()",
+                            "line":  122,
+                            "returnType":  "void",
+                            "methodName":  "UnsubscribeFromPlayerEvents",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void UpdateHealthUI(int current, int max)",
+                            "line":  136,
+                            "returnType":  "void",
+                            "methodName":  "UpdateHealthUI",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void UpdateAPUI(int current, int max)",
+                            "line":  141,
+                            "returnType":  "void",
+                            "methodName":  "UpdateAPUI",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void RequestAbility(Ability ability)",
+                            "line":  146,
+                            "returnType":  "void",
+                            "methodName":  "RequestAbility",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "UI/GraphicsSettingsController.cs",
+        "classes":  [
+                        {
+                            "name":  "GraphicsSettingsController",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Start()",
+                            "line":  17,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SetupQualityDropdown()",
+                            "line":  33,
+                            "returnType":  "void",
+                            "methodName":  "SetupQualityDropdown",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SetupResolutionDropdown(IGraphicsSettingsService graphicsService)",
+                            "line":  41,
+                            "returnType":  "void",
+                            "methodName":  "SetupResolutionDropdown",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SetupToggles()",
+                            "line":  59,
+                            "returnType":  "void",
+                            "methodName":  "SetupToggles",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void AddListeners(IGraphicsSettingsService graphicsService)",
+                            "line":  72,
+                            "returnType":  "void",
+                            "methodName":  "AddListeners",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "UI/PlatformSpecificUI.cs",
+        "classes":  [
+                        {
+                            "name":  "PlatformSpecificUI",
+                            "kind":  "class",
+                            "line":  3,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  5,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "UI/UIPanel.cs",
+        "classes":  [
+                        {
+                            "name":  "UIPanel",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+
+                    ]
+    },
+    {
+        "file":  "Upgrades/UpgradeManager.cs",
+        "classes":  [
+                        {
+                            "name":  "UpgradeManager",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  29,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  48,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PresentUpgradeOptions()",
+                            "line":  56,
+                            "returnType":  "void",
+                            "methodName":  "PresentUpgradeOptions",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private List\u003cAbilityUpgrade\u003e GetRandomUpgrades(int count)",
+                            "line":  68,
+                            "returnType":  "List\u003cAbilityUpgrade\u003e",
+                            "methodName":  "GetRandomUpgrades",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ApplyUpgrade(AbilityUpgrade upgrade)",
+                            "line":  79,
+                            "returnType":  "void",
+                            "methodName":  "ApplyUpgrade",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void SaveStats()",
+                            "line":  100,
+                            "returnType":  "void",
+                            "methodName":  "SaveStats",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void LoadStats()",
+                            "line":  110,
+                            "returnType":  "void",
+                            "methodName":  "LoadStats",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Upgrades/UpgradeUI.cs",
+        "classes":  [
+                        {
+                            "name":  "UpgradeUI",
+                            "kind":  "class",
+                            "line":  8,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Start()",
+                            "line":  22,
+                            "returnType":  "void",
+                            "methodName":  "Start",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)",
+                            "line":  32,
+                            "returnType":  "void",
+                            "methodName":  "ShowUpgrades",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnOption1Clicked()",
+                            "line":  46,
+                            "returnType":  "void",
+                            "methodName":  "OnOption1Clicked",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnOption2Clicked()",
+                            "line":  51,
+                            "returnType":  "void",
+                            "methodName":  "OnOption2Clicked",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void ChooseUpgrade(AbilityUpgrade chosenUpgrade)",
+                            "line":  56,
+                            "returnType":  "void",
+                            "methodName":  "ChooseUpgrade",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "VFX/PooledParticleSystem.cs",
+        "classes":  [
+                        {
+                            "name":  "PooledParticleSystem",
+                            "kind":  "class",
+                            "line":  10,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  19,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnEnable()",
+                            "line":  24,
+                            "returnType":  "void",
+                            "methodName":  "OnEnable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private IEnumerator ReturnToPoolWhenFinished()",
+                            "line":  30,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "ReturnToPoolWhenFinished",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "VFX/VFXManager.cs",
+        "classes":  [
+                        {
+                            "name":  "VFXManager",
+                            "kind":  "class",
+                            "line":  6,
+                            "namespace":  ""
+                        },
+                        {
+                            "name":  "VfxPoolConfig",
+                            "kind":  "class",
+                            "line":  11,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  23,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void InitializePools()",
+                            "line":  43,
+                            "returnType":  "void",
+                            "methodName":  "InitializePools",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroy()",
+                            "line":  73,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroy",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public GameObject PlayEffect(string key, Vector3 position, Quaternion? rotation = null)",
+                            "line":  95,
+                            "returnType":  "GameObject",
+                            "methodName":  "PlayEffect",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private PooledParticleSystem CreatePooledVFX(GameObject prefab)",
+                            "line":  124,
+                            "returnType":  "PooledParticleSystem",
+                            "methodName":  "CreatePooledVFX",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnGetFromPool(PooledParticleSystem vfx)",
+                            "line":  137,
+                            "returnType":  "void",
+                            "methodName":  "OnGetFromPool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnReleaseToPool(PooledParticleSystem vfx)",
+                            "line":  142,
+                            "returnType":  "void",
+                            "methodName":  "OnReleaseToPool",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDestroyPooledVFX(PooledParticleSystem vfx)",
+                            "line":  147,
+                            "returnType":  "void",
+                            "methodName":  "OnDestroyPooledVFX",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnPlayVFXRequest(PlayVFXRequest request)",
+                            "line":  153,
+                            "returnType":  "void",
+                            "methodName":  "OnPlayVFXRequest",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnHitboxImpact(HitboxImpactEvent evt)",
+                            "line":  158,
+                            "returnType":  "void",
+                            "methodName":  "OnHitboxImpact",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "public void PlayFadeAndDestroyEffect(GameObject targetObject, float duration)",
+                            "line":  166,
+                            "returnType":  "void",
+                            "methodName":  "PlayFadeAndDestroyEffect",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private IEnumerator FadeRoutine(GameObject targetObject, float duration)",
+                            "line":  173,
+                            "returnType":  "IEnumerator",
+                            "methodName":  "FadeRoutine",
+                            "namespace":  ""
+                        }
+                    ]
+    },
+    {
+        "file":  "Movement.cs",
+        "classes":  [
+                        {
+                            "name":  "Movement",
+                            "kind":  "class",
+                            "line":  7,
+                            "namespace":  ""
+                        }
+                    ],
+        "methods":  [
+                        {
+                            "signature":  "private void Awake()",
+                            "line":  25,
+                            "returnType":  "void",
+                            "methodName":  "Awake",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnEnable()",
+                            "line":  36,
+                            "returnType":  "void",
+                            "methodName":  "OnEnable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnDisable()",
+                            "line":  45,
+                            "returnType":  "void",
+                            "methodName":  "OnDisable",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnMove(Vector2 moveInput)",
+                            "line":  54,
+                            "returnType":  "void",
+                            "methodName":  "OnMove",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnInteract()",
+                            "line":  59,
+                            "returnType":  "void",
+                            "methodName":  "OnInteract",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnTriggerEnter(Collider other)",
+                            "line":  67,
+                            "returnType":  "void",
+                            "methodName":  "OnTriggerEnter",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void OnTriggerExit(Collider other)",
+                            "line":  76,
+                            "returnType":  "void",
+                            "methodName":  "OnTriggerExit",
+                            "namespace":  ""
+                        },
+                        {
+                            "signature":  "private void Update()",
+                            "line":  85,
+                            "returnType":  "void",
+                            "methodName":  "Update",
+                            "namespace":  ""
+                        }
+                    ]
+    }
+]

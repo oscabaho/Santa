@@ -31,14 +31,14 @@ public class CombatUI : MonoBehaviour
     [Tooltip("Assign the ScriptableObject for the Meditate Ability here.")]
     [SerializeField] private Ability _meditateAbility;
 
-    private HealthComponentBehaviour _playerHealth;
-    private ActionPointComponentBehaviour _playerAP;
+    private IHealthController _playerHealth;
+    private IActionPointController _playerAP;
 
     private void Start()
     {
         if (_directAttackAbility == null || _areaAttackAbility == null || _specialAttackAbility == null)
         {
-            Debug.LogError("One or more Ability assets are not assigned in CombatUI.", this);
+            GameLog.LogError("One or more Ability assets are not assigned in CombatUI.", this);
             directAttackButton.interactable = false;
             areaAttackButton.interactable = false;
             specialAttackButton.interactable = false;
@@ -96,17 +96,24 @@ public class CombatUI : MonoBehaviour
 
         if (player != null)
         {
-            _playerHealth = player.GetComponent<HealthComponentBehaviour>();
-            _playerAP = player.GetComponent<ActionPointComponentBehaviour>();
+            var registry = player.GetComponent<IComponentRegistry>();
+            if (registry == null)
+            {
+                GameLog.LogError("Player is missing an IComponentRegistry implementation.", player);
+                return;
+            }
+
+            _playerHealth = registry.HealthController;
+            _playerAP = registry.ActionPointController;
 
             if (_playerHealth != null)
             {
-                _playerHealth.Health.OnValueChanged += UpdateHealthUI;
+                _playerHealth.OnValueChanged += UpdateHealthUI;
                 UpdateHealthUI(_playerHealth.CurrentValue, _playerHealth.MaxValue);
             }
             if (_playerAP != null)
             {
-                _playerAP.ActionPoints.OnValueChanged += UpdateAPUI;
+                _playerAP.OnValueChanged += UpdateAPUI;
                 UpdateAPUI(_playerAP.CurrentValue, _playerAP.MaxValue);
             }
         }
@@ -116,11 +123,11 @@ public class CombatUI : MonoBehaviour
     {
         if (_playerHealth != null)
         {
-            _playerHealth.Health.OnValueChanged -= UpdateHealthUI;
+            _playerHealth.OnValueChanged -= UpdateHealthUI;
         }
         if (_playerAP != null)
         {
-            _playerAP.ActionPoints.OnValueChanged -= UpdateAPUI;
+            _playerAP.OnValueChanged -= UpdateAPUI;
         }
         _playerHealth = null;
         _playerAP = null;
@@ -143,9 +150,15 @@ public class CombatUI : MonoBehaviour
 
         GameObject primaryTarget = combatService.Enemies.FirstOrDefault(enemy => enemy != null && enemy.activeInHierarchy);
 
-        if (primaryTarget == null && (ability.Targeting == TargetingStyle.SingleEnemy || ability.Targeting == TargetingStyle.RandomEnemies))
+        // A simple way to determine if a target is needed. This could be more robust.
+        bool needsTarget = ability.Targeting.Style == TargetingStyle.SingleEnemy || 
+                           ability.Targeting.Style == TargetingStyle.AllEnemies; // AllEnemies can still use a primary target for some logic
+
+        if (primaryTarget == null && needsTarget)
         {
-            Debug.LogWarning("Could not find a valid enemy to target for this UI.");
+            GameLog.LogWarning("Could not find a valid enemy to target for this UI.");
+            // Optionally, provide feedback to the player here.
+            return; // Stop the action if a required target is missing.
         }
 
         combatService.SubmitPlayerAction(ability, primaryTarget);

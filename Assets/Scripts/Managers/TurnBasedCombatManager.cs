@@ -1,13 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System;
+using System.Threading.Tasks;
 
 /// <summary>
-/// Manages the turn-based combat flow following a Planning/Execution model.
-/// 1. Planning Phase: All combatants choose their actions.
-/// 2. Execution Phase: All chosen actions are sorted by speed and executed in order.
+/// Manages the turn-based combat flow, delegating state storage to a CombatState object.
+/// This class is responsible for the COMBAT FLOW (Planning -> Executing) and coordinating other services.
 /// </summary>
 public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 {
@@ -15,35 +14,23 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public event Action OnPlayerTurnStarted;
     public event Action OnPlayerTurnEnded;
 
-    private enum CombatState { Planning, Executing }
-    private CombatState _currentState;
+    private enum CombatPhase { Planning, Executing }
+    private CombatPhase _currentPhase;
 
-    private readonly List<PendingAction> _pendingActions = new List<PendingAction>();
-    private readonly List<GameObject> _combatants = new List<GameObject>();
-    private GameObject _player;
+    private readonly CombatState _combatState = new CombatState();
+    private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
+
+    // This list is for sorting and is ephemeral to the execution phase, so it stays here.
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
-    private readonly List<GameObject> _tempEnemies = new List<GameObject>(8);
-    private readonly List<GameObject> _tempAllies = new List<GameObject>(8);
-    private static readonly System.Random _rng = new System.Random();
 
-    // Cache for health components to avoid repeated GetComponent calls
-    private readonly Dictionary<GameObject, HealthComponentBehaviour> _healthComponents = new Dictionary<GameObject, HealthComponentBehaviour>();
+    public IReadOnlyList<GameObject> AllCombatants => _combatState.AllCombatants;
+    public IReadOnlyList<GameObject> Enemies => _combatState.Enemies;
 
-    public IReadOnlyList<GameObject> AllCombatants => _combatants;
-
-    public IReadOnlyList<GameObject> Enemies
-    {
-        get
-        {
-            _tempEnemies.Clear();
-            for (int i = 0; i < _combatants.Count; i++)
-            {
-                var c = _combatants[i];
-                if (c != null && c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            }
-            return _tempEnemies;
-        }
-    }
+    [Header("Dependencies")]
+    [Tooltip("Assign the ActionExecutor component here.")]
+    [SerializeField] private ActionExecutor _actionExecutor;
+    [Tooltip("Assign the AIManager component here.")]
+    [SerializeField] private AIManager _aiManager;
 
     private void Awake()
     {
@@ -53,6 +40,14 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
         Instance = this;
+
+        if (_actionExecutor == null || _aiManager == null)
+        {
+            GameLog.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
+            enabled = false;
+            return;
+        }
+
         ServiceLocator.Register<ICombatService>(this);
     }
 
@@ -66,35 +61,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     public void StartCombat(List<GameObject> participants)
     {
-        Debug.Log("--- COMBAT STARTED ---");
-        _combatants.Clear();
-        _combatants.AddRange(participants);
-        _player = _combatants.FirstOrDefault(c => c.CompareTag("Player"));
+        GameLog.Log("--- COMBAT STARTED ---");
+        _combatState.Initialize(participants);
 
-        // Cache all health components at the start of combat
-        _healthComponents.Clear();
-        foreach (var combatant in _combatants)
+        if (_combatState.Player == null)
         {
-            if (combatant != null)
-            {
-                var health = combatant.GetComponent<HealthComponentBehaviour>();
-                if (health != null)
-                {
-                    _healthComponents[combatant] = health;
-                }
-
-                // Set initial Action Points for all combatants
-                var ap = combatant.GetComponent<ActionPointComponentBehaviour>();
-                if (ap != null)
-                {
-                    ap.SetValue(100); // Set initial AP to 100
-                }
-            }
-        }
-
-        if (_player == null)
-        {
-            Debug.LogError("Combat cannot start without a player!");
+            GameLog.LogError("Combat cannot start without a player!");
             return;
         }
 
@@ -104,28 +76,34 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void StartNewTurn()
     {
-        Debug.Log("--- PLANNING PHASE ---: Starting new turn.");
-        _currentState = CombatState.Planning;
-        _pendingActions.Clear();
+        GameLog.Log("--- PLANNING PHASE ---: Starting new turn.");
+        _currentPhase = CombatPhase.Planning;
+        _combatState.PendingActions.Clear();
 
         OnPlayerTurnStarted?.Invoke();
     }
 
     public void SubmitPlayerAction(Ability ability, GameObject primaryTarget)
     {
-        if (_currentState != CombatState.Planning) return;
+        if (_currentPhase != CombatPhase.Planning) return;
 
-        var playerAP = _player.GetComponent<ActionPointComponentBehaviour>();
-        if (ability == null || !playerAP.ActionPoints.HasEnough(ability.ApCost))
+        if (!_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
         {
-            Debug.LogWarning("Player tried to submit an invalid or unaffordable action.");
+            GameLog.LogError("Player does not have an ActionPointComponent cached!");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
-        playerAP.ActionPoints.SpendActionPoints(ability.ApCost);
-        _pendingActions.Add(new PendingAction { Ability = ability, Caster = _player, PrimaryTarget = primaryTarget });
-        Debug.Log($"Player submitted action: {ability.AbilityName}");
+        if (ability == null || playerAP.CurrentValue < ability.ApCost)
+        {
+            GameLog.LogWarning("Player tried to submit an invalid or unaffordable action.");
+            OnPlayerTurnStarted?.Invoke();
+            return;
+        }
+
+        playerAP.AffectValue(-ability.ApCost);
+        _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
+        GameLog.Log($"Player submitted action: {ability.AbilityName}");
 
         OnPlayerTurnEnded?.Invoke();
         TriggerAIPlanning();
@@ -133,204 +111,70 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void TriggerAIPlanning()
     {
-    PendingAction? playerAction = null;
-        for (int i = 0; i < _pendingActions.Count; i++)
+        PendingAction? playerAction = null;
+        foreach(var action in _combatState.PendingActions)
         {
-            if (_pendingActions[i].Caster != null && _pendingActions[i].Caster.CompareTag("Player"))
+            if (action.Caster != null && action.Caster.CompareTag("Player"))
             {
-                playerAction = _pendingActions[i];
+                playerAction = action;
                 break;
             }
         }
 
-        _tempEnemies.Clear();
-        _tempAllies.Clear();
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var c = _combatants[i];
-            if (c == null) continue;
-            if (c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            else _tempAllies.Add(c);
-        }
+        _aiManager.PlanActions(
+            _combatState.AllCombatants,
+            _combatState.Player,
+            _combatState.Brains,
+            _combatState.APComponents,
+            _combatState.PendingActions,
+            playerAction);
 
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var combatant = _combatants[i];
-            if (combatant == null) continue;
-            if (combatant != _player && combatant.activeInHierarchy)
-            {
-                var brain = combatant.GetComponent<IBrain>();
-                var aiAP = combatant.GetComponent<ActionPointComponentBehaviour>();
-
-                if (brain != null && aiAP != null)
-                {
-                    PendingAction aiAction = brain.ChooseAction(playerAction, _tempEnemies, _tempAllies);
-
-                    if (aiAction.Ability != null && aiAP.ActionPoints.HasEnough(aiAction.Ability.ApCost))
-                    {
-                        aiAP.ActionPoints.SpendActionPoints(aiAction.Ability.ApCost);
-                        _pendingActions.Add(aiAction);
-                        Debug.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
-                    }
-                }
-            }
-        }
-
-        StartCoroutine(ExecuteTurn());
+        _ = ExecuteTurnAsync();
     }
 
-    private IEnumerator ExecuteTurn()
+    private async Task ExecuteTurnAsync()
     {
-        Debug.Log("--- EXECUTION PHASE ---");
-        _currentState = CombatState.Executing;
+        GameLog.Log("--- EXECUTION PHASE ---");
+        _currentPhase = CombatPhase.Executing;
 
-    _sortedActions.Clear();
-    _sortedActions.AddRange(_pendingActions);
-    _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
+        _sortedActions.Clear();
+        _sortedActions.AddRange(_combatState.PendingActions);
+        _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
 
-    foreach (var action in _sortedActions)
+        foreach (var action in _sortedActions)
         {
-            if (action.Caster == null)
+            _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
+
+            CombatResult result = _winConditionChecker.Check(_combatState);
+            if (result != CombatResult.Ongoing)
             {
-                Debug.LogWarning("Skipping action: caster is null.");
-                continue;
+                EndCombat(result == CombatResult.Victory);
+                return; // End the execution
             }
 
-            if (action.Ability == null)
-            {
-                Debug.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
-                continue;
-            }
-
-            if (!_healthComponents.TryGetValue(action.Caster, out var casterHealth))
-            {
-                Debug.LogWarning($"{action.Caster.name} has no cached HealthComponentBehaviour; skipping action {action.Ability.AbilityName}.");
-                continue;
-            }
-
-            if (casterHealth.CurrentValue <= 0)
-            {
-                Debug.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
-                continue;
-            }
-
-            List<GameObject> finalTargets = ResolveTargets(action);
-            try
-            {
-                action.Ability.Execute(finalTargets, action.Caster);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Exception while executing ability {action.Ability.AbilityName} from {action.Caster.name}: {ex}");
-            }
-
-            if (CheckForDefeat()) { yield break; }
-            if (CheckForVictory()) { yield break; }
-
-            yield return new WaitForSeconds(1.0f);
+            await Task.Delay(1000);
         }
 
-        if (_currentState == CombatState.Executing)
+        if (_currentPhase == CombatPhase.Executing)
         {
-            Debug.Log("Execution phase finished.");
+            GameLog.Log("Execution phase finished.");
             StartNewTurn();
         }
     }
 
-    private List<GameObject> ResolveTargets(PendingAction action)
-    {
-        List<GameObject> finalTargets = new List<GameObject>(4);
-
-        _tempEnemies.Clear();
-        _tempAllies.Clear();
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var c = _combatants[i];
-            if (c == null || !c.activeInHierarchy) continue;
-            if (c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            else _tempAllies.Add(c);
-        }
-
-        List<GameObject> potentialTargets = (action.Caster != null && (action.Caster.CompareTag("Player") || action.Caster.CompareTag("Ally"))) ? _tempEnemies : _tempAllies;
-
-        switch (action.Ability.Targeting)
-        {
-            case TargetingStyle.Self:
-                if (action.Caster != null)
-                    finalTargets.Add(action.Caster);
-                break;
-
-            case TargetingStyle.SingleEnemy:
-                if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
-                    finalTargets.Add(action.PrimaryTarget);
-                break;
-
-            case TargetingStyle.AllEnemies:
-                finalTargets.AddRange(potentialTargets);
-                break;
-
-            case TargetingStyle.RandomEnemies:
-                if (action.PrimaryTarget != null && action.PrimaryTarget.activeInHierarchy)
-                {
-                    finalTargets.Add(action.PrimaryTarget);
-                    var temp = new List<GameObject>(potentialTargets.Count);
-                    for (int i = 0; i < potentialTargets.Count; i++) if (potentialTargets[i] != action.PrimaryTarget) temp.Add(potentialTargets[i]);
-                    potentialTargets = temp;
-                }
-
-                int totalToHit = Mathf.CeilToInt(_tempEnemies.Count * action.Ability.TargetPercentage);
-                int additionalTargetsToHit = totalToHit - finalTargets.Count;
-
-                if (additionalTargetsToHit > 0 && potentialTargets.Count > 0)
-                {
-                    for (int i = potentialTargets.Count - 1; i > 0; i--)
-                    {
-                        int j = _rng.Next(i + 1);
-                        var tmp = potentialTargets[i];
-                        potentialTargets[i] = potentialTargets[j];
-                        potentialTargets[j] = tmp;
-                    }
-                    for (int k = 0; k < additionalTargetsToHit && k < potentialTargets.Count; k++)
-                        finalTargets.Add(potentialTargets[k]);
-                }
-                break;
-        }
-        return finalTargets;
-    }
-
-    private bool CheckForVictory()
-    {
-        for (int i = 0; i < _combatants.Count; i++)
-        {
-            var c = _combatants[i];
-            if (c != null && c.CompareTag("Enemy") && c.activeInHierarchy) return false;
-        }
-        EndCombat(true);
-        return true;
-    }
-
-    private bool CheckForDefeat()
-    {
-        if (_healthComponents.TryGetValue(_player, out var playerHealth) && playerHealth.CurrentValue <= 0)
-        {
-            EndCombat(false);
-            return true;
-        }
-        return false;
-    }
-
     private void EndCombat(bool playerWon)
     {
-        _currentState = CombatState.Planning;
-        _healthComponents.Clear(); // Clear the cache
+        _currentPhase = CombatPhase.Planning; // Reset for next combat
+        _combatState.Clear();
+
         if (playerWon)
         {
-            Debug.Log("--- COMBAT ENDED: VICTORY ---");
+            GameLog.Log("--- COMBAT ENDED: VICTORY ---");
             ServiceLocator.Get<IUpgradeService>()?.PresentUpgradeOptions();
         }
         else
         {
-            Debug.Log("--- COMBAT ENDED: DEFEAT ---");
+            GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
             var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
             if (combatTransition != null) combatTransition.EndCombat();
         }

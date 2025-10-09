@@ -1,7 +1,6 @@
 {
     "name": "Santa.UI",
     "references": [
-    "Santa.Gameplay",
     "Santa.Core",
     "Unity.TextMeshPro"
   ],

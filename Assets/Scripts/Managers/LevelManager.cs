@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         else
         {
-            Debug.LogWarning("LevelManager: No levels assigned in the inspector.");
+            GameLog.LogWarning("LevelManager: No levels assigned in the inspector.");
         }
     }
 
@@ -67,7 +67,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         LevelData currentLevel = GetCurrentLevelData();
         if (currentLevel != null)
         {
-            Debug.Log($"Liberating level: {currentLevel.levelName}");
+            GameLog.Log($"Liberating level: {currentLevel.levelName}");
 
             foreach (var visual in currentLevel.gentrifiedVisuals)
             {
@@ -92,7 +92,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         else
         {
-            Debug.Log("LevelManager: All levels have been liberated! Game Over.");
+            GameLog.Log("LevelManager: All levels have been liberated! Game Over.");
             // TODO: Handle game completion logic
         }
     }
@@ -101,7 +101,7 @@ public class LevelManager : MonoBehaviour, ILevelService
     {
         if (levelIndex < 0 || levelIndex >= levels.Count)
         {
-            Debug.LogError($"LevelManager: Invalid level index {levelIndex}.");
+            GameLog.LogError($"LevelManager: Invalid level index {levelIndex}.");
             return;
         }
 
@@ -114,7 +114,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         currentLevelIndex = levelIndex;
         LevelData newLevel = levels[currentLevelIndex];
 
-        Debug.Log($"Setting up level: {newLevel.levelName}");
+    GameLog.Log($"Setting up level: {newLevel.levelName}");
 
         // Activate the initial 'gentrified' visuals for the new level.
         ActivateGentrifiedVisuals(newLevel);

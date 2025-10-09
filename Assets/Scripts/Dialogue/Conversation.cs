@@ -25,7 +25,7 @@ public class Conversation : MonoBehaviour, IInteractable
             dialogueUI = FindAnyObjectByType<DialogueScript>(FindObjectsInactive.Include);
             if (dialogueUI == null)
             {
-                Debug.LogError("Conversation: No se pudo encontrar el DialogueScript en la escena.", this);
+                GameLog.LogError("Conversation: No se pudo encontrar el DialogueScript en la escena.", this);
             }
         }
     }

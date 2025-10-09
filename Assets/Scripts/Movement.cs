@@ -1,7 +1,6 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(HealthComponentBehaviour))]
 [RequireComponent(typeof(ActionPointComponentBehaviour))]
 [RequireComponent(typeof(EnergyComponentBehaviour))]
 public class Movement : MonoBehaviour
@@ -29,7 +28,7 @@ public class Movement : MonoBehaviour
 
         if (inputReader == null)
         {
-            Debug.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
+            GameLog.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
         }
     }
 

@@ -1,14 +1,13 @@
 using System;
 
-// The enum is defined here so any service client can access it without needing a reference to the concrete manager class.
-public enum GameState
-{
-    Exploration, // Player is moving around the world
-    Combat       // Player is in a turn-based battle
-}
-
 public interface IGameStateService
 {
+
+    /// <summary>
+    /// Sets the game state.
+    /// </summary>
+    void SetState(GameState state);
+
     /// <summary>
     /// Gets the current state of the game.
     /// </summary>

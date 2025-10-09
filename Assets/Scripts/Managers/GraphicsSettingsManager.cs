@@ -50,7 +50,7 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
         // For now, we'll set a default windowed resolution.
         Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
         Application.targetFrameRate = 60; // A sensible default for PC
-        Debug.Log("Platform: PC. Applied default graphics settings (1920x1080, 60 FPS, Windowed).");
+    GameLog.Log("Platform: PC. Applied default graphics settings (1920x1080, 60 FPS, Windowed).");
 
 #elif UNITY_ANDROID || UNITY_IOS
         // --- MOBILE SPECIFIC LOGIC ---
@@ -65,7 +65,7 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
         var bestResolution = Screen.resolutions.Last();
         Screen.SetResolution(bestResolution.width, bestResolution.height, true);
 
-        Debug.Log($"Platform: Mobile. Applied native graphics settings ({bestResolution.width}x{bestResolution.height} @ {Application.targetFrameRate} FPS).");
+    GameLog.Log($"Platform: Mobile. Applied native graphics settings ({bestResolution.width}x{bestResolution.height} @ {Application.targetFrameRate} FPS).");
 #endif
     }
 
@@ -120,7 +120,7 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
     {
         if (resolutionIndex < 0 || resolutionIndex >= AvailableResolutions.Length)
         {
-            Debug.LogWarning($"GraphicsSettingsManager: Invalid resolution index {resolutionIndex}.");
+            GameLog.LogWarning($"GraphicsSettingsManager: Invalid resolution index {resolutionIndex}.");
             return;
         }
         Resolution resolution = AvailableResolutions[resolutionIndex];

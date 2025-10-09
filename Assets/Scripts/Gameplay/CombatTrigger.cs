@@ -9,10 +9,24 @@ public class CombatTrigger : MonoBehaviour
 {
     private CombatEncounter _encounter;
     private bool _combatHasBeenTriggered = false;
+    private GameObject _activeCombatInstance;
+    private string _activeCombatPoolKey;
+    private IGameStateService _gameStateService;
+    private ICombatTransitionService _combatTransitionService;
 
     private void Awake()
     {
         _encounter = GetComponent<CombatEncounter>();
+        if (_encounter == null)
+        {
+            GameLog.LogError("CombatTrigger requires a CombatEncounter component.");
+            enabled = false;
+            return;
+        }
+
+        // Cache services that we'll use when starting combat
+        _gameStateService = ServiceLocator.Get<IGameStateService>();
+        _combatTransitionService = ServiceLocator.Get<ICombatTransitionService>();
     }
 
     private void Start()
@@ -21,33 +35,63 @@ public class CombatTrigger : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    public void StartCombatInteraction()
+    public async void StartCombatInteraction()
     {
-        // Avoid triggering the same combat multiple times.
         if (_combatHasBeenTriggered) return;
-
-        GameObject combatScene = _encounter.CombatSceneParent;
-        if (combatScene == null)
-        {
-            Debug.LogError("CombatTrigger: CombatSceneParent is not assigned in the CombatEncounter component.");
-            return;
-        }
-
-        Debug.Log("Player has interacted with a combat trigger.");
         _combatHasBeenTriggered = true;
+        GameLog.Log("Player has interacted with a combat trigger.");
 
-        // Use the CombatTransitionManager to start the combat via ServiceLocator.
-        var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
-        if (combatTransition != null)
+        var poolKey = _encounter.GetPoolKey();
+        var pool = CombatScenePool.Instance;
+        if (pool == null) 
         {
-            combatTransition.StartCombat(combatScene);
-        }
-        else
-        {
-            Debug.LogError("A ICombatTransitionService is required in the scene to start combat!");
+            GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
+            _combatHasBeenTriggered = false; // Allow retry
+            return; 
         }
 
-        // For now, we just disable the trigger object.
-        gameObject.SetActive(false);
+        try
+        {
+            _activeCombatInstance = await pool.GetInstanceAsync(poolKey, _encounter);
+            if (_activeCombatInstance == null)
+            {
+                GameLog.LogError("Failed to get instance from pool.");
+                _combatHasBeenTriggered = false;
+                return;
+            }
+
+            _activeCombatInstance.SetActive(true); // Activate the instance
+            _activeCombatPoolKey = poolKey;
+            
+            _gameStateService.OnCombatEnded += OnCombatEnded;
+            _combatTransitionService.StartCombat(_activeCombatInstance);
+            _gameStateService.StartCombat();
+
+            gameObject.SetActive(false);
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError("Failed to start combat interaction.");
+            GameLog.LogException(ex);
+            _combatHasBeenTriggered = false; // Allow retry on failure
+        }
+    }
+
+    private void OnCombatEnded()
+    {
+        // Release the instance back to the pool
+        if (_activeCombatInstance != null && !string.IsNullOrEmpty(_activeCombatPoolKey))
+        {
+            CombatScenePool.Instance.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance);
+        }
+
+        // Unsubscribe
+        if (_gameStateService != null)
+        {
+            _gameStateService.OnCombatEnded -= OnCombatEnded;
+        }
+
+        _activeCombatInstance = null;
+        _activeCombatPoolKey = null;
     }
 }
