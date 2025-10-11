@@ -28,6 +28,7 @@ public class CombatScenePool : MonoBehaviour
     }
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
+    private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
 
     /// <summary>
     /// Get an instance for the given key. If pool has available instance, returns it.
@@ -49,6 +50,28 @@ public class CombatScenePool : MonoBehaviour
             }
         }
 
+        // Check for pending instantiations
+        if (_pendingInstantiations.TryGetValue(key, out var pendingTask))
+        {
+            return await pendingTask;
+        }
+
+        // Create and store the task, then remove it upon completion
+        var instantiationTask = InstantiateNewInstanceAsync(key, encounter);
+        _pendingInstantiations[key] = instantiationTask;
+
+        try
+        {
+            return await instantiationTask;
+        }
+        finally
+        {
+            _pendingInstantiations.Remove(key);
+        }
+    }
+
+    private async Task<GameObject> InstantiateNewInstanceAsync(string key, ICombatEncounter encounter)
+    {
 #if UNITY_ADDRESSABLES
         if (encounter != null && !string.IsNullOrEmpty(encounter.CombatSceneAddress))
         {
