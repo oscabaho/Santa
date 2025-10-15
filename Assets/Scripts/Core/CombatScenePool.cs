@@ -28,7 +28,8 @@ public class CombatScenePool : MonoBehaviour
     }
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
-    private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
+        private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
+    private readonly Vector3 _combatSceneOffset = new Vector3(0f, -2000f, 0f);
 
     /// <summary>
     /// Get an instance for the given key. If pool has available instance, returns it.
@@ -75,7 +76,8 @@ public class CombatScenePool : MonoBehaviour
 #if UNITY_ADDRESSABLES
         if (encounter != null && !string.IsNullOrEmpty(encounter.CombatSceneAddress))
         {
-            var handle = Addressables.InstantiateAsync(encounter.CombatSceneAddress, new InstantiationParameters(transform, false));
+            // Instantiates the prefab at the specified offset position
+            var handle = Addressables.InstantiateAsync(encounter.CombatSceneAddress, _combatSceneOffset, Quaternion.identity, transform);
             var inst = await handle.Task;
 
             if (handle.Status == AsyncOperationStatus.Succeeded && inst != null)
@@ -94,6 +96,9 @@ public class CombatScenePool : MonoBehaviour
             var inst = await encounter.InstantiateCombatSceneFallbackAsync();
             if (inst != null)
             {
+                // On fallback, manually set the position and parent
+                inst.transform.position = _combatSceneOffset;
+                inst.transform.SetParent(transform);
                 inst.SetActive(false);
                 return inst;
             }
