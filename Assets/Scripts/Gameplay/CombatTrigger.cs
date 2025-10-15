@@ -24,21 +24,29 @@ public class CombatTrigger : MonoBehaviour
             return;
         }
 
-        // Cache services that we'll use when starting combat
-        _gameStateService = ServiceLocator.Get<IGameStateService>();
-        _combatTransitionService = ServiceLocator.Get<ICombatTransitionService>();
+        // Ensure the collider is set to be a trigger.
+        GetComponent<Collider>().isTrigger = true;
     }
 
     private void Start()
     {
-        // Ensure the collider is set to be a trigger.
-        GetComponent<Collider>().isTrigger = true;
+        // Cache services that we'll use when starting combat
+        _gameStateService = ServiceLocator.Get<IGameStateService>();
     }
 
     public async void StartCombatInteraction()
     {
         if (_combatHasBeenTriggered) return;
         _combatHasBeenTriggered = true;
+
+        _combatTransitionService = ServiceLocator.Get<ICombatTransitionService>();
+        if (_combatTransitionService == null)
+        {
+            GameLog.LogError("CombatTrigger: ICombatTransitionService not found when starting combat.");
+            _combatHasBeenTriggered = false; // Allow retry
+            return;
+        }
+        
         GameLog.Log("Player has interacted with a combat trigger.");
 
         var poolKey = _encounter.GetPoolKey();

@@ -1,0 +1,18 @@
+{
+    "name": "Santa.Upgrades",
+    "rootNamespace": "Santa.Upgrades",
+    "references": [
+        "Santa.Core",
+        "Santa.Input",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

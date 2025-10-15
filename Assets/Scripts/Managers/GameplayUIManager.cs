@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class GameplayUIManager : MonoBehaviour, IGameplayUIService
 {
-    [Header("UI Elements")]
-    [Tooltip("Assign the Action Button GameObject from your UI here.")]
-    [SerializeField] private GameObject actionButtonGameObject;
+    // The actual button object, assigned at runtime.
+    private GameObject actionButtonGameObject;
+    // A "queued" or "buffered" state for the button, in case ShowActionButton is called before the button is registered.
+    private bool? _queuedShowState = null;
 
     private void Awake()
     {
@@ -13,14 +14,7 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
 
     private void Start()
     {
-        if (actionButtonGameObject != null)
-        {
-            actionButtonGameObject.SetActive(false);
-        }
-        else
-        {
-            GameLog.LogError("ActionButton GameObject is not assigned in the GameplayUIManager!");
-        }
+        // The button will now register itself. We can add a check here later if needed.
     }
 
     private void OnDestroy()
@@ -33,11 +27,43 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
         }
     }
 
+    public void RegisterActionButton(GameObject button)
+    {
+        if (button != null)
+        {
+            actionButtonGameObject = button;
+            GameLog.Log("Action Button was registered successfully.", this);
+
+            // If a state was queued before the button was ready, apply it now.
+            if (_queuedShowState.HasValue)
+            {
+                actionButtonGameObject.SetActive(_queuedShowState.Value);
+                _queuedShowState = null; // Clear the queued state
+            }
+            else
+            {
+                // If no state was queued, ensure it starts as inactive.
+                actionButtonGameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            GameLog.LogError("An attempt was made to register a null Action Button.", this);
+        }
+    }
+
     public void ShowActionButton(bool show)
     {
         if (actionButtonGameObject != null)
         {
+            // If the button is ready, just set its state directly.
             actionButtonGameObject.SetActive(show);
+        }
+        else
+        {
+            // If the button is not ready, queue the desired state.
+            _queuedShowState = show;
+            GameLog.LogWarning("ShowActionButton was called, but the button is not yet registered. The state has been queued.", this);
         }
     }
 }

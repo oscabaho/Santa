@@ -1,21 +1,29 @@
 {
-  "name": "Santa.Gameplay",
-  "references": [
-    "Unity.InputSystem",
-    "Santa.Input",
-    "Unity.TextMeshPro",
-    "Santa.Core",
-    "Unity.Cinemachine",
-    "Santa.UI"
-  ],
-  "optionalUnityReferences": [],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "Santa.Gameplay",
+    "rootNamespace": "",
+    "references": [
+        "Unity.InputSystem",
+        "Santa.Input",
+        "Santa.Core",
+        "Unity.Cinemachine",
+        "Santa.UI",
+        "Santa.Enemies",
+        "Santa.Abilities",
+        "Santa.Allies",
+        "Santa.Dialogue",
+        "Santa.Upgrades",
+        "Santa.Audio",
+        "Santa.Components",
+        "Santa.VFX",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

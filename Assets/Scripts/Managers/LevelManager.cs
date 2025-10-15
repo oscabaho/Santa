@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Manages the game's level progression, including visual transformation of areas.
+/// Manages the game's level progression, including visual transformation of areas by instantiating prefabs.
 /// </summary>
 public class LevelManager : MonoBehaviour, ILevelService
 {
@@ -12,7 +12,13 @@ public class LevelManager : MonoBehaviour, ILevelService
     [Tooltip("The list of all levels/areas in the game, in order.")]
     [SerializeField] private List<LevelData> levels;
 
+    [Header("Scene References")]
+    [Tooltip("A parent transform for the instantiated level visuals to keep the hierarchy clean.")]
+    [SerializeField] private Transform levelVisualsParent;
+
     private int currentLevelIndex = -1;
+    private readonly List<GameObject> _activeGentrifiedVisuals = new List<GameObject>();
+    private readonly List<GameObject> _activeLiberatedVisuals = new List<GameObject>();
 
     private void Awake()
     {
@@ -69,11 +75,11 @@ public class LevelManager : MonoBehaviour, ILevelService
         {
             GameLog.Log($"Liberating level: {currentLevel.levelName}");
 
-            foreach (var visual in currentLevel.gentrifiedVisuals)
+            foreach (var visual in _activeGentrifiedVisuals)
             {
                 if (visual != null) visual.SetActive(false);
             }
-            foreach (var visual in currentLevel.liberatedVisuals)
+            foreach (var visual in _activeLiberatedVisuals)
             {
                 if (visual != null) visual.SetActive(true);
             }
@@ -105,42 +111,57 @@ public class LevelManager : MonoBehaviour, ILevelService
             return;
         }
 
-        // Deactivate all visuals from the previous level before setting up the new one.
+        // Destroy all visuals from the previous level before setting up the new one.
         if (currentLevelIndex != -1)
         {
-            DeactivateAllVisuals(levels[currentLevelIndex]);
+            DestroyActiveVisuals();
         }
 
         currentLevelIndex = levelIndex;
         LevelData newLevel = levels[currentLevelIndex];
 
-    GameLog.Log($"Setting up level: {newLevel.levelName}");
+        GameLog.Log($"Setting up level: {newLevel.levelName}");
 
-        // Activate the initial 'gentrified' visuals for the new level.
-        ActivateGentrifiedVisuals(newLevel);
+        // Instantiate the initial 'gentrified' visuals for the new level.
+        InstantiateLevelVisuals(newLevel);
     }
 
-    private void ActivateGentrifiedVisuals(LevelData levelData)
+    private void InstantiateLevelVisuals(LevelData levelData)
     {
-        foreach (var visual in levelData.gentrifiedVisuals)
+        // Use the specified parent if available, otherwise use this manager's transform.
+        Transform parent = levelVisualsParent != null ? levelVisualsParent : transform;
+
+        foreach (var prefab in levelData.gentrifiedVisuals)
         {
-            if (visual != null) visual.SetActive(true);
+            if (prefab != null)
+            {
+                var instance = Instantiate(prefab, parent);
+                _activeGentrifiedVisuals.Add(instance);
+            }
         }
-        foreach (var visual in levelData.liberatedVisuals)
+        foreach (var prefab in levelData.liberatedVisuals)
         {
-            if (visual != null) visual.SetActive(false);
+            if (prefab != null)
+            {
+                var instance = Instantiate(prefab, parent);
+                instance.SetActive(false);
+                _activeLiberatedVisuals.Add(instance);
+            }
         }
     }
 
-    private void DeactivateAllVisuals(LevelData levelData)
+    private void DestroyActiveVisuals()
     {
-        foreach (var visual in levelData.gentrifiedVisuals)
+        foreach (var visual in _activeGentrifiedVisuals)
         {
-            if (visual != null) visual.SetActive(false);
+            if (visual != null) Destroy(visual);
         }
-        foreach (var visual in levelData.liberatedVisuals)
+        _activeGentrifiedVisuals.Clear();
+
+        foreach (var visual in _activeLiberatedVisuals)
         {
-            if (visual != null) visual.SetActive(false);
+            if (visual != null) Destroy(visual);
         }
+        _activeLiberatedVisuals.Clear();
     }
 }

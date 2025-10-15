@@ -3,6 +3,8 @@
     "com.unity.adaptiveperformance": "5.1.6",
     "com.unity.adaptiveperformance.google.android": "5.1.6",
     "com.unity.adaptiveperformance.samsung.android": "5.1.0",
+    "com.unity.addressables": "2.7.4",
+    "com.unity.addressables.android": "1.0.7",
     "com.unity.ai.navigation": "2.0.9",
     "com.unity.burst": "1.8.25",
     "com.unity.cinemachine": "3.1.4",

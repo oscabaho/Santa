@@ -1,0 +1,17 @@
+{
+    "name": "Santa.Managers",
+    "rootNamespace": "Santa.Managers",
+    "references": [
+        "Santa.Core",
+        "Santa.Gameplay"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

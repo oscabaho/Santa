@@ -32,6 +32,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     [Tooltip("Assign the AIManager component here.")]
     [SerializeField] private AIManager _aiManager;
 
+    [Header("Configuration")]
+    [SerializeField] private float _delayBetweenActions = 1.0f;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -152,7 +155,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 return; // End the execution
             }
 
-            await Task.Delay(1000);
+            await Task.Delay(TimeSpan.FromSeconds(_delayBetweenActions)); // TODO: Make this delay configurable or animation-driven.
         }
 
         if (_currentPhase == CombatPhase.Executing)

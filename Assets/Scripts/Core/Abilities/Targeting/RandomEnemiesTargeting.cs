@@ -4,14 +4,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RandomEnemiesTargeting", menuName = "Santa/Abilities/Targeting/Random Enemies")]
 public class RandomEnemiesTargeting : TargetingStrategy
 {
+    public override TargetingStyle Style => TargetingStyle.AllEnemies;
     private readonly System.Random _rng = new System.Random();
-    private readonly List<GameObject> _enemyPool = new List<GameObject>(8);
-
-    public override TargetingStyle Style => TargetingStyle.SingleEnemy; // Or a new style like MultiEnemy if appropriate
-
     public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
-        _enemyPool.Clear();
+        var _enemyPool = new List<GameObject>(8);
         foreach (var combatant in allCombatants)
         {
             if (combatant != null && combatant.CompareTag("Enemy"))

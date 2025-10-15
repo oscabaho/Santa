@@ -1,0 +1,14 @@
+{
+    "name": "Santa.Components",
+    "rootNamespace": "Santa.Components",
+    "references": [ "Santa.Core" ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

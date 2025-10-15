@@ -1,9 +1,11 @@
 {
     "name": "Santa.UI",
     "references": [
-    "Santa.Core",
-    "Unity.TextMeshPro"
-  ],
+        "Santa.Core",
+        "Unity.TextMeshPro",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

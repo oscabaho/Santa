@@ -21,8 +21,11 @@ public static class GameLog
 #else
     // No-op in release builds unless GAME_LOGS_ENABLED is specified.
     public static void Log(object message) { }
+    public static void Log(object message, UnityEngine.Object context) { }
     public static void LogWarning(object message) { }
+    public static void LogWarning(object message, UnityEngine.Object context) { }
     public static void LogError(object message) { }
+    public static void LogError(object message, UnityEngine.Object context) { }
     public static void LogFormat(string format, params object[] args) { }
     public static void LogException(System.Exception ex) { }
 #endif
