@@ -16,6 +16,6 @@ public class FadeFromColorTask : TransitionTask
     public override IEnumerator Execute(TransitionContext context)
     {
         // Use the static ScreenFade helper to fade from 1 (solid) to 0 (transparent)
-        yield return ScreenFade.Fade(1f, 0f, duration, fadeColor);
+        yield return ScreenFade.Instance.Fade(1f, 0f, duration, fadeColor);
     }
 }

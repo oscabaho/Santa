@@ -1,9 +1,8 @@
 {
-    "name": "Santa.Core",
-    "rootNamespace": "Santa.Core",
+    "name": "Santa.Enemies",
+    "rootNamespace": "",
     "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Santa.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

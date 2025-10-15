@@ -1,9 +1,10 @@
 {
-    "name": "Santa.Core",
-    "rootNamespace": "Santa.Core",
+    "name": "Santa.Dialogue",
+    "rootNamespace": "Santa.Dialogue",
     "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Santa.Core",
+        "Santa.Input",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

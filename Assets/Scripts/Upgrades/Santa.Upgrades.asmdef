@@ -1,9 +1,10 @@
 {
-    "name": "Santa.Core",
-    "rootNamespace": "Santa.Core",
+    "name": "Santa.Upgrades",
+    "rootNamespace": "Santa.Upgrades",
     "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Santa.Core",
+        "Santa.Input",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

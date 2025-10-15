@@ -1,10 +1,7 @@
 {
-    "name": "Santa.Core",
-    "rootNamespace": "Santa.Core",
-    "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
-    ],
+    "name": "Santa.VFX",
+    "rootNamespace": "Santa.VFX",
+    "references": [ "Santa.Core" ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

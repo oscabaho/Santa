@@ -4,12 +4,18 @@
     "references": [
         "Unity.InputSystem",
         "Santa.Input",
-        "Unity.TextMeshPro",
         "Santa.Core",
         "Unity.Cinemachine",
         "Santa.UI",
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Santa.Enemies",
+        "Santa.Abilities",
+        "Santa.Allies",
+        "Santa.Dialogue",
+        "Santa.Upgrades",
+        "Santa.Audio",
+        "Santa.Components",
+        "Santa.VFX",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

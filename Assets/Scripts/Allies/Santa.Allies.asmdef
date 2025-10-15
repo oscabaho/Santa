@@ -1,9 +1,9 @@
 {
-    "name": "Santa.Core",
-    "rootNamespace": "Santa.Core",
+    "name": "Santa.Allies",
+    "rootNamespace": "Santa.Allies",
     "references": [
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Santa.Core",
+        "Santa.Input"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

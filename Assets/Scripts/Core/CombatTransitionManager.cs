@@ -21,13 +21,6 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     [Tooltip("The root GameObject for the combat UI.")]
     [SerializeField] private GameObject combatUI;
 
-    // Public accessors for editor scripts
-    public GameObject ExplorationPlayer => explorationPlayer;
-    public GameObject CombatPlayer => combatPlayer;
-    public GameObject ExplorationCamera => explorationCamera;
-    public GameObject ExplorationUI => explorationUI;
-    public GameObject CombatUI => combatUI;
-
     [Header("Transition Sequences")]
     [Tooltip("Sequence of tasks to execute when starting combat.")]
     [SerializeField] private TransitionSequence startCombatSequence;
