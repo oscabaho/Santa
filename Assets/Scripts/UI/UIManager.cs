@@ -3,6 +3,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class UIManager : MonoBehaviour, IUIManager
 {
@@ -43,7 +44,7 @@ public class UIManager : MonoBehaviour, IUIManager
     }
 
     // Modificado para cargar paneles a través de Addressables
-    public void ShowPanel(string panelId)
+    public async Task ShowPanel(string panelId)
     {
         // Si el panel ya está cargado, simplemente muéstralo.
         if (_instantiatedPanels.TryGetValue(panelId, out var panelInstance))
@@ -53,22 +54,22 @@ public class UIManager : MonoBehaviour, IUIManager
         }
 
         // Si no está cargado, instáncialo desde Addressables
-        Addressables.InstantiateAsync(panelId, transform).Completed += (handle) =>
+        var handle = Addressables.InstantiateAsync(panelId, transform);
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
         {
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                var newPanelInstance = handle.Result;
-                _instantiatedPanels[panelId] = newPanelInstance;
-                newPanelInstance.GetComponent<UIPanel>()?.Show();
-                // Asumiendo que GameLog tiene un método Log. Si no, ajústalo a tu logger.
-                GameLog.Log($"UIManager: Panel with ID '{panelId}' loaded and shown.");
-            }
-            else
-            {
-                // Asumiendo que GameLog tiene un método LogError.
-                GameLog.LogError($"UIManager: Failed to load panel with ID '{panelId}'.");
-            }
-        };
+            var newPanelInstance = handle.Result;
+            _instantiatedPanels[panelId] = newPanelInstance;
+            newPanelInstance.GetComponent<UIPanel>()?.Show();
+            // Asumiendo que GameLog tiene un método Log. Si no, ajústalo a tu logger.
+            GameLog.Log($"UIManager: Panel with ID '{panelId}' loaded and shown.");
+        }
+        else
+        {
+            // Asumiendo que GameLog tiene un método LogError.
+            GameLog.LogError($"UIManager: Failed to load panel with ID '{panelId}'.");
+        }
     }
 
     // Modificado para liberar el panel de la memoria
@@ -87,7 +88,7 @@ public class UIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public void SwitchToPanel(string panelId)
+    public async Task SwitchToPanel(string panelId)
     {
         // Oculta todos los demás paneles primero
         var currentPanelIds = _instantiatedPanels.Keys.ToList();
@@ -100,6 +101,6 @@ public class UIManager : MonoBehaviour, IUIManager
         }
 
         // Muestra el panel de destino (se cargará si aún no lo está)
-        ShowPanel(panelId);
+        await ShowPanel(panelId);
     }
 }

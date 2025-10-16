@@ -18,7 +18,8 @@ public class GameInitializer : MonoBehaviour
         if (uiManager != null)
         {
             // Usamos la "dirección" del Addressable: "VirtualGamepad"
-            uiManager.ShowPanel("VirtualGamepad");
+            var task = uiManager.ShowPanel("VirtualGamepad");
+            yield return new WaitUntil(() => task.IsCompleted);
         }
         else
         {

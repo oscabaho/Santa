@@ -5,9 +5,9 @@ using UnityEngine;
 public class RandomEnemiesTargeting : TargetingStrategy
 {
     public override TargetingStyle Style => TargetingStyle.AllEnemies;
-    private readonly System.Random _rng = new System.Random();
     public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
+        var _rng = new System.Random();
         var _enemyPool = new List<GameObject>(8);
         foreach (var combatant in allCombatants)
         {

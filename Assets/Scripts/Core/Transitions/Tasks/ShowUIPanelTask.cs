@@ -12,7 +12,10 @@ public class ShowUIPanelTask : TransitionTask
 
     public override IEnumerator Execute(TransitionContext context)
     {
-        ServiceLocator.Get<IUIManager>()?.ShowPanel(panelId);
-        yield break;
+        var task = ServiceLocator.Get<IUIManager>()?.ShowPanel(panelId);
+        if (task != null)
+        {
+            yield return new WaitUntil(() => task.IsCompleted);
+        }
     }
 }

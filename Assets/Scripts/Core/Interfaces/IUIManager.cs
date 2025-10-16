@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 /// <summary>
 /// Interface for a UI Manager that can show, hide, and switch between UI panels.
 /// </summary>
@@ -7,7 +9,7 @@ public interface IUIManager
     /// Shows a specific panel without hiding others.
     /// </summary>
     /// <param name="panelId">The ID of the panel to show.</param>
-    void ShowPanel(string panelId);
+    Task ShowPanel(string panelId);
 
     /// <summary>
     /// Hides a specific panel.
@@ -19,5 +21,5 @@ public interface IUIManager
     /// Hides all other panels and shows the specified one.
     /// </summary>
     /// <param name="panelId">The ID of the panel to switch to.</param>
-    void SwitchToPanel(string panelId);
+    Task SwitchToPanel(string panelId);
 }
