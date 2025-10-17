@@ -2,14 +2,29 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Defines the discrete phases of a combat encounter.
+/// </summary>
+public enum CombatPhase
+{
+    Selection,  // Players and AI are choosing their actions
+    Execution,  // Actions are being resolved in order
+    Victory,    // The player has won the combat
+    Defeat      // The player has lost the combat
+}
+
 public interface ICombatService
 {
-    void StartCombat(List<GameObject> participants);
+    // Properties
+    GameObject Player { get; }
     IReadOnlyList<GameObject> AllCombatants { get; }
     IReadOnlyList<GameObject> Enemies { get; }
-    void SubmitPlayerAction(Ability ability, GameObject primaryTarget);
+    CombatPhase CurrentPhase { get; }
 
-    // Events to signal player turn lifecycle
-    event Action OnPlayerTurnStarted;
-    event Action OnPlayerTurnEnded;
+    // Events
+    event Action<CombatPhase> OnPhaseChanged;
+
+    // Methods
+    void StartCombat(List<GameObject> participants);
+    void SubmitPlayerAction(Ability ability);
 }

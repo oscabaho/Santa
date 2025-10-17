@@ -1,7 +1,11 @@
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class GameInitializer : MonoBehaviour
 {
+    [SerializeField]
+    private AssetReferenceGameObject initialUIPanel;
+
     void Start()
     {
         // Espera un frame para asegurarse de que todos los managers (como UIManager) han completado su Awake().
@@ -17,8 +21,15 @@ public class GameInitializer : MonoBehaviour
         var uiManager = ServiceLocator.Get<IUIManager>();
         if (uiManager != null)
         {
-            // Usamos la "dirección" del Addressable: "VirtualGamepad"
-            uiManager.ShowPanel("VirtualGamepad");
+            if (initialUIPanel != null && initialUIPanel.RuntimeKeyIsValid())
+            {
+                var task = uiManager.ShowPanel(initialUIPanel);
+                yield return new WaitUntil(() => task.IsCompleted);
+            }
+            else
+            {
+                Debug.LogError("GameInitializer: Initial UI Panel reference is not set or not valid.");
+            }
         }
         else
         {

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 /// <summary>
 /// A transition task that hides a specific UI panel via the UIManager.
@@ -8,11 +9,17 @@ using UnityEngine;
 public class HideUIPanelTask : TransitionTask
 {
     [SerializeField]
-    private string panelId;
+    private AssetReferenceGameObject panelReference;
 
     public override IEnumerator Execute(TransitionContext context)
     {
-        ServiceLocator.Get<IUIManager>()?.HidePanel(panelId);
+        if (panelReference == null || !panelReference.RuntimeKeyIsValid())
+        {
+            Debug.LogError("HideUIPanelTask: Panel Reference is not valid.");
+            yield break;
+        }
+
+        ServiceLocator.Get<IUIManager>()?.HidePanel(panelReference);
         yield break;
     }
 }

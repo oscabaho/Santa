@@ -3,25 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// A transition task that fades the screen to a solid color.
-/// </summary>
-[CreateAssetMenu(fileName = "NewFadeToColorTask", menuName = "Transitions/Tasks/Fade To Color")]
-public class FadeToColorTask : TransitionTask
-{
-    [SerializeField]
-    private float duration = 0.25f;
-
-    [SerializeField]
-    private Color fadeColor = Color.black;
-
-    public override IEnumerator Execute(TransitionContext context)
-    {
-        // Use the ScreenFade singleton to fade from 0 (transparent) to 1 (solid)
-        yield return ScreenFade.Instance.Fade(0f, 1f, duration, fadeColor);
-    }
-}
-
-/// <summary>
 /// Helper MonoBehaviour singleton to manage the fade overlay canvas.
 /// </summary>
 public class ScreenFade : MonoBehaviour
