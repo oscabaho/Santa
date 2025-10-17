@@ -7,117 +7,111 @@ using System.Threading.Tasks;
 
 public class UIManager : MonoBehaviour, IUIManager
 {
-    private static UIManager Instance { get; set; }
-
-    private readonly Dictionary<string, GameObject> _guidToInstanceMap = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, GameObject> _addressToInstanceMap = new Dictionary<string, GameObject>();
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
+        // This is a singleton, but we are using ServiceLocator for access.
         ServiceLocator.Register<IUIManager>(this);
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
+        // Release all instantiated panels
+        foreach (var panelInstance in _addressToInstanceMap.Values)
         {
-            // Create a copy of the list to avoid modification during iteration
-            var allInstances = _guidToInstanceMap.Values.ToList();
-            foreach (var panelInstance in allInstances)
-            {
-                // The AssetReference is not stored here, so we must release the instance directly.
-                // This assumes the panel was loaded via Addressables.
-                Addressables.ReleaseInstance(panelInstance);
-            }
-            _guidToInstanceMap.Clear();
-
-            ServiceLocator.Unregister<IUIManager>();
-            Instance = null;
+            Addressables.ReleaseInstance(panelInstance);
         }
+        _addressToInstanceMap.Clear();
+
+        ServiceLocator.Unregister<IUIManager>();
     }
 
-    public async Task ShowPanel(AssetReferenceGameObject panelReference)
+    public async Task ShowPanel(string panelAddress)
     {
-        string key = panelReference.AssetGUID;
-        if (!panelReference.RuntimeKeyIsValid())
+        if (string.IsNullOrEmpty(panelAddress))
         {
-            GameLog.LogError($"UIManager: Panel reference is not valid.");
+            GameLog.LogError("UIManager: Panel address is null or empty.");
             return;
         }
 
-        if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
+        // If panel is already cached, just show it.
+        if (_addressToInstanceMap.TryGetValue(panelAddress, out var panelInstance))
         {
-            panelInstance.GetComponent<UIPanel>()?.Show();
+            var panelComponent = panelInstance.GetComponent<UIPanel>();
+            if (panelComponent != null)
+            {
+                panelComponent.Show();
+            }
+            else
+            {
+                GameLog.LogError($"UIManager: Cached panel with address '{panelAddress}' is missing its UIPanel component. The panel will not be shown.");
+            }
             return;
         }
 
-        var handle = panelReference.InstantiateAsync(transform);
+        // If not cached, load and instantiate it.
+        var handle = Addressables.InstantiateAsync(panelAddress, transform);
         await handle.Task;
 
         if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             var newPanelInstance = handle.Result;
-            _guidToInstanceMap[key] = newPanelInstance;
-            newPanelInstance.GetComponent<UIPanel>()?.Show();
-            GameLog.Log($"UIManager: Panel with key '{key}' loaded and shown.");
-        }
-        else
-        {
-            GameLog.LogError($"UIManager: Failed to load panel with key '{key}'.");
-        }
-    }
-
-    public void HidePanel(AssetReferenceGameObject panelReference)
-    {
-        string key = panelReference.AssetGUID;
-        if (!panelReference.RuntimeKeyIsValid())
-        {
-            GameLog.LogError($"UIManager: Panel reference is not valid for hiding.");
-            return;
-        }
-
-        if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
-        {
-            panelReference.ReleaseInstance(panelInstance);
-            _guidToInstanceMap.Remove(key);
-            GameLog.Log($"UIManager: Panel with key '{key}' hidden and released.");
-        }
-        else
-        {
-            GameLog.LogWarning($"UIManager: Panel with key '{key}' not found or not instantiated.");
-        }
-    }
-
-    public async Task SwitchToPanel(AssetReferenceGameObject panelReference)
-    {
-        if (!panelReference.RuntimeKeyIsValid())
-        {
-            GameLog.LogError($"UIManager: Panel reference is not valid for switching.");
-            return;
-        }
-
-        string keyToKeep = panelReference.AssetGUID;
-        var keysToHide = _guidToInstanceMap.Keys.Where(key => key != keyToKeep).ToList();
-
-        foreach (var key in keysToHide)
-        {
-            if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
+            _addressToInstanceMap[panelAddress] = newPanelInstance;
+            
+            var panelComponent = newPanelInstance.GetComponent<UIPanel>();
+            if (panelComponent != null)
             {
-                // To release it, we need the original AssetReference.
-                // This is a limitation. A more robust system might map instances back to references.
-                // For now, we'll just release the instance.
-                Addressables.ReleaseInstance(panelInstance);
-                _guidToInstanceMap.Remove(key);
-                GameLog.Log($"UIManager: Panel with key '{key}' hidden and released during switch.");
+                panelComponent.Show();
+                GameLog.Log($"UIManager: Panel with address '{panelAddress}' loaded and shown.");
+            }
+            else
+            {
+                // If the component is missing, log an error. The prefab is likely misconfigured.
+                GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' does not have a UIPanel component on its root object. The panel will not be shown.");
             }
         }
+        else
+        {
+            GameLog.LogError($"UIManager: Failed to load panel with address '{panelAddress}'.");
+        }
+    }
 
-        await ShowPanel(panelReference);
+    public void HidePanel(string panelAddress)
+    {
+        if (string.IsNullOrEmpty(panelAddress))
+        {
+            GameLog.LogError("UIManager: Panel address is null or empty for hiding.");
+            return;
+        }
+
+        if (_addressToInstanceMap.TryGetValue(panelAddress, out var panelInstance))
+        {
+            panelInstance.GetComponent<UIPanel>()?.Hide();
+            GameLog.Log($"UIManager: Panel with address '{panelAddress}' hidden.");
+        }
+        else
+        {
+            GameLog.LogWarning($"UIManager: Panel with address '{panelAddress}' not found or not instantiated.");
+        }
+    }
+
+    public async Task SwitchToPanel(string panelAddress)
+    {
+        if (string.IsNullOrEmpty(panelAddress))
+        {
+            GameLog.LogError("UIManager: Panel address is null or empty for switching.");
+            return;
+        }
+
+        // Hide all panels except the one we are switching to
+        var keysToHide = _addressToInstanceMap.Keys.Where(key => key != panelAddress).ToList();
+        foreach (var key in keysToHide)
+        {
+            HidePanel(key);
+        }
+
+        // Show the target panel
+        await ShowPanel(panelAddress);
     }
 }

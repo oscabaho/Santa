@@ -1,87 +1,93 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 /// <summary>
 /// Manages the visual transition between the exploration state and the combat state.
+/// This version is decoupled from scene references and discovers objects at runtime.
 /// </summary>
 public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 {
-    // Reduce visibility to internal to avoid external code depending on the concrete singleton.
-    private static CombatTransitionManager Instance { get; set; }
-
-    [Header("Scene References")]
-    [Tooltip("The camera GameObject used for exploration.")]
-    [SerializeField] private GameObject explorationCamera;
-    [Tooltip("The player GameObject in the exploration scene.")]
-    [SerializeField] private GameObject explorationPlayer;
-    [Tooltip("The player GameObject used for combat.")]
-    [SerializeField] private GameObject combatPlayer;
-    [Tooltip("The root GameObject for the exploration UI.")]
-    [SerializeField] private GameObject explorationUI;
-    [Tooltip("The root GameObject for the combat UI.")]
-    [SerializeField] private GameObject combatUI;
-
     [Header("Transition Sequences")]
     [Tooltip("Sequence of tasks to execute when starting combat.")]
     [SerializeField] private TransitionSequence startCombatSequence;
     [Tooltip("Sequence of tasks to execute when ending combat.")]
     [SerializeField] private TransitionSequence endCombatSequence;
 
+    // --- Discovered References ---
+    private GameObject _explorationCamera;
+    private GameObject _explorationPlayer;
+    
+    // --- Runtime State ---
     private GameObject _currentCombatSceneParent;
+    private TransitionContext _currentContext;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
         // Register service interface for decoupled access
         ServiceLocator.Register<ICombatTransitionService>(this);
+
+        // Discover persistent exploration objects
+        _explorationPlayer = FindFirstObjectByType<ExplorationPlayerIdentifier>()?.gameObject;
+        _explorationCamera = Camera.main?.gameObject;
+
+        if (_explorationPlayer == null)
+        {
+            GameLog.LogError("CombatTransitionManager: Could not find the exploration player via the ExplorationPlayerIdentifier component.", this);
+            enabled = false;
+        }
+        if (_explorationCamera == null)
+        {
+            GameLog.LogError("CombatTransitionManager: Could not find the main camera.", this);
+            enabled = false;
+        }
     }
 
     private void OnDestroy()
     {
         var registered = ServiceLocator.Get<ICombatTransitionService>();
-        if ((Object)registered == (Object)this)
+        if (registered as Object == this)
             ServiceLocator.Unregister<ICombatTransitionService>();
-        if (Instance == this) Instance = null;
     }
 
     public void StartCombat(GameObject combatSceneParent)
     {
         _currentCombatSceneParent = combatSceneParent;
-    // Instance bookkeeping (pool management is handled by the caller).
-        var context = BuildTransitionContext();
+
+        // Discover combat-specific objects within the instantiated prefab
+        var combatPlayer = _currentCombatSceneParent.GetComponentInChildren<CombatPlayerIdentifier>()?.gameObject;
+        if (combatPlayer == null)
+        {
+            GameLog.LogError($"CombatTransitionManager: Could not find the combat player via the CombatPlayerIdentifier component within {_currentCombatSceneParent.name}.", this);
+            return;
+        }
+
+        // Build and store the context for both start and end transitions
+        _currentContext = new TransitionContext();
+        _currentContext.AddTarget(TargetId.ExplorationCamera, _explorationCamera);
+        _currentContext.AddTarget(TargetId.ExplorationPlayer, _explorationPlayer);
+        _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
+        _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
+        
         if (startCombatSequence != null)
         {
-            StartCoroutine(startCombatSequence.Execute(context));
+            StartCoroutine(startCombatSequence.Execute(_currentContext));
         }
     }
 
     public void EndCombat()
     {
-        if (_currentCombatSceneParent == null) return;
-
-        var context = BuildTransitionContext();
-        if (endCombatSequence != null)
+        if (_currentCombatSceneParent == null || _currentContext == null)
         {
-            StartCoroutine(endCombatSequence.Execute(context));
+            GameLog.LogWarning("EndCombat was called but there is no active combat or context.", this);
+            return;
         }
 
-        _currentCombatSceneParent = null;
-    }
+        if (endCombatSequence != null)
+        {
+            StartCoroutine(endCombatSequence.Execute(_currentContext));
+        }
 
-    private TransitionContext BuildTransitionContext()
-    {
-        var context = new TransitionContext();
-        context.AddTarget(TargetId.ExplorationCamera, explorationCamera);
-        context.AddTarget(TargetId.ExplorationPlayer, explorationPlayer);
-        context.AddTarget(TargetId.CombatPlayer, combatPlayer);
-        context.AddTarget(TargetId.ExplorationUI, explorationUI);
-        context.AddTarget(TargetId.CombatUI, combatUI);
-        context.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
-        return context;
+        // Clean up context after use
+        _currentCombatSceneParent = null;
+        _currentContext = null;
     }
 }

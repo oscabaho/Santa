@@ -2,60 +2,79 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using TMPro;
+using System.Collections.Generic;
 
 /// <summary>
-/// Manages the combat UI, including player stats display and action buttons.
+/// Manages the combat UI, including player stats display, action buttons, and target selection.
 /// </summary>
 public class CombatUI : UIPanel
 {
+    public static CombatUI Instance { get; private set; }
+
     [Header("Panels")]
     [Tooltip("The parent object containing all the player action buttons.")]
-    [SerializeField] private GameObject _actionButtonsPanel;
+    [SerializeField] private GameObject actionButtonsPanel;
 
     [Header("Player Stat Displays")]
-    [SerializeField] private Slider _playerHealthSlider;
-    [SerializeField] private TextMeshProUGUI _playerAPText;
+    [SerializeField] private Slider playerHealthSlider;
+    [SerializeField] private TextMeshProUGUI playerAPText;
+    [SerializeField] private TextMeshProUGUI statusText; // To show "Select a target"
 
     [Header("Action Buttons")]
-    [SerializeField] private Button _directAttackButton;
-    [SerializeField] private Button _areaAttackButton;
-    [SerializeField] private Button _specialAttackButton;
-    [SerializeField] private Button _meditateButton; // New button for gaining AP
+    [SerializeField] private Button directAttackButton;
+    [SerializeField] private Button areaAttackButton;
+    [SerializeField] private Button specialAttackButton;
+    [SerializeField] private Button meditateButton;
 
     [Header("Ability Assets")]
     [Tooltip("Assign the ScriptableObject for the Direct Attack here.")]
-    [SerializeField] private Ability _directAttackAbility;
+    [SerializeField] private Ability directAttackAbility;
     [Tooltip("Assign the ScriptableObject for the Area Attack here.")]
-    [SerializeField] private Ability _areaAttackAbility;
+    [SerializeField] private Ability areaAttackAbility;
     [Tooltip("Assign the ScriptableObject for the Special Attack here.")]
-    [SerializeField] private Ability _specialAttackAbility;
+    [SerializeField] private Ability specialAttackAbility;
     [Tooltip("Assign the ScriptableObject for the Meditate Ability here.")]
-    [SerializeField] private Ability _meditateAbility;
+    [SerializeField] private Ability meditateAbility;
 
     private IHealthController _playerHealth;
     private IActionPointController _playerAP;
     private ICombatService _combatService;
 
+    private Ability _pendingAbility;
+    private List<Button> _actionButtons;
+
     protected override void Awake()
     {
         base.Awake(); // Caches the CanvasGroup from UIPanel
+
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
         SetupButtonListeners();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     private void OnEnable()
     {
         if (ServiceLocator.TryGet(out _combatService))
         {
-            // Subscribe to the main phase change event
             _combatService.OnPhaseChanged += HandlePhaseChanged;
-            // Handle the initial state when the UI is enabled
-            HandlePhaseChanged(_combatService.CurrentPhase);
         }
         else
         {
             GameLog.LogError("CombatUI could not find ICombatService on enable.", this);
-            // Hide panels if the service isn't ready
-            _actionButtonsPanel.SetActive(false);
+            if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
         }
     }
 
@@ -65,46 +84,35 @@ public class CombatUI : UIPanel
         {
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
         }
-        // Always unsubscribe from player stats to prevent memory leaks
         UnsubscribeFromPlayerEvents();
         _combatService = null;
     }
 
-    /// <summary>
-    /// The core logic that reacts to changes in the combat flow.
-    /// </summary>
-private void HandlePhaseChanged(CombatPhase newPhase)
-{
-    // Ensure the action panel is valid before trying to use it
-    if (_actionButtonsPanel == null)
+    private void HandlePhaseChanged(CombatPhase newPhase)
     {
-        GameLog.LogWarning("ActionButtonsPanel is not assigned in the inspector.", this);
-        return;
-    }
+        if (actionButtonsPanel == null)
+        {
+            GameLog.LogWarning("ActionButtonsPanel is not assigned in the inspector.", this);
+            return;
+        }
 
-    switch (newPhase)
-    {
-        case CombatPhase.Selection:
-            // Player's turn to choose an action
-            _actionButtonsPanel.SetActive(true);
-            SubscribeToPlayerEvents(); // Subscribe to stats only when relevant
-            break;
+        bool inSelection = newPhase == CombatPhase.Selection;
+        actionButtonsPanel.SetActive(inSelection);
 
-        case CombatPhase.Execution:
-            // Actions are being performed, hide buttons
-            _actionButtonsPanel.SetActive(false);
-            UnsubscribeFromPlayerEvents(); // Unsubscribe to save performance
-            break;
-
-        case CombatPhase.Victory:
-        case CombatPhase.Defeat:
-            // End of combat, hide buttons
-            _actionButtonsPanel.SetActive(false);
+        if (inSelection)
+        {
+            SubscribeToPlayerEvents();
+            // If we return to selection phase, cancel any pending targeting
+            if (_pendingAbility != null)
+            {
+                CancelTargetingMode();
+            }
+        }
+        else
+        {
             UnsubscribeFromPlayerEvents();
-            break;
+        }
     }
-}
-
 
     private void SubscribeToPlayerEvents()
     {
@@ -150,35 +158,73 @@ private void HandlePhaseChanged(CombatPhase newPhase)
 
     private void SetupButtonListeners()
     {
-        // Assigns the RequestAbility method to each button's click event.
-        _directAttackButton.onClick.AddListener(() => RequestAbility(_directAttackAbility));
-        _areaAttackButton.onClick.AddListener(() => RequestAbility(_areaAttackAbility));
-        _specialAttackButton.onClick.AddListener(() => RequestAbility(_specialAttackAbility));
-        _meditateButton.onClick.AddListener(() => RequestAbility(_meditateAbility));
+        directAttackButton.onClick.AddListener(() => RequestAbility(directAttackAbility));
+        areaAttackButton.onClick.AddListener(() => RequestAbility(areaAttackAbility));
+        specialAttackButton.onClick.AddListener(() => RequestAbility(specialAttackAbility));
+        meditateButton.onClick.AddListener(() => RequestAbility(meditateAbility));
+
+        _actionButtons = new List<Button> { directAttackButton, areaAttackButton, specialAttackButton, meditateButton };
     }
 
     private void UpdateHealthUI(int current, int max)
     {
-        if (_playerHealthSlider != null) _playerHealthSlider.value = (float)current / max;
+        if (playerHealthSlider != null) playerHealthSlider.value = (float)current / max;
     }
 
     private void UpdateAPUI(int current, int max)
     {
-        if (_playerAPText != null) _playerAPText.text = $"PA: {current}";
+        if (playerAPText != null) playerAPText.text = $"PA: {current}";
     }
 
-    /// <summary>
-    /// Called when an action button is pressed. It submits the ability request to the combat service.
-    /// </summary>
     private void RequestAbility(Ability ability)
     {
-        if (ability == null || _combatService == null)
+        if (ability == null || _combatService == null) return;
+
+        // If we are already waiting for a target, a button click should cancel targeting.
+        if (_pendingAbility != null)
         {
-            GameLog.LogWarning("Ability or Combat Service is not available.", this);
+            CancelTargetingMode();
             return;
         }
 
-        // The UI's only job is to signal the intent. The service handles the rest.
-        _combatService.SubmitPlayerAction(ability);
+        if (ability.Targeting.Style == TargetingStyle.SingleEnemy)
+        {
+            // Enter targeting mode
+            _pendingAbility = ability;
+            ToggleActionButtons(false);
+            if (statusText != null) statusText.text = "Select a target";
+        }
+        else
+        {
+            // For non-targeted abilities, submit immediately.
+            _combatService.SubmitPlayerAction(ability, null);
+        }
+    }
+
+    public void OnTargetSelected(GameObject target)
+    {
+        if (_pendingAbility == null) return;
+
+        _combatService.SubmitPlayerAction(_pendingAbility, target);
+        
+        // Exit targeting mode
+        _pendingAbility = null;
+        if (statusText != null) statusText.text = "";
+        // Buttons will be re-enabled by the phase manager automatically
+    }
+
+    private void CancelTargetingMode()
+    {
+        _pendingAbility = null;
+        ToggleActionButtons(true);
+        if (statusText != null) statusText.text = "";
+    }
+
+    private void ToggleActionButtons(bool interactable)
+    {
+        foreach (var button in _actionButtons)
+        {
+            if (button != null) button.interactable = interactable;
+        }
     }
 }

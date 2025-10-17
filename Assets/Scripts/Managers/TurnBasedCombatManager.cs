@@ -27,25 +27,33 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public IReadOnlyList<GameObject> Enemies => _combatState.Enemies;
     public GameObject Player => _combatState.Player;
 
-    [Header("Dependencies")]
-    [Tooltip("Assign the ActionExecutor component here.")]
-    [SerializeField] private ActionExecutor _actionExecutor;
-    [Tooltip("Assign the AIManager component here.")]
-    [SerializeField] private AIManager _aiManager;
-
     [Header("Configuration")]
     [SerializeField] private float _delayBetweenActions = 1.0f;
 
+    private IActionExecutor _actionExecutor;
+    private IAIManager _aiManager;
+
     private void Awake()
     {
-        if (_actionExecutor == null || _aiManager == null)
+        _actionExecutor = GetComponentInChildren<IActionExecutor>();
+        _aiManager = GetComponentInChildren<IAIManager>();
+
+        if (_actionExecutor == null)
         {
-            GameLog.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
+            GameLog.LogError($"Could not find a component implementing IActionExecutor in children of {gameObject.name}.", this);
             enabled = false;
-            return;
         }
 
-        ServiceLocator.Register<ICombatService>(this);
+        if (_aiManager == null)
+        {
+            GameLog.LogError($"Could not find a component implementing IAIManager in children of {gameObject.name}.", this);
+            enabled = false;
+        }
+
+        if (enabled)
+        {
+            ServiceLocator.Register<ICombatService>(this);
+        }
     }
 
     private void OnDestroy()
@@ -80,7 +88,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         OnPlayerTurnStarted?.Invoke();
     }
 
-    public void SubmitPlayerAction(Ability ability)
+    public void SubmitPlayerAction(Ability ability, GameObject primaryTarget = null)
     {
         if (CurrentPhase != CombatPhase.Selection) return;
 
@@ -105,19 +113,13 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
 
-        // Centralized Targeting Logic
-        GameObject primaryTarget = null;
-        if (ability.Targeting.Style == TargetingStyle.SingleEnemy)
+        // Targeting validation
+        if (ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
         {
-            primaryTarget = _combatState.Enemies.FirstOrDefault(e => e != null && e.activeInHierarchy);
-            if (primaryTarget == null)
-            {
-                GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No valid enemy target found.");
-                OnPlayerTurnStarted?.Invoke();
-                return;
-            }
+            GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No target specified for a single-target ability.");
+            OnPlayerTurnStarted?.Invoke();
+            return;
         }
-        // Other targeting styles (Self, All, etc.) don't require a primary target from this logic.
 
         playerAP.AffectValue(-ability.ApCost);
         _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
@@ -129,16 +131,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void FinalizeSelectionAndExecuteTurn()
     {
-        PendingAction? playerAction = null;
-        if (_combatState.PendingActions.Count > 0)
-        {
-            // The player's action was the last one added.
-            var lastAction = _combatState.PendingActions[_combatState.PendingActions.Count - 1];
-            if (lastAction.Caster == _combatState.Player)
-            {
-                playerAction = lastAction;
-            }
-        }
+        PendingAction? playerAction = _combatState.PendingActions.FirstOrDefault(action => action.Caster == _combatState.Player);
 
         if (playerAction == null)
         {
