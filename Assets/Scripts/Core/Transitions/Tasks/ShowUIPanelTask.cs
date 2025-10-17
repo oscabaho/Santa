@@ -19,7 +19,10 @@ public class ShowUIPanelTask : TransitionTask
             yield break;
         }
 
-        var task = ServiceLocator.Get<IUIManager>()?.ShowPanel(panelReference);
+        // The RuntimeKey is the addressable address string.
+        string panelAddress = panelReference.RuntimeKey.ToString();
+
+        var task = ServiceLocator.Get<IUIManager>()?.ShowPanel(panelAddress);
         if (task != null)
         {
             yield return new WaitUntil(() => task.IsCompleted);

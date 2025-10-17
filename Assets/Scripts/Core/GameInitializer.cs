@@ -1,10 +1,8 @@
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 public class GameInitializer : MonoBehaviour
 {
-    [SerializeField]
-    private AssetReferenceGameObject initialUIPanel;
+    private const string InitialUIPanelAddress = "VirtualGamepad";
 
     void Start()
     {
@@ -21,15 +19,8 @@ public class GameInitializer : MonoBehaviour
         var uiManager = ServiceLocator.Get<IUIManager>();
         if (uiManager != null)
         {
-            if (initialUIPanel != null && initialUIPanel.RuntimeKeyIsValid())
-            {
-                var task = uiManager.ShowPanel(initialUIPanel);
-                yield return new WaitUntil(() => task.IsCompleted);
-            }
-            else
-            {
-                Debug.LogError("GameInitializer: Initial UI Panel reference is not set or not valid.");
-            }
+            var task = uiManager.ShowPanel(InitialUIPanelAddress);
+            yield return new WaitUntil(() => task.IsCompleted);
         }
         else
         {

@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(ActionPointComponentBehaviour))]
 [RequireComponent(typeof(EnergyComponentBehaviour))]
+[RequireComponent(typeof(ExplorationPlayerIdentifier))]
 public class Movement : MonoBehaviour
 {
     [Header("Dependencies")]
