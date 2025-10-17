@@ -41,23 +41,36 @@ public static class ServiceLocator
     }
 
     /// <summary>
-    /// Gets a registered service.
+    /// Gets a registered service. Logs an error if not found.
     /// </summary>
-    /// <returns>The service instance, or null if not found.</returns>
     public static T Get<T>()
     {
-        var type = typeof(T);
-        if (_services.TryGetValue(type, out var service))
+        if (TryGet<T>(out var service))
         {
-            return (T)service;
+            return service;
         }
 
-    #if UNITY_EDITOR
-    // Don't log an error for the initial request in the initializer, as the service might be about to be created.
-    // The initializer itself should handle warnings if the service is still null after instantiation.
-    GameLog.LogError($"ServiceLocator: Service of type '{type.Name}' not found.");
-    #endif
+        #if UNITY_EDITOR
+        GameLog.LogError($"ServiceLocator: Service of type '{typeof(T).Name}' not found.");
+        #endif
 
         return default;
+    }
+
+    /// <summary>
+    /// Tries to get a registered service without logging an error if not found.
+    /// </summary>
+    /// <returns>True if the service was found, otherwise false.</returns>
+    public static bool TryGet<T>(out T service)
+    {
+        var type = typeof(T);
+        if (_services.TryGetValue(type, out var serviceObject))
+        {
+            service = (T)serviceObject;
+            return true;
+        }
+
+        service = default;
+        return false;
     }
 }

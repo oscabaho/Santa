@@ -9,8 +9,7 @@ public class UIManager : MonoBehaviour, IUIManager
 {
     private static UIManager Instance { get; set; }
 
-    // Cambiado para almacenar el GameObject instanciado, para poder liberarlo.
-    private Dictionary<string, GameObject> _instantiatedPanels;
+    private readonly Dictionary<string, GameObject> _guidToInstanceMap = new Dictionary<string, GameObject>();
 
     private void Awake()
     {
@@ -21,9 +20,6 @@ public class UIManager : MonoBehaviour, IUIManager
         }
         Instance = this;
 
-        // Inicializa el diccionario. Se poblará bajo demanda.
-        _instantiatedPanels = new Dictionary<string, GameObject>();
-
         ServiceLocator.Register<IUIManager>(this);
     }
 
@@ -31,76 +27,97 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (Instance == this)
         {
-            // Libera todos los paneles instanciados cuando el manager se destruye
-            foreach (var panel in _instantiatedPanels.Values)
+            // Create a copy of the list to avoid modification during iteration
+            var allInstances = _guidToInstanceMap.Values.ToList();
+            foreach (var panelInstance in allInstances)
             {
-                Addressables.ReleaseInstance(panel);
+                // The AssetReference is not stored here, so we must release the instance directly.
+                // This assumes the panel was loaded via Addressables.
+                Addressables.ReleaseInstance(panelInstance);
             }
-            _instantiatedPanels.Clear();
+            _guidToInstanceMap.Clear();
 
             ServiceLocator.Unregister<IUIManager>();
             Instance = null;
         }
     }
 
-    // Modificado para cargar paneles a través de Addressables
-    public async Task ShowPanel(string panelId)
+    public async Task ShowPanel(AssetReferenceGameObject panelReference)
     {
-        // Si el panel ya está cargado, simplemente muéstralo.
-        if (_instantiatedPanels.TryGetValue(panelId, out var panelInstance))
+        string key = panelReference.AssetGUID;
+        if (!panelReference.RuntimeKeyIsValid())
+        {
+            GameLog.LogError($"UIManager: Panel reference is not valid.");
+            return;
+        }
+
+        if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
         {
             panelInstance.GetComponent<UIPanel>()?.Show();
             return;
         }
 
-        // Si no está cargado, instáncialo desde Addressables
-        var handle = Addressables.InstantiateAsync(panelId, transform);
+        var handle = panelReference.InstantiateAsync(transform);
         await handle.Task;
 
         if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             var newPanelInstance = handle.Result;
-            _instantiatedPanels[panelId] = newPanelInstance;
+            _guidToInstanceMap[key] = newPanelInstance;
             newPanelInstance.GetComponent<UIPanel>()?.Show();
-            // Asumiendo que GameLog tiene un método Log. Si no, ajústalo a tu logger.
-            GameLog.Log($"UIManager: Panel with ID '{panelId}' loaded and shown.");
+            GameLog.Log($"UIManager: Panel with key '{key}' loaded and shown.");
         }
         else
         {
-            // Asumiendo que GameLog tiene un método LogError.
-            GameLog.LogError($"UIManager: Failed to load panel with ID '{panelId}'.");
+            GameLog.LogError($"UIManager: Failed to load panel with key '{key}'.");
         }
     }
 
-    // Modificado para liberar el panel de la memoria
-    public void HidePanel(string panelId)
+    public void HidePanel(AssetReferenceGameObject panelReference)
     {
-        if (_instantiatedPanels.TryGetValue(panelId, out var panelInstance))
+        string key = panelReference.AssetGUID;
+        if (!panelReference.RuntimeKeyIsValid())
         {
-            // Para la optimización de la memoria, liberar es mejor que solo ocultar.
-            Addressables.ReleaseInstance(panelInstance);
-            _instantiatedPanels.Remove(panelId);
-            GameLog.Log($"UIManager: Panel with ID '{panelId}' hidden and released.");
+            GameLog.LogError($"UIManager: Panel reference is not valid for hiding.");
+            return;
+        }
+
+        if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
+        {
+            panelReference.ReleaseInstance(panelInstance);
+            _guidToInstanceMap.Remove(key);
+            GameLog.Log($"UIManager: Panel with key '{key}' hidden and released.");
         }
         else
         {
-            GameLog.LogWarning($"UIManager: Panel with ID '{panelId}' not found or not instantiated.");
+            GameLog.LogWarning($"UIManager: Panel with key '{key}' not found or not instantiated.");
         }
     }
 
-    public async Task SwitchToPanel(string panelId)
+    public async Task SwitchToPanel(AssetReferenceGameObject panelReference)
     {
-        // Oculta todos los demás paneles primero
-        var currentPanelIds = _instantiatedPanels.Keys.ToList();
-        foreach (var id in currentPanelIds)
+        if (!panelReference.RuntimeKeyIsValid())
         {
-            if (id != panelId)
+            GameLog.LogError($"UIManager: Panel reference is not valid for switching.");
+            return;
+        }
+
+        string keyToKeep = panelReference.AssetGUID;
+        var keysToHide = _guidToInstanceMap.Keys.Where(key => key != keyToKeep).ToList();
+
+        foreach (var key in keysToHide)
+        {
+            if (_guidToInstanceMap.TryGetValue(key, out var panelInstance))
             {
-                HidePanel(id);
+                // To release it, we need the original AssetReference.
+                // This is a limitation. A more robust system might map instances back to references.
+                // For now, we'll just release the instance.
+                Addressables.ReleaseInstance(panelInstance);
+                _guidToInstanceMap.Remove(key);
+                GameLog.Log($"UIManager: Panel with key '{key}' hidden and released during switch.");
             }
         }
 
-        // Muestra el panel de destino (se cargará si aún no lo está)
-        await ShowPanel(panelId);
+        await ShowPanel(panelReference);
     }
 }

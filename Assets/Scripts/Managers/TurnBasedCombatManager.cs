@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 /// <summary>
 /// Manages the turn-based combat flow, delegating state storage to a CombatState object.
@@ -10,12 +11,11 @@ using System.Threading.Tasks;
 /// </summary>
 public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 {
-    private static TurnBasedCombatManager Instance { get; set; }
+    public event Action<CombatPhase> OnPhaseChanged;
     public event Action OnPlayerTurnStarted;
     public event Action OnPlayerTurnEnded;
 
-    private enum CombatPhase { Planning, Executing }
-    private CombatPhase _currentPhase;
+    public CombatPhase CurrentPhase { get; private set; }
 
     private readonly CombatState _combatState = new CombatState();
     private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
@@ -25,6 +25,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     public IReadOnlyList<GameObject> AllCombatants => _combatState.AllCombatants;
     public IReadOnlyList<GameObject> Enemies => _combatState.Enemies;
+    public GameObject Player => _combatState.Player;
 
     [Header("Dependencies")]
     [Tooltip("Assign the ActionExecutor component here.")]
@@ -37,13 +38,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         if (_actionExecutor == null || _aiManager == null)
         {
             GameLog.LogError("Dependencies not assigned in TurnBasedCombatManager! Please assign them in the Inspector.", this);
@@ -59,7 +53,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         var registered = ServiceLocator.Get<ICombatService>();
         if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
             ServiceLocator.Unregister<ICombatService>();
-        if (Instance == this) Instance = null;
     }
 
     public void StartCombat(List<GameObject> participants)
@@ -79,16 +72,24 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void StartNewTurn()
     {
-        GameLog.Log("--- PLANNING PHASE ---: Starting new turn.");
-        _currentPhase = CombatPhase.Planning;
+        GameLog.Log("--- SELECTION PHASE ---: Starting new turn.");
+        CurrentPhase = CombatPhase.Selection;
+        OnPhaseChanged?.Invoke(CurrentPhase);
         _combatState.PendingActions.Clear();
 
         OnPlayerTurnStarted?.Invoke();
     }
 
-    public void SubmitPlayerAction(Ability ability, GameObject primaryTarget)
+    public void SubmitPlayerAction(Ability ability)
     {
-        if (_currentPhase != CombatPhase.Planning) return;
+        if (CurrentPhase != CombatPhase.Selection) return;
+
+        if (ability == null)
+        {
+            GameLog.LogWarning("Player tried to submit a null ability.");
+            OnPlayerTurnStarted?.Invoke();
+            return;
+        }
 
         if (!_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
         {
@@ -97,31 +98,51 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
 
-        if (ability == null || playerAP.CurrentValue < ability.ApCost)
+        if (playerAP.CurrentValue < ability.ApCost)
         {
-            GameLog.LogWarning("Player tried to submit an invalid or unaffordable action.");
+            GameLog.LogWarning($"Player cannot afford action: {ability.AbilityName}. Cost: {ability.ApCost}, Has: {playerAP.CurrentValue}");
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
+        // Centralized Targeting Logic
+        GameObject primaryTarget = null;
+        if (ability.Targeting.Style == TargetingStyle.SingleEnemy)
+        {
+            primaryTarget = _combatState.Enemies.FirstOrDefault(e => e != null && e.activeInHierarchy);
+            if (primaryTarget == null)
+            {
+                GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No valid enemy target found.");
+                OnPlayerTurnStarted?.Invoke();
+                return;
+            }
+        }
+        // Other targeting styles (Self, All, etc.) don't require a primary target from this logic.
+
         playerAP.AffectValue(-ability.ApCost);
         _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
-        GameLog.Log($"Player submitted action: {ability.AbilityName}");
+        GameLog.Log($"Player submitted action: {ability.AbilityName} targeting {primaryTarget?.name ?? "self/area"}.");
 
         OnPlayerTurnEnded?.Invoke();
-        TriggerAIPlanning();
+        FinalizeSelectionAndExecuteTurn();
     }
 
-    private void TriggerAIPlanning()
+    private void FinalizeSelectionAndExecuteTurn()
     {
         PendingAction? playerAction = null;
-        foreach(var action in _combatState.PendingActions)
+        if (_combatState.PendingActions.Count > 0)
         {
-            if (action.Caster != null && action.Caster.CompareTag("Player"))
+            // The player's action was the last one added.
+            var lastAction = _combatState.PendingActions[_combatState.PendingActions.Count - 1];
+            if (lastAction.Caster == _combatState.Player)
             {
-                playerAction = action;
-                break;
+                playerAction = lastAction;
             }
+        }
+
+        if (playerAction == null)
+        {
+            GameLog.LogWarning("Could not find player's action for AI planning context.");
         }
 
         _aiManager.PlanActions(
@@ -137,37 +158,53 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private async Task ExecuteTurnAsync()
     {
+        PrepareExecutionPhase();
+
+        foreach (var action in _sortedActions)
+        {
+            CombatResult result = await ProcessActionAsync(action);
+            if (result != CombatResult.Ongoing)
+            {
+                HandleCombatEnd(result);
+                return; // End turn execution
+            }
+        }
+
+        // If the loop completes, it means no one won or lost, so start a new turn.
+        GameLog.Log("Execution phase finished.");
+        StartNewTurn();
+    }
+
+    private void PrepareExecutionPhase()
+    {
         GameLog.Log("--- EXECUTION PHASE ---");
-        _currentPhase = CombatPhase.Executing;
+        CurrentPhase = CombatPhase.Execution;
+        OnPhaseChanged?.Invoke(CurrentPhase);
 
         _sortedActions.Clear();
         _sortedActions.AddRange(_combatState.PendingActions);
         _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
+    }
 
-        foreach (var action in _sortedActions)
-        {
-            _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
+    private async Task<CombatResult> ProcessActionAsync(PendingAction action)
+    {
+        _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
+        
+        // Wait for a moment to let players see the action
+        await Task.Delay(TimeSpan.FromSeconds(_delayBetweenActions));
 
-            CombatResult result = _winConditionChecker.Check(_combatState);
-            if (result != CombatResult.Ongoing)
-            {
-                EndCombat(result == CombatResult.Victory);
-                return; // End the execution
-            }
+        return _winConditionChecker.Check(_combatState);
+    }
 
-            await Task.Delay(TimeSpan.FromSeconds(_delayBetweenActions)); // TODO: Make this delay configurable or animation-driven.
-        }
-
-        if (_currentPhase == CombatPhase.Executing)
-        {
-            GameLog.Log("Execution phase finished.");
-            StartNewTurn();
-        }
+    private void HandleCombatEnd(CombatResult result)
+    {
+        CurrentPhase = (result == CombatResult.Victory) ? CombatPhase.Victory : CombatPhase.Defeat;
+        OnPhaseChanged?.Invoke(CurrentPhase);
+        EndCombat(result == CombatResult.Victory);
     }
 
     private void EndCombat(bool playerWon)
     {
-        _currentPhase = CombatPhase.Planning; // Reset for next combat
         _combatState.Clear();
 
         if (playerWon)

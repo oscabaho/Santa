@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ba589c127d402c498447a47f42c5e2e, type: 3}
   m_Name: Wait
   m_EditorClassIdentifier: 
-  duration: 1
+  duration: 2
