@@ -45,6 +45,7 @@ public class CombatUI : UIPanel
 
     protected override void Awake()
     {
+        GameLog.LogWarning("CombatUI.Awake called.");
         base.Awake(); // Caches the CanvasGroup from UIPanel
 
         if (Instance != null && Instance != this)
@@ -67,6 +68,7 @@ public class CombatUI : UIPanel
 
     private void OnEnable()
     {
+        GameLog.LogWarning("CombatUI.OnEnable called.");
         if (ServiceLocator.TryGet(out _combatService))
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
@@ -101,6 +103,7 @@ public class CombatUI : UIPanel
 
         if (inSelection)
         {
+            GameLog.LogWarning($"Direct Attack Button interactable: {directAttackButton.interactable}");
             SubscribeToPlayerEvents();
             // If we return to selection phase, cancel any pending targeting
             if (_pendingAbility != null)
@@ -158,6 +161,11 @@ public class CombatUI : UIPanel
 
     private void SetupButtonListeners()
     {
+        if (directAttackButton == null) GameLog.LogWarning("Direct Attack Button is NULL");
+        if (areaAttackButton == null) GameLog.LogWarning("Area Attack Button is NULL");
+        if (specialAttackButton == null) GameLog.LogWarning("Special Attack Button is NULL");
+        if (meditateButton == null) GameLog.LogWarning("Meditate Button is NULL");
+
         directAttackButton.onClick.AddListener(() => RequestAbility(directAttackAbility));
         areaAttackButton.onClick.AddListener(() => RequestAbility(areaAttackAbility));
         specialAttackButton.onClick.AddListener(() => RequestAbility(specialAttackAbility));
@@ -178,6 +186,7 @@ public class CombatUI : UIPanel
 
     private void RequestAbility(Ability ability)
     {
+        GameLog.LogWarning($"CombatUI.RequestAbility called with ability: {ability?.AbilityName ?? "NULL"}");
         if (ability == null || _combatService == null) return;
 
         // If we are already waiting for a target, a button click should cancel targeting.
@@ -203,6 +212,7 @@ public class CombatUI : UIPanel
 
     public void OnTargetSelected(GameObject target)
     {
+        GameLog.LogWarning($"CombatUI.OnTargetSelected called with target: {target?.name ?? "NULL"}");
         if (_pendingAbility == null) return;
 
         _combatService.SubmitPlayerAction(_pendingAbility, target);
