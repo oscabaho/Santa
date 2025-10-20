@@ -18,7 +18,7 @@ public static class ServiceLocator
         if (_services.ContainsKey(type))
         {
             #if UNITY_EDITOR
-            GameLog.LogWarning($"ServiceLocator: Service of type '{type.Name}' is already registered. Overwriting.");
+            GameLog.LogWarning($"ServiceLocator: Service of type '{{type.Name}}' is already registered. Overwriting.");
             #endif
             _services[type] = service;
         }
@@ -51,7 +51,7 @@ public static class ServiceLocator
         }
 
         #if UNITY_EDITOR
-        GameLog.LogError($"ServiceLocator: Service of type '{typeof(T).Name}' not found.");
+        GameLog.LogError($"ServiceLocator: Service of type '{{typeof(T).Name}}' not found.");
         #endif
 
         return default;

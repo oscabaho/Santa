@@ -23,6 +23,8 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     // This list is for sorting and is ephemeral to the execution phase, so it stays here.
     private readonly List<PendingAction> _sortedActions = new List<PendingAction>();
 
+    private Ability _abilityPendingTarget; // Stores the ability waiting for a target
+
     public IReadOnlyList<GameObject> AllCombatants => _combatState.AllCombatants;
     public IReadOnlyList<GameObject> Enemies => _combatState.Enemies;
     public GameObject Player => _combatState.Player;
@@ -84,14 +86,48 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         CurrentPhase = CombatPhase.Selection;
         OnPhaseChanged?.Invoke(CurrentPhase);
         _combatState.PendingActions.Clear();
+        _abilityPendingTarget = null;
 
         OnPlayerTurnStarted?.Invoke();
     }
 
     public void SubmitPlayerAction(Ability ability, GameObject primaryTarget = null)
     {
+        // If we are in the targeting phase, this call is providing the target.
+        if (CurrentPhase == CombatPhase.Targeting)
+        {
+            if (_abilityPendingTarget == null)
+            {
+                GameLog.LogError("Received a target submission but no ability was pending.");
+                StartNewTurn(); // Reset the turn state
+                return;
+            }
+
+            // Use the pending ability with the newly provided target
+            ProcessActionSubmission(_abilityPendingTarget, primaryTarget);
+            _abilityPendingTarget = null;
+            return;
+        }
+
+        // Standard check for being in the correct phase to initiate an action.
         if (CurrentPhase != CombatPhase.Selection) return;
 
+        // If the ability requires a target but none was provided, switch to Targeting phase.
+        if (ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
+        {
+            _abilityPendingTarget = ability;
+            CurrentPhase = CombatPhase.Targeting;
+            OnPhaseChanged?.Invoke(CurrentPhase);
+            GameLog.Log($"Player selected ability '{ability.AbilityName}'. Waiting for target selection.");
+            return;
+        }
+
+        // If targeting is not required, or was already provided, process the action immediately.
+        ProcessActionSubmission(ability, primaryTarget);
+    }
+
+    private void ProcessActionSubmission(Ability ability, GameObject primaryTarget)
+    {
         if (ability == null)
         {
             GameLog.LogWarning("Player tried to submit a null ability.");
@@ -113,11 +149,11 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
 
-        // Targeting validation
+        // Re-validate targeting here for the final submission
         if (ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
         {
             GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No target specified for a single-target ability.");
-            OnPlayerTurnStarted?.Invoke();
+            OnPlayerTurnStarted?.Invoke(); // Allow player to try again
             return;
         }
 

@@ -66,9 +66,9 @@ public class CombatUI : UIPanel
         }
     }
 
-    private void OnEnable()
+    private void Start()
     {
-        GameLog.LogWarning("CombatUI.OnEnable called.");
+        GameLog.LogWarning("CombatUI.Start called.");
         if (ServiceLocator.TryGet(out _combatService))
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
