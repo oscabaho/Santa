@@ -9,8 +9,6 @@ using System.Collections.Generic;
 /// </summary>
 public class CombatUI : UIPanel
 {
-    public static CombatUI Instance { get; private set; }
-
     [Header("Panels")]
     [Tooltip("The parent object containing all the player action buttons.")]
     [SerializeField] private GameObject actionButtonsPanel;
@@ -47,35 +45,25 @@ public class CombatUI : UIPanel
     {
         GameLog.Log("CombatUI.Awake called.");
         base.Awake(); // Caches the CanvasGroup from UIPanel
-
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         SetupButtonListeners();
     }
 
-    private void OnDestroy()
+    [Inject]
+    public void Construct(ICombatService combatService)
     {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
+        GameLog.Log("CombatUI.Construct called.");
+        _combatService = combatService;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        GameLog.Log("CombatUI.Start called.");
-        if (ServiceLocator.TryGet(out _combatService))
+        if (_combatService != null)
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
         }
         else
         {
-            GameLog.LogError("CombatUI could not find ICombatService on enable.", this);
+            GameLog.LogError("CombatUI has not been injected with ICombatService.", this);
             if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
         }
     }
@@ -87,7 +75,6 @@ public class CombatUI : UIPanel
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
         }
         UnsubscribeFromPlayerEvents();
-        _combatService = null;
     }
 
     private void HandlePhaseChanged(CombatPhase newPhase)

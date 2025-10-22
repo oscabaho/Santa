@@ -1,22 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using VContainer;
 
 /// <summary>
 /// Manages the player's permanent progression by applying and saving ability upgrades.
 /// </summary>
 public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
 {
-    private static UpgradeManager Instance { get; set; }
-
     [Header("Upgrade Pool")]
     [Tooltip("A list of all possible upgrades that can be offered to the player.")]
     [SerializeField] private List<AbilityUpgrade> allPossibleUpgrades;
 
-    [Header("UI Reference")]
-    [Tooltip("Assign the component that implements IUpgradeUI here.")]
-    [SerializeField] private UpgradeUI upgradeUI;
-
+    private IUpgradeUI _upgradeUI;
+    private ICombatTransitionService _combatTransitionService;
 
     // Player Stats - These will be modified by upgrades.
     // We are centralizing them here for now.
@@ -26,31 +23,17 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
     public float SpecialAttackMissChance { get; private set; } = 0.2f;
     public int EnergyGainedPerTurn { get; private set; } = 34;
 
-    private void Awake()
+    [Inject]
+    public void Construct(IUpgradeUI upgradeUI, ICombatTransitionService combatTransitionService)
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        ServiceLocator.Register<IUpgradeService>(this);
-        DontDestroyOnLoad(gameObject);
-
-        if (upgradeUI == null)
-        {
-            GameLog.LogError("The UpgradeUI component is not assigned in the UpgradeManager!");
-        }
-
-        LoadStats();
+        _upgradeUI = upgradeUI;
+        _combatTransitionService = combatTransitionService;
     }
 
-    private void OnDestroy()
+    private void Awake()
     {
-        var registered = ServiceLocator.Get<IUpgradeService>();
-        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
-            ServiceLocator.Unregister<IUpgradeService>();
-        if (Instance == this) Instance = null;
+        DontDestroyOnLoad(gameObject);
+        LoadStats();
     }
 
     public void PresentUpgradeOptions()
@@ -59,10 +42,10 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         if (randomUpgrades.Count < 2)
         {
             GameLog.LogWarning("Not enough unique upgrades available to present a choice.");
-            ServiceLocator.Get<ICombatTransitionService>()?.EndCombat();
+            _combatTransitionService?.EndCombat();
             return;
         }
-        upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
+        _upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);
     }
 
     private List<AbilityUpgrade> GetRandomUpgrades(int count)

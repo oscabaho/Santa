@@ -23,15 +23,36 @@ Examples
 
 - Instantiating a combat scene via the pool (simplified):
 
-  StartCoroutine(CombatScenePool.Instance.GetInstanceAsync(encounter.GetPoolKey(), (go) => {
-      if (go == null) { GameLog.LogError("Failed to create combat scene"); return; }
-      // set parent, position and activate
-      go.SetActive(true);
-  }, encounter));
+```csharp
+// In a class where CombatScenePool is injected
+public class MyCombatClass : MonoBehaviour
+{
+    private CombatScenePool _combatScenePool;
+
+    [Inject]
+    public void Construct(CombatScenePool combatScenePool)
+    {
+        _combatScenePool = combatScenePool;
+    }
+
+    public async void LoadCombatScene(ICombatEncounter encounter)
+    {
+        var go = await _combatScenePool.GetInstanceAsync(encounter.GetPoolKey(), encounter);
+        if (go == null) { GameLog.LogError("Failed to create combat scene"); return; }
+        // set parent, position and activate
+        go.SetActive(true);
+    }
+
+    public void ReleaseCombatScene(ICombatEncounter encounter, GameObject instanceGameObject)
+    {
+        _combatScenePool.ReleaseInstance(encounter.GetPoolKey(), instanceGameObject);
+    }
+}
+```
 
 - Releasing an instance:
 
-  CombatScenePool.Instance.ReleaseInstance(encounter.GetPoolKey(), instanceGameObject);
+  `_combatScenePool.ReleaseInstance(encounter.GetPoolKey(), instanceGameObject);`
 
 Notes
 

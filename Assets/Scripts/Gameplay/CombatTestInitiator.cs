@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using VContainer;
 
 /// <summary>
 /// This script is for testing purposes only.
@@ -11,12 +12,19 @@ public class CombatTestInitiator : MonoBehaviour
     [SerializeField] private string _playerTag = "Player";
     [SerializeField] private string _enemyTag = "Enemy";
 
+    private ICombatService _combatService;
+
+    [Inject]
+    public void Construct(ICombatService combatService)
+    {
+        _combatService = combatService;
+    }
+
     void Start()
     {
-        // Find the combat service
-        if (!ServiceLocator.TryGet(out ICombatService combatService))
+        if (_combatService == null)
         {
-            GameLog.LogError("CombatTestInitiator could not find ICombatService. Make sure TurnBasedCombatManager is in the scene.");
+            GameLog.LogError("CombatTestInitiator could not find ICombatService. Make sure it is registered in a LifetimeScope.");
             return;
         }
 
@@ -43,6 +51,6 @@ public class CombatTestInitiator : MonoBehaviour
 
         // Start the combat
         GameLog.Log("CombatTestInitiator is starting combat...");
-        combatService.StartCombat(participants);
+        _combatService.StartCombat(participants);
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using VContainer;
 
 public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 {
@@ -12,14 +13,10 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     private const int ACTIVE_PRIORITY = 100;
     private const int INACTIVE_PRIORITY = 0;
 
-    private void Awake()
+    [Inject]
+    public void Construct(ICombatService combatService)
     {
-        ServiceLocator.Register<ICombatCameraManager>(this);
-    }
-
-    private void Start()
-    {
-        _combatService = ServiceLocator.Get<ICombatService>();
+        _combatService = combatService;
         if (_combatService != null)
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
@@ -28,13 +25,12 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         }
         else
         {
-            GameLog.LogError("CombatCameraManager could not find ICombatService.");
+            GameLog.LogError("CombatCameraManager could not receive ICombatService via injection.");
         }
     }
 
     private void OnDestroy()
     {
-        ServiceLocator.Unregister<ICombatCameraManager>();
         if (_combatService != null)
         {
             _combatService.OnPhaseChanged -= HandlePhaseChanged;

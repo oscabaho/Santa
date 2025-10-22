@@ -3,66 +3,18 @@ using UnityEngine;
 
 /// <summary>
 /// Manages the game's graphics settings. Behaves differently based on the platform.
-/// Ensures it is created and registered before any scene loads.
 /// </summary>
 public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
 {
-    private static GraphicsSettingsManager _instance;
-
-    /// <summary>
-    /// Gets the singleton instance of the GraphicsSettingsManager.
-    /// </summary>
-    public static GraphicsSettingsManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                // This will be handled by the RuntimeInitializeOnLoadMethod,
-                // but as a fallback, we can try to find it.
-                _instance = FindFirstObjectByType<GraphicsSettingsManager>();
-                if (_instance == null)
-                {
-                    GameLog.LogError("GraphicsSettingsManager instance is required in the scene, but none was found and couldn't be created automatically.");
-                }
-            }
-            return _instance;
-        }
-    }
-
     /// <summary>
     /// Gets the list of resolutions supported by the current display.
     /// </summary>
     public Resolution[] AvailableResolutions => Screen.resolutions;
 
-    // This method is called by the Unity runtime before the first scene is loaded.
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize()
-    {
-        if (_instance == null)
-        {
-            _instance = FindFirstObjectByType<GraphicsSettingsManager>();
-            if (_instance == null)
-            {
-                GameObject go = new GameObject("GraphicsSettingsManager");
-                _instance = go.AddComponent<GraphicsSettingsManager>();
-            }
-        }
-    }
-
     private void Awake()
     {
-        // Singleton pattern enforcement
-        if (_instance != null && _instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        _instance = this;
+        // We want this to persist across scenes.
         DontDestroyOnLoad(gameObject);
-
-        // Register with the Service Locator
-        ServiceLocator.Register<IGraphicsSettingsService>(this);
     }
 
     private void Start()

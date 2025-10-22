@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using VContainer;
 
 /// <summary>
 /// This component should be placed on any clickable enemy combatant.
@@ -13,6 +14,14 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
 {
     private Collider _collider;
     private ICombatService _combatService;
+    private CombatUI _combatUI;
+
+    [Inject]
+    public void Construct(ICombatService combatService, CombatUI combatUI)
+    {
+        _combatService = combatService;
+        _combatUI = combatUI;
+    }
 
     private void Awake()
     {
@@ -24,30 +33,6 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         GameLog.Log($"EnemyTarget OnEnable on {gameObject.name}");
         // Always start with the collider disabled. It will be enabled by the combat manager.
         if (_collider != null) _collider.enabled = false;
-    }
-
-    private void Start()
-    {
-        // Start is the reliable place to find services registered in Awake.
-        if (ServiceLocator.TryGet(out ICombatService svc))
-        {
-            _combatService = svc;
-            // The manager now directly controls the collider, so no subscription is needed.
-        }
-        else
-        {
-            GameLog.LogWarning($"EnemyTarget on {gameObject.name} could not find ICombatService in Start. Clicks will not work.");
-        }
-    }
-
-    private void OnDisable()
-    {
-        GameLog.Log($"EnemyTarget OnDisable on {gameObject.name}");
-        if (_combatService != null)
-        {
-            // No subscription to remove.
-            _combatService = null;
-        }
     }
 
     public void SetColliderActive(bool isActive)
@@ -73,23 +58,16 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     private void TrySelect()
     {
         GameLog.Log($"EnemyTarget TrySelect on {gameObject.name}");
-        // By the time this runs the collider should already be disabled when clicks are invalid.
-        // We still perform a defensive check to avoid unexpected behavior.
-        if (!TurnBasedCombatManager.CombatIsInitialized)
-        {
-            GameLog.LogWarning("EnemyTarget clicked, but combat is not initialized. Ignoring.");
-            return;
-        }
 
-        if (CombatUI.Instance == null)
+        if (_combatUI == null)
         {
-            GameLog.LogWarning("EnemyTarget: CombatUI.Instance is null.");
+            GameLog.LogWarning("EnemyTarget: CombatUI has not been injected.");
             return;
         }
 
         if (_combatService == null)
         {
-            GameLog.LogWarning("EnemyTarget: ICombatService not found.");
+            GameLog.LogWarning("EnemyTarget: ICombatService has not been injected.");
             return;
         }
 
@@ -100,6 +78,6 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         }
 
         // Notify the UI that this target has been selected
-        CombatUI.Instance.OnTargetSelected(gameObject);
+        _combatUI.OnTargetSelected(gameObject);
     }
 }

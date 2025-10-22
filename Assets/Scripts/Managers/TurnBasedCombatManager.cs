@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using VContainer;
 
 /// <summary>
 /// Manages the turn-based combat flow, delegating state storage to a CombatState object.
@@ -35,8 +36,17 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private IActionExecutor _actionExecutor;
     private IAIManager _aiManager;
+    private IUpgradeService _upgradeService;
+    private ICombatTransitionService _combatTransitionService;
 
     public static bool CombatIsInitialized { get; private set; } = false;
+
+    [Inject]
+    public void Construct([InjectOptional] IUpgradeService upgradeService, [InjectOptional] ICombatTransitionService combatTransitionService)
+    {
+        _upgradeService = upgradeService;
+        _combatTransitionService = combatTransitionService;
+    }
 
     private void Awake()
     {
@@ -54,18 +64,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             GameLog.LogError($"Could not find a component implementing IAIManager in children of {gameObject.name}.", this);
             enabled = false;
         }
-
-        if (enabled)
-        {
-            ServiceLocator.Register<ICombatService>(this);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        var registered = ServiceLocator.Get<ICombatService>();
-        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
-            ServiceLocator.Unregister<ICombatService>();
     }
 
     public void StartCombat(List<GameObject> participants)
@@ -307,13 +305,12 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (playerWon)
         {
             GameLog.Log("--- COMBAT ENDED: VICTORY ---");
-            ServiceLocator.Get<IUpgradeService>()?.PresentUpgradeOptions();
+            _upgradeService?.PresentUpgradeOptions();
         }
         else
         {
             GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
-            var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
-            if (combatTransition != null) combatTransition.EndCombat();
+            _combatTransitionService?.EndCombat();
         }
         gameObject.SetActive(false);
     }

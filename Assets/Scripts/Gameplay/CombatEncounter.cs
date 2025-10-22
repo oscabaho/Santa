@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Threading.Tasks;
+using VContainer;
 
 /// <summary>
 /// A data container for a specific combat encounter.
@@ -37,6 +38,14 @@ public class CombatEncounter : MonoBehaviour, ICombatEncounter
 
     public bool ReleaseAddressablesInstances => releaseAddressablesInstances;
 
+    private CombatScenePool _combatScenePool;
+
+    [Inject]
+    public void Construct(CombatScenePool combatScenePool)
+    {
+        _combatScenePool = combatScenePool;
+    }
+
     private void Start()
     {
         if (autoPrewarm && prewarmCount > 0)
@@ -45,7 +54,7 @@ public class CombatEncounter : MonoBehaviour, ICombatEncounter
             if (!string.IsNullOrEmpty(key))
             {
                 // Start prewarming in background
-                _ = CombatScenePool.Instance.PrewarmAsync(key, prewarmCount, this);
+                _ = _combatScenePool.PrewarmAsync(key, prewarmCount, this);
             }
         }
     }

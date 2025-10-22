@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using VContainer;
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
@@ -18,6 +19,18 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
     private AbilityUpgrade _upgrade1;
     private AbilityUpgrade _upgrade2;
+
+    private IUpgradeService _upgradeService;
+    private ILevelService _levelService;
+    private ICombatTransitionService _combatTransitionService;
+
+    [Inject]
+    public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService)
+    {
+        _upgradeService = upgradeService;
+        _levelService = levelService;
+        _combatTransitionService = combatTransitionService;
+    }
 
     private void Start()
     {
@@ -56,28 +69,16 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     private void ChooseUpgrade(AbilityUpgrade chosenUpgrade)
     {
         // 1. Apply the stat upgrade
-        var upgradeService = ServiceLocator.Get<IUpgradeService>();
-        if (upgradeService != null) upgradeService.ApplyUpgrade(chosenUpgrade);
+        _upgradeService?.ApplyUpgrade(chosenUpgrade);
         upgradePanel.SetActive(false);
 
         // 2. Liberate the current level (change visuals)
-        var levelService = ServiceLocator.Get<ILevelService>();
-        if (levelService != null)
-        {
-            levelService.LiberateCurrentLevel();
-        }
+        _levelService?.LiberateCurrentLevel();
 
         // 3. End the combat state (this was already here)
-        var combatTransition = ServiceLocator.Get<ICombatTransitionService>();
-        if (combatTransition != null)
-        {
-            combatTransition.EndCombat();
-        }
+        _combatTransitionService?.EndCombat();
 
         // 4. Prepare the next level/area
-        if (levelService != null)
-        {
-            levelService.AdvanceToNextLevel();
-        }
+        _levelService?.AdvanceToNextLevel();
     }
 }

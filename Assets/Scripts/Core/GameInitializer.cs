@@ -1,8 +1,16 @@
 using UnityEngine;
+using VContainer;
 
 public class GameInitializer : MonoBehaviour
 {
     private const string InitialUIPanelAddress = "VirtualGamepad";
+    private IUIManager _uiManager;
+
+    [Inject]
+    public void Construct(IUIManager uiManager)
+    {
+        _uiManager = uiManager;
+    }
 
     void Start()
     {
@@ -16,15 +24,14 @@ public class GameInitializer : MonoBehaviour
         // Espera al final del primer frame.
         yield return new WaitForEndOfFrame();
 
-        var uiManager = ServiceLocator.Get<IUIManager>();
-        if (uiManager != null)
+        if (_uiManager != null)
         {
-            var task = uiManager.ShowPanel(InitialUIPanelAddress);
+            var task = _uiManager.ShowPanel(InitialUIPanelAddress);
             yield return new WaitUntil(() => task.IsCompleted);
         }
         else
         {
-            GameLog.LogError("GameInitializer: IUIManager service not found. Make sure UIManager has registered itself with the ServiceLocator.");
+            GameLog.LogError("GameInitializer: IUIManager service was not injected. Make sure it's registered in a LifetimeScope.");
         }
     }
 }

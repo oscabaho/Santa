@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using System.Collections.Generic;
+using VContainer;
 
 public class GraphicsSettingsController : MonoBehaviour
 {
@@ -14,10 +15,17 @@ public class GraphicsSettingsController : MonoBehaviour
     [SerializeField] private Toggle fullscreenToggle;
     [SerializeField] private Toggle vsyncToggle;
 
+    private IGraphicsSettingsService _graphicsService;
+
+    [Inject]
+    public void Construct(IGraphicsSettingsService graphicsService)
+    {
+        _graphicsService = graphicsService;
+    }
+
     private void Start()
     {
-        var graphicsService = ServiceLocator.Get<IGraphicsSettingsService>();
-        if (graphicsService == null)
+        if (_graphicsService == null)
         {
             GameLog.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionar\u00e1.", this);
             gameObject.SetActive(false);
@@ -25,9 +33,9 @@ public class GraphicsSettingsController : MonoBehaviour
         }
 
         SetupQualityDropdown();
-        SetupResolutionDropdown(graphicsService);
+        SetupResolutionDropdown(_graphicsService);
         SetupToggles();
-        AddListeners(graphicsService);
+        AddListeners(_graphicsService);
     }
 
     private void SetupQualityDropdown()
