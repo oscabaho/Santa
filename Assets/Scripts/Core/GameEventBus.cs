@@ -6,15 +6,6 @@ using System.Collections.Generic;
 /// </summary>
 public class GameEventBus : IEventBus
 {
-    private static GameEventBus _instance;
-    private static GameEventBus Instance => _instance ?? (_instance = new GameEventBus());
-
-    // Register the global instance in the ServiceLocator for decoupled access.
-    static GameEventBus()
-    {
-        ServiceLocator.Register<IEventBus>(Instance);
-    }
-
     // Protect access to the subscriber dictionary for thread-safety and reentrancy.
     private readonly Dictionary<Type, List<Delegate>> _subscribers = new Dictionary<Type, List<Delegate>>();
     private readonly object _lock = new object();

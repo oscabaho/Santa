@@ -1,10 +1,19 @@
 using UnityEngine;
+using VContainer;
 
 public class VirtualGamepadUI : MonoBehaviour
 {
     [Header("Child UI Elements")]
     [Tooltip("Drag the Action Button GameObject that is a child of this prefab here.")]
     [SerializeField] private GameObject actionButton;
+
+    private IGameplayUIService _gameplayUIService;
+
+    [Inject]
+    public void Construct(IGameplayUIService gameplayUIService)
+    {
+        _gameplayUIService = gameplayUIService;
+    }
 
     void Awake()
     {
@@ -14,14 +23,13 @@ public class VirtualGamepadUI : MonoBehaviour
             return;
         }
 
-        var gameplayUIService = ServiceLocator.Get<IGameplayUIService>();
-        if (gameplayUIService != null)
+        if (_gameplayUIService != null)
         {
-            gameplayUIService.RegisterActionButton(actionButton);
+            _gameplayUIService.RegisterActionButton(actionButton);
         }
         else
         {
-            GameLog.LogError("VirtualGamepadUI: Could not find the IGameplayUIService. Make sure the GameplayUIManager is active in the scene.", this);
+            GameLog.LogError("VirtualGamepadUI: IGameplayUIService was not injected. Make sure it's registered in the LifetimeScope.", this);
         }
     }
 }

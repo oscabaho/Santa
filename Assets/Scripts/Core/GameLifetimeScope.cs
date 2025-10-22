@@ -10,14 +10,28 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private TurnBasedCombatManager turnBasedCombatManagerInstance;
 
-    [SerializeField]
-    private AudioManager audioManagerInstance;
+    // TODO: Descomentar cuando el sistema de audio esté implementado
+    // [SerializeField]
+    // private AudioManager audioManagerInstance;
 
     [SerializeField]
     private CombatTransitionManager combatTransitionManagerInstance;
 
     [SerializeField]
     private UpgradeManager upgradeManagerInstance;
+
+    [SerializeField]
+    private GameStateManager gameStateManagerInstance;
+
+    [SerializeField]
+    private GameplayUIManager gameplayUIManagerInstance;
+
+    [SerializeField]
+    private LevelManager levelManagerInstance;
+
+    // TODO: Descomentar cuando el sistema de VFX esté implementado
+    // [SerializeField]
+    // private VFXManager vfxManagerInstance;
 
     protected override void Awake()
     {
@@ -36,14 +50,31 @@ public class GameLifetimeScope : LifetimeScope
         // Registramos TurnBasedCombatManager
         builder.RegisterComponent(turnBasedCombatManagerInstance).As<ICombatService>().AsSelf();
 
+        // TODO: Descomentar cuando el sistema de audio esté implementado
         // Registramos AudioManager
-        builder.RegisterComponent(audioManagerInstance).As<IAudioService>().AsSelf();
+        // builder.RegisterComponent(audioManagerInstance).As<IAudioService>().AsSelf();
 
         // Registramos CombatTransitionManager
         builder.RegisterComponent(combatTransitionManagerInstance).As<ICombatTransitionService>().AsSelf();
 
         // Registramos UpgradeManager
         builder.RegisterComponent(upgradeManagerInstance).As<IUpgradeService>().As<IUpgradeTarget>().AsSelf();
+
+        // Registramos GameEventBus como Singleton
+        builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
+
+        // Registramos GameStateManager
+        builder.RegisterComponent(gameStateManagerInstance).As<IGameStateService>().AsSelf();
+
+        // Registramos GameplayUIManager
+        builder.RegisterComponent(gameplayUIManagerInstance).As<IGameplayUIService>().AsSelf();
+
+        // Registramos LevelManager
+        builder.RegisterComponent(levelManagerInstance).As<ILevelService>().AsSelf();
+
+        // TODO: Descomentar cuando el sistema de VFX esté implementado
+        // Registramos VFXManager
+        // builder.RegisterComponent(vfxManagerInstance).As<IVFXService>().AsSelf();
 
         // --- Componentes en la jerarquía ---
         builder.RegisterComponentInHierarchy<GameInitializer>();

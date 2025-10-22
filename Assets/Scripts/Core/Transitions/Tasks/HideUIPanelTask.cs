@@ -18,7 +18,16 @@ public class HideUIPanelTask : TransitionTask
             yield break;
         }
 
-        ServiceLocator.Get<IUIManager>()?.HidePanel(panelAddress);
+        var uiManager = context.GetFromContext<IUIManager>("UIManager");
+        if (uiManager != null)
+        {
+            uiManager.HidePanel(panelAddress);
+        }
+        else
+        {
+            GameLog.LogError("HideUIPanelTask: IUIManager not found in TransitionContext.");
+        }
+        
         yield break;
     }
 }

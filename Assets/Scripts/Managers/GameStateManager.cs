@@ -7,11 +7,6 @@ using System;
 /// </summary>
 public class GameStateManager : MonoBehaviour, IGameStateService
 {
-    // Private singleton instance. Access should be through the ServiceLocator.
-    private static GameStateManager Instance { get; set; }
-
-    // --- IGameStateService Implementation ---
-
     public GameState CurrentState { get; private set; }
 
     public event Action OnCombatStarted;
@@ -21,29 +16,8 @@ public class GameStateManager : MonoBehaviour, IGameStateService
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        // Register this instance as the IGameStateService
-        ServiceLocator.Register<IGameStateService>(this);
-
         // The game always starts in Exploration mode.
         CurrentState = GameState.Exploration;
-    }
-
-    private void OnDestroy()
-    {
-        // Unregister the service if this is the instance being destroyed.
-        if (Instance == this)
-        {
-            ServiceLocator.Unregister<IGameStateService>();
-            Instance = null;
-        }
     }
 
     // --- Public Methods (from Interface) ---

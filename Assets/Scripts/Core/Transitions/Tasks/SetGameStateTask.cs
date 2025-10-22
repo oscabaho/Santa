@@ -13,17 +13,14 @@ public class SetGameStateTask : TransitionTask
 
     public override IEnumerator Execute(TransitionContext context)
     {
-        // This is a placeholder for your actual game state service interface.
-        // You should have an interface like this for managing game state.
-        // Example: public interface IGameStateService { void SetState(GameState state); }
-        var gameStateService = ServiceLocator.Get<IGameStateService>();
+        var gameStateService = context.GetFromContext<IGameStateService>("GameStateService");
         if (gameStateService != null)
         {
             gameStateService.SetState(newGameState);
         }
         else
         {
-            GameLog.LogWarning("SetGameStateTask: IGameStateService not found in ServiceLocator.");
+            GameLog.LogWarning("SetGameStateTask: IGameStateService not found in TransitionContext.");
         }
         yield break;
     }

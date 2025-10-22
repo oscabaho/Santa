@@ -7,24 +7,9 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
     // A "queued" or "buffered" state for the button, in case ShowActionButton is called before the button is registered.
     private bool? _queuedShowState = null;
 
-    private void Awake()
-    {
-        ServiceLocator.Register<IGameplayUIService>(this);
-    }
-
     private void Start()
     {
         // The button will now register itself. We can add a check here later if needed.
-    }
-
-    private void OnDestroy()
-    {
-        // Ensure we only unregister if this instance is the one registered
-        var registeredService = ServiceLocator.Get<IGameplayUIService>();
-        if ((Object)registeredService == this)
-        {
-            ServiceLocator.Unregister<IGameplayUIService>();
-        }
     }
 
     public void RegisterActionButton(GameObject button)

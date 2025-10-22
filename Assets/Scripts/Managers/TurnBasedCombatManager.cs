@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using VContainer;
+using VContainer.Unity;
 
 /// <summary>
 /// Manages the turn-based combat flow, delegating state storage to a CombatState object.
@@ -42,7 +43,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public static bool CombatIsInitialized { get; private set; } = false;
 
     [Inject]
-    public void Construct([InjectOptional] IUpgradeService upgradeService, [InjectOptional] ICombatTransitionService combatTransitionService)
+    public void Construct(IUpgradeService upgradeService = null, ICombatTransitionService combatTransitionService = null)
     {
         _upgradeService = upgradeService;
         _combatTransitionService = combatTransitionService;

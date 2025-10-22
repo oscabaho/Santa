@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 
 /// <summary>
 /// Desactiva el GameObject cuando la vida llega a 0 y notifica al EventBus.
@@ -7,6 +8,13 @@ using UnityEngine;
 public class DieOnZeroHealth : MonoBehaviour
 {
     private HealthComponentBehaviour _health;
+    private IEventBus _eventBus;
+
+    [Inject]
+    public void Construct(IEventBus eventBus)
+    {
+        _eventBus = eventBus;
+    }
 
     private void Awake()
     {
@@ -29,8 +37,8 @@ public class DieOnZeroHealth : MonoBehaviour
     {
         if (current <= 0)
         {
-            // Publicar evento global
-            ServiceLocator.Get<IEventBus>()?.Publish(new CharacterDeathEvent(gameObject));
+            // Publicar evento global usando el IEventBus inyectado
+            _eventBus?.Publish(new CharacterDeathEvent(gameObject));
 
             // Desactivar el objeto para que TurnBasedCombatManager lo considere como "muerto"
             gameObject.SetActive(false);

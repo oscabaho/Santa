@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Linq;
 using TMPro;
 using System.Collections.Generic;
+using VContainer;
 
 /// <summary>
 /// Manages the combat UI, including player stats display, action buttons, and target selection.

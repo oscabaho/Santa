@@ -22,15 +22,6 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
         ApplyPlatformSpecificSettings();
     }
 
-    private void OnDestroy()
-    {
-        // Unregister from the Service Locator when destroyed
-        if (_instance == this)
-        {
-            ServiceLocator.Unregister<IGraphicsSettingsService>();
-        }
-    }
-
     private void ApplyPlatformSpecificSettings()
     {
 #if UNITY_STANDALONE
