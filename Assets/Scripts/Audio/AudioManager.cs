@@ -13,8 +13,6 @@ public class AudioManager : MonoBehaviour, IAudioService
     public const string MusicVolumeKey = "MusicVolume";
     public const string SfxVolumeKey = "SFXVolume";
 
-    private static AudioManager Instance { get; set; }
-
     [Header("Pool Configuration")]
     [SerializeField] private PooledAudioSource audioSourcePrefab;
     [SerializeField] private int defaultPoolSize = 20;
@@ -31,16 +29,7 @@ public class AudioManager : MonoBehaviour, IAudioService
 
     private void Awake()
     {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        // Register this instance as the audio service for decoupled access
-        ServiceLocator.Register<IAudioService>(this);
 
         if (audioSourcePrefab == null)
         {
@@ -193,12 +182,4 @@ public class AudioManager : MonoBehaviour, IAudioService
         Destroy(pooledSource.gameObject);
     }
     #endregion
-
-    private void OnDestroy()
-    {
-        var registered = ServiceLocator.Get<IAudioService>();
-        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
-            ServiceLocator.Unregister<IAudioService>();
-        if (Instance == this) Instance = null;
-    }
 }

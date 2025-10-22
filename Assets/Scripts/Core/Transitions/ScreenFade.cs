@@ -3,42 +3,15 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Helper MonoBehaviour singleton to manage the fade overlay canvas.
+/// Helper MonoBehaviour to manage the fade overlay canvas.
 /// </summary>
 public class ScreenFade : MonoBehaviour
 {
-    private static ScreenFade _instance;
     private Image _overlayImage;
-
-    public static ScreenFade Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                // Check if an instance exists in the scene
-                _instance = FindFirstObjectByType<ScreenFade>();
-
-                // If not, create a new one
-                if (_instance == null)
-                {
-                    var go = new GameObject("__TransitionOverlay");
-                    _instance = go.AddComponent<ScreenFade>();
-                }
-            }
-            return _instance;
-        }
-    }
 
     private void Awake()
     {
-        // Singleton pattern
-        if (_instance != null && _instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        _instance = this;
+        // We still want this to persist across scenes
         DontDestroyOnLoad(gameObject);
 
         // Set up the canvas and image

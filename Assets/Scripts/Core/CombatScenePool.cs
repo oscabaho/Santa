@@ -12,20 +12,6 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 /// </summary>
 public class CombatScenePool : MonoBehaviour
 {
-    private static CombatScenePool _instance;
-    public static CombatScenePool Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                var go = new GameObject("__CombatScenePool");
-                DontDestroyOnLoad(go);
-                _instance = go.AddComponent<CombatScenePool>();
-            }
-            return _instance;
-        }
-    }
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
         private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();

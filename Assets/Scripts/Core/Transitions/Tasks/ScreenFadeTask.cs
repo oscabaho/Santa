@@ -20,10 +20,17 @@ public class ScreenFadeTask : TransitionTask
 
     public override IEnumerator Execute(TransitionContext context)
     {
+        var screenFade = context.GetFromContext<ScreenFade>("ScreenFade");
+        if (screenFade == null)
+        {
+            GameLog.LogError("ScreenFadeTask: ScreenFade not found in context.");
+            yield break;
+        }
+
         // Fade Out is to a color (transparent to solid)
         // Fade In is from a color (solid to transparent)
         float fromAlpha = (direction == FadeDirection.Out) ? 0f : 1f;
         float toAlpha = (direction == FadeDirection.Out) ? 1f : 0f;
-        yield return ScreenFade.Instance.Fade(fromAlpha, toAlpha, duration, fadeColor);
+        yield return screenFade.Fade(fromAlpha, toAlpha, duration, fadeColor);
     }
 }

@@ -9,12 +9,6 @@ public class UIManager : MonoBehaviour, IUIManager
 {
     private readonly Dictionary<string, GameObject> _addressToInstanceMap = new Dictionary<string, GameObject>();
 
-    private void Awake()
-    {
-        // This is a singleton, but we are using ServiceLocator for access.
-        ServiceLocator.Register<IUIManager>(this);
-    }
-
     private void OnDestroy()
     {
         // Release all instantiated panels
@@ -23,8 +17,6 @@ public class UIManager : MonoBehaviour, IUIManager
             Addressables.ReleaseInstance(panelInstance);
         }
         _addressToInstanceMap.Clear();
-
-        ServiceLocator.Unregister<IUIManager>();
     }
 
     public async Task ShowPanel(string panelAddress)

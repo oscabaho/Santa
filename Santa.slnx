@@ -19,6 +19,7 @@
   <Project Path="Unity.VisualScripting.Flow.Editor.csproj" />
   <Project Path="Unity.ProBuilder.Csg.csproj" />
   <Project Path="Unity.Animation.Rigging.csproj" />
+  <Project Path="VContainer.csproj" />
   <Project Path="Unity.Recorder.Editor.csproj" />
   <Project Path="Unity.VisualStudio.Editor.csproj" />
   <Project Path="Unity.Polybrush.csproj" />
@@ -44,6 +45,7 @@
   <Project Path="Unity.Addressables.Android.Editor.csproj" />
   <Project Path="Unity.Sequences.csproj" />
   <Project Path="Unity.Burst.Editor.csproj" />
+  <Project Path="VContainer.Editor.csproj" />
   <Project Path="Unity.Rider.Editor.csproj" />
   <Project Path="Unity.VisualScripting.State.csproj" />
   <Project Path="Unity.AI.Navigation.Updater.csproj" />

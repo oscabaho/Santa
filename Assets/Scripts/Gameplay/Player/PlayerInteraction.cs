@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 
 // It is expected that this component is attached to the same GameObject as the Movement script.
 // It requires an InputReader to be assigned in the inspector.
@@ -9,12 +10,18 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] private InputReader inputReader;
 
     private CombatTrigger _currentCombatTrigger;
+    private IGameplayUIService _gameplayUIService;
+    private IObjectResolver _resolver;
+
+    [Inject]
+    public void Construct(IGameplayUIService gameplayUIService, IObjectResolver resolver)
+    {
+        _gameplayUIService = gameplayUIService;
+        _resolver = resolver;
+    }
 
     private void Awake()
     {
-        // The GameLog class is not defined in the provided context.
-        // Assuming it's a custom static class for logging.
-        // If not, this line will cause a compilation error.
         if (inputReader == null)
         {
             GameLog.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
@@ -49,9 +56,9 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (other.TryGetComponent<CombatTrigger>(out var combatTrigger))
         {
+            _resolver.Inject(combatTrigger);
             _currentCombatTrigger = combatTrigger;
-            // Assuming ServiceLocator and IGameplayUIService are defined and accessible.
-            ServiceLocator.Get<IGameplayUIService>()?.ShowActionButton(true);
+            _gameplayUIService?.ShowActionButton(true);
         }
     }
 
@@ -60,7 +67,7 @@ public class PlayerInteraction : MonoBehaviour
         if (other.TryGetComponent<CombatTrigger>(out var combatTrigger) && combatTrigger == _currentCombatTrigger)
         {
             _currentCombatTrigger = null;
-            ServiceLocator.Get<IGameplayUIService>()?.ShowActionButton(false);
+            _gameplayUIService?.ShowActionButton(false);
         }
     }
 }

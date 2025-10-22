@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 
 /// <summary>
 /// This component starts a turn-based combat encounter when the player interacts with it.
@@ -13,6 +14,15 @@ public class CombatTrigger : MonoBehaviour
     private string _activeCombatPoolKey;
     private IGameStateService _gameStateService;
     private ICombatTransitionService _combatTransitionService;
+    private CombatScenePool _combatScenePool;
+
+    [Inject]
+    public void Construct(IGameStateService gameStateService, ICombatTransitionService combatTransitionService, CombatScenePool combatScenePool)
+    {
+        _gameStateService = gameStateService;
+        _combatTransitionService = combatTransitionService;
+        _combatScenePool = combatScenePool;
+    }
 
     private void Awake()
     {
@@ -28,18 +38,11 @@ public class CombatTrigger : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    private void Start()
-    {
-        // Cache services that we'll use when starting combat
-        _gameStateService = ServiceLocator.Get<IGameStateService>();
-    }
-
     public async void StartCombatInteraction()
     {
         if (_combatHasBeenTriggered) return;
         _combatHasBeenTriggered = true;
 
-        _combatTransitionService = ServiceLocator.Get<ICombatTransitionService>();
         if (_combatTransitionService == null)
         {
             GameLog.LogError("CombatTrigger: ICombatTransitionService not found when starting combat.");
@@ -50,8 +53,7 @@ public class CombatTrigger : MonoBehaviour
         GameLog.Log("Player has interacted with a combat trigger.");
 
         var poolKey = _encounter.GetPoolKey();
-        var pool = CombatScenePool.Instance;
-        if (pool == null) 
+        if (_combatScenePool == null) 
         {
             GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
             _combatHasBeenTriggered = false; // Allow retry
@@ -60,7 +62,7 @@ public class CombatTrigger : MonoBehaviour
 
         try
         {
-            _activeCombatInstance = await pool.GetInstanceAsync(poolKey, _encounter);
+            _activeCombatInstance = await _combatScenePool.GetInstanceAsync(poolKey, _encounter);
             if (_activeCombatInstance == null)
             {
                 GameLog.LogError("Failed to get instance from pool.");
@@ -90,7 +92,7 @@ public class CombatTrigger : MonoBehaviour
         // Release the instance back to the pool
         if (_activeCombatInstance != null && !string.IsNullOrEmpty(_activeCombatPoolKey))
         {
-            CombatScenePool.Instance.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance);
+            _combatScenePool.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance);
         }
 
         // Unsubscribe

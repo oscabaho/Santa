@@ -12,6 +12,9 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     [Tooltip("Sequence of tasks to execute when ending combat.")]
     [SerializeField] private TransitionSequence endCombatSequence;
 
+    // --- Injected References ---
+    private ScreenFade _screenFade;
+
     // --- Discovered References ---
     private GameObject _explorationCamera;
     private GameObject _explorationPlayer;
@@ -20,11 +23,14 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private GameObject _currentCombatSceneParent;
     private TransitionContext _currentContext;
 
+    [Inject]
+    public void Construct(ScreenFade screenFade)
+    {
+        _screenFade = screenFade;
+    }
+
     private void Awake()
     {
-        // Register service interface for decoupled access
-        ServiceLocator.Register<ICombatTransitionService>(this);
-
         // Discover persistent exploration objects
         _explorationPlayer = FindFirstObjectByType<ExplorationPlayerIdentifier>()?.gameObject;
         _explorationCamera = Camera.main?.gameObject;
@@ -39,13 +45,6 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             GameLog.LogError("CombatTransitionManager: Could not find the main camera.", this);
             enabled = false;
         }
-    }
-
-    private void OnDestroy()
-    {
-        var registered = ServiceLocator.Get<ICombatTransitionService>();
-        if (registered as Object == this)
-            ServiceLocator.Unregister<ICombatTransitionService>();
     }
 
     public void StartCombat(GameObject combatSceneParent)
@@ -66,6 +65,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentContext.AddTarget(TargetId.ExplorationPlayer, _explorationPlayer);
         _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
         _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
+        _currentContext.AddToContext("ScreenFade", _screenFade);
         
         if (startCombatSequence != null)
         {

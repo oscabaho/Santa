@@ -7,6 +7,7 @@ using UnityEngine;
 public class TransitionContext
 {
     private readonly Dictionary<TargetId, GameObject> _targets = new Dictionary<TargetId, GameObject>();
+    private readonly Dictionary<string, object> _customContext = new Dictionary<string, object>();
 
     public void AddTarget(TargetId id, GameObject obj)
     {
@@ -20,5 +21,16 @@ public class TransitionContext
     {
         _targets.TryGetValue(id, out var target);
         return target;
+    }
+
+    public void AddToContext(string key, object value)
+    {
+        _customContext[key] = value;
+    }
+
+    public T GetFromContext<T>(string key) where T : class
+    {
+        _customContext.TryGetValue(key, out var value);
+        return value as T;
     }
 }
