@@ -24,7 +24,7 @@ public class GameInitializer : MonoBehaviour
         }
         else
         {
-            Debug.LogError("GameInitializer: IUIManager service not found. Make sure UIManager has registered itself with the ServiceLocator.");
+            GameLog.LogError("GameInitializer: IUIManager service not found. Make sure UIManager has registered itself with the ServiceLocator.");
         }
     }
 }

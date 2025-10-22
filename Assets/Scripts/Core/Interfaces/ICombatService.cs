@@ -8,6 +8,7 @@ using UnityEngine;
 public enum CombatPhase
 {
     Selection,  // Players and AI are choosing their actions
+    Targeting,  // The player is actively selecting a target
     Execution,  // Actions are being resolved in order
     Victory,    // The player has won the combat
     Defeat      // The player has lost the combat

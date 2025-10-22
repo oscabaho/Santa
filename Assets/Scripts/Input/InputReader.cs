@@ -22,6 +22,7 @@ public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
     private void OnDisable()
     {
         _actionMap.Player.Disable();
+        _actionMap.UI.Disable();
     }
 
     public void OnMove(InputAction.CallbackContext context)
