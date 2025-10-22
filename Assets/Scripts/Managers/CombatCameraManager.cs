@@ -23,8 +23,8 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_combatService != null)
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
-            // Set initial camera based on current phase, in case we missed the initial event
-            HandlePhaseChanged(_combatService.CurrentPhase);
+            // Always start with main camera as default
+            SwitchToMainCamera();
         }
         else
         {
@@ -43,19 +43,14 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 
     private void HandlePhaseChanged(CombatPhase phase)
     {
-        switch (phase)
+        if (phase == CombatPhase.Targeting)
         {
-            case CombatPhase.Targeting:
-                SwitchToTargetSelectionCamera();
-                break;
-
-            case CombatPhase.Selection:
-            case CombatPhase.Execution:
-            case CombatPhase.Victory:
-            case CombatPhase.Defeat:
-            default:
-                SwitchToMainCamera();
-                break;
+            SwitchToTargetSelectionCamera();
+        }
+        else
+        {
+            // In any other phase, always use main camera
+            SwitchToMainCamera();
         }
     }
 
@@ -64,6 +59,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_mainCombatCamera != null)
         {
             _mainCombatCamera.Priority = ACTIVE_PRIORITY;
+            _mainCombatCamera.gameObject.SetActive(true);
         }
         else
         {
@@ -73,11 +69,14 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_targetSelectionCamera != null)
         {
             _targetSelectionCamera.Priority = INACTIVE_PRIORITY;
+            _targetSelectionCamera.gameObject.SetActive(false);
         }
         else
         {
             GameLog.LogError("TargetSelectionCamera is not assigned in CombatCameraManager.");
         }
+
+        GameLog.Log($"Switched to MAIN camera. Main(active={_mainCombatCamera?.gameObject.activeSelf}, prio={_mainCombatCamera?.Priority}), Target(active={_targetSelectionCamera?.gameObject.activeSelf}, prio={_targetSelectionCamera?.Priority})");
     }
 
     public void SwitchToTargetSelectionCamera()
@@ -85,6 +84,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_targetSelectionCamera != null)
         {
             _targetSelectionCamera.Priority = ACTIVE_PRIORITY;
+            _targetSelectionCamera.gameObject.SetActive(true);
         }
         else
         {
@@ -94,10 +94,13 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_mainCombatCamera != null)
         {
             _mainCombatCamera.Priority = INACTIVE_PRIORITY;
+            _mainCombatCamera.gameObject.SetActive(false);
         }
         else
         {
             GameLog.LogError("MainCombatCamera is not assigned in CombatCameraManager.");
         }
+
+        GameLog.Log($"Switched to TARGET-SELECTION camera. Target(active={_targetSelectionCamera?.gameObject.activeSelf}, prio={_targetSelectionCamera?.Priority}), Main(active={_mainCombatCamera?.gameObject.activeSelf}, prio={_mainCombatCamera?.Priority})");
     }
 }

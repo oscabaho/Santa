@@ -15,7 +15,7 @@ public class ShowUIPanelTask : TransitionTask
     {
         if (panelReference == null || !panelReference.RuntimeKeyIsValid())
         {
-            Debug.LogError("ShowUIPanelTask: Panel Reference is not valid.");
+            GameLog.LogError("ShowUIPanelTask: Panel Reference is not valid.");
             yield break;
         }
 

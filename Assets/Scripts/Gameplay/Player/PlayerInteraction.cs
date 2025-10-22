@@ -17,7 +17,7 @@ public class PlayerInteraction : MonoBehaviour
         // If not, this line will cause a compilation error.
         if (inputReader == null)
         {
-            Debug.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
+            GameLog.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
         }
     }
 

@@ -7,19 +7,19 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public class UIPanel : MonoBehaviour
 {
-    private CanvasGroup _canvasGroup;
+    protected CanvasGroup CanvasGroup { get; private set; }
 
     /// <summary>
     /// Ensures the CanvasGroup component is cached.
     /// </summary>
     protected virtual void Awake()
     {
-        Debug.Log($"UIPanel.Awake() called for {gameObject.name}", gameObject);
-        _canvasGroup = GetComponent<CanvasGroup>();
-        if (_canvasGroup == null)
+        GameLog.Log($"UIPanel.Awake() called for {gameObject.name}", gameObject);
+        CanvasGroup = GetComponent<CanvasGroup>();
+        if (CanvasGroup == null)
         {
             // This should not happen due to [RequireComponent]
-            Debug.LogError($"UIPanel on {gameObject.name} requires a CanvasGroup component.", this);
+            GameLog.LogError($"UIPanel on {gameObject.name} requires a CanvasGroup component.", this);
         }
     }
 
@@ -29,25 +29,25 @@ public class UIPanel : MonoBehaviour
     /// </summary>
     public virtual void Show()
     {
-        Debug.Log($"UIPanel.Show() called for {gameObject.name}", gameObject);
+        GameLog.Log($"UIPanel.Show() called for {gameObject.name}", gameObject);
         gameObject.SetActive(true);
         
         // Ensure canvas group is fetched, as Awake might not have been called if the object was inactive.
-        if (_canvasGroup == null)
+        if (CanvasGroup == null)
         {
-            _canvasGroup = GetComponent<CanvasGroup>();
+            CanvasGroup = GetComponent<CanvasGroup>();
         }
 
-        if (_canvasGroup == null)
+        if (CanvasGroup == null)
         {
-            Debug.LogError($"UIPanel.Show() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
+            GameLog.LogError($"UIPanel.Show() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
             return;
         }
         
-        _canvasGroup.alpha = 1f;
-        _canvasGroup.interactable = true;
-        _canvasGroup.blocksRaycasts = true;
-        Debug.Log($"UIPanel.Show() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+        CanvasGroup.alpha = 1f;
+        CanvasGroup.interactable = true;
+        CanvasGroup.blocksRaycasts = true;
+        GameLog.Log($"UIPanel.Show() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
     }
 
     /// <summary>
@@ -56,23 +56,23 @@ public class UIPanel : MonoBehaviour
     /// </summary>
     public virtual void Hide()
      {
-        Debug.Log($"UIPanel.Hide() called for {gameObject.name}", gameObject);
+        GameLog.Log($"UIPanel.Hide() called for {gameObject.name}", gameObject);
         
-        if (_canvasGroup == null)
+        if (CanvasGroup == null)
         {
-            _canvasGroup = GetComponent<CanvasGroup>();
+            CanvasGroup = GetComponent<CanvasGroup>();
         }
 
-        if (_canvasGroup == null)
+        if (CanvasGroup == null)
         {
-            Debug.LogError($"UIPanel.Hide() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
+            GameLog.LogError($"UIPanel.Hide() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
             return;
         }
 
-        _canvasGroup.alpha = 0f;
-        _canvasGroup.interactable = false;
-        _canvasGroup.blocksRaycasts = false;
+        CanvasGroup.alpha = 0f;
+        CanvasGroup.interactable = false;
+        CanvasGroup.blocksRaycasts = false;
         gameObject.SetActive(false);
-        Debug.Log($"UIPanel.Hide() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+        GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
     }
 }

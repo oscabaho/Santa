@@ -14,7 +14,7 @@ public class SwitchUIPanelTask : TransitionTask
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
-            Debug.LogError("SwitchUIPanelTask: Panel Address is not valid.");
+            GameLog.LogError("SwitchUIPanelTask: Panel Address is not valid.");
             yield break;
         }
 

@@ -14,7 +14,7 @@ public class HideUIPanelTask : TransitionTask
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
-            Debug.LogError("HideUIPanelTask: Panel Address is not valid.");
+            GameLog.LogError("HideUIPanelTask: Panel Address is not valid.");
             yield break;
         }
 

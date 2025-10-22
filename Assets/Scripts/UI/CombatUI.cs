@@ -45,7 +45,7 @@ public class CombatUI : UIPanel
 
     protected override void Awake()
     {
-        GameLog.LogWarning("CombatUI.Awake called.");
+        GameLog.Log("CombatUI.Awake called.");
         base.Awake(); // Caches the CanvasGroup from UIPanel
 
         if (Instance != null && Instance != this)
@@ -68,7 +68,7 @@ public class CombatUI : UIPanel
 
     private void Start()
     {
-        GameLog.LogWarning("CombatUI.Start called.");
+        GameLog.Log("CombatUI.Start called.");
         if (ServiceLocator.TryGet(out _combatService))
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
@@ -101,9 +101,13 @@ public class CombatUI : UIPanel
         bool inSelection = newPhase == CombatPhase.Selection;
         actionButtonsPanel.SetActive(inSelection);
 
+        if (statusText != null && newPhase != CombatPhase.Targeting)
+        {
+            statusText.text = "";
+        }
+
         if (inSelection)
         {
-            GameLog.LogWarning($"Direct Attack Button interactable: {directAttackButton.interactable}");
             SubscribeToPlayerEvents();
             // If we return to selection phase, cancel any pending targeting
             if (_pendingAbility != null)
@@ -186,8 +190,15 @@ public class CombatUI : UIPanel
 
     private void RequestAbility(Ability ability)
     {
-        GameLog.LogWarning($"CombatUI.RequestAbility called with ability: {ability?.AbilityName ?? "NULL"}");
+        GameLog.Log($"CombatUI.RequestAbility called with ability: {ability?.AbilityName ?? "NULL"}");
         if (ability == null || _combatService == null) return;
+
+        // Only allow initiating abilities during the Selection phase
+        if (_combatService.CurrentPhase != CombatPhase.Selection)
+        {
+            GameLog.LogWarning($"Cannot request ability '{ability.AbilityName}': combat is not in Selection phase (current: {_combatService.CurrentPhase}).");
+            return;
+        }
 
         // If we are already waiting for a target, a button click should cancel targeting.
         if (_pendingAbility != null)
@@ -201,7 +212,16 @@ public class CombatUI : UIPanel
             // Enter targeting mode
             _pendingAbility = ability;
             ToggleActionButtons(false);
-            if (statusText != null) statusText.text = "Select a target";
+            if (statusText != null)
+            {
+                statusText.text = "Select a target";
+            }
+            // Make the entire UI panel non-blocking for raycasts
+            if (CanvasGroup != null) CanvasGroup.blocksRaycasts = false;
+
+            // Inform the combat manager that we're entering targeting so it can switch phase/camera
+            // and remember the pending ability on its side.
+            _combatService.SubmitPlayerAction(ability, null);
         }
         else
         {
@@ -212,14 +232,27 @@ public class CombatUI : UIPanel
 
     public void OnTargetSelected(GameObject target)
     {
-        GameLog.LogWarning($"CombatUI.OnTargetSelected called with target: {target?.name ?? "NULL"}");
+        GameLog.Log($"CombatUI.OnTargetSelected called with target: {target?.name ?? "NULL"}");
         if (_pendingAbility == null) return;
+        // Ensure the combat manager is in Targeting phase before submitting the selected target
+        if (_combatService == null || _combatService.CurrentPhase != CombatPhase.Targeting)
+        {
+            GameLog.LogError("Cannot submit target: CombatService not in Targeting phase or is null.");
+            // Cancel UI-side targeting to avoid stuck state
+            CancelTargetingMode();
+            return;
+        }
 
         _combatService.SubmitPlayerAction(_pendingAbility, target);
         
         // Exit targeting mode
         _pendingAbility = null;
-        if (statusText != null) statusText.text = "";
+        if (statusText != null)
+        {
+            statusText.text = "";
+        }
+        // Restore UI raycast blocking
+        if (CanvasGroup != null) CanvasGroup.blocksRaycasts = true;
         // Buttons will be re-enabled by the phase manager automatically
     }
 
@@ -227,7 +260,12 @@ public class CombatUI : UIPanel
     {
         _pendingAbility = null;
         ToggleActionButtons(true);
-        if (statusText != null) statusText.text = "";
+        if (statusText != null)
+        {
+            statusText.text = "";
+        }
+        // Restore UI raycast blocking
+        if (CanvasGroup != null) CanvasGroup.blocksRaycasts = true;
     }
 
     private void ToggleActionButtons(bool interactable)

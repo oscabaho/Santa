@@ -16,15 +16,7 @@ public class SpecialAttackAbility : Ability
 
     public override void Execute(List<GameObject> targets, GameObject caster)
     {
-        var energyComponent = caster.GetComponent<EnergyComponentBehaviour>();
-        if (energyComponent == null || !energyComponent.Energy.IsFull())
-        {
-            GameLog.Log("Not enough energy for Special Attack!");
-            return;
-        }
-
-    GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
-        energyComponent.Energy.UseSpecialAttack();
+        GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
 
         if (Random.value < _missChance)
         {
