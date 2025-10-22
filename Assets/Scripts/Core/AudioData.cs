@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -40,6 +41,7 @@ public class AudioData : ScriptableObject
     /// <summary>
     /// Reproduce este sonido como un sonido 2D.
     /// </summary>
+    [Obsolete("Use IAudioService.PlaySound2D(audioData) instead. This method relies on ServiceLocator which is being phased out.")]
     public void Play()
     {
         ServiceLocator.Get<IAudioService>()?.PlaySound2D(this);
@@ -48,6 +50,7 @@ public class AudioData : ScriptableObject
     /// <summary>
     /// Reproduce este sonido en una posición 3D específica.
     /// </summary>
+    [Obsolete("Use IAudioService.PlaySound3D(audioData, position) instead. This method relies on ServiceLocator which is being phased out.")]
     public void PlayAtPoint(Vector3 position)
     {
         ServiceLocator.Get<IAudioService>()?.PlaySound3D(this, position);
@@ -56,18 +59,18 @@ public class AudioData : ScriptableObject
     public AudioClip GetClip()
     {
         if (clips == null || clips.Length == 0) return null;
-        return clips[Random.Range(0, clips.Length)];
+        return clips[UnityEngine.Random.Range(0, clips.Length)];
     }
 
     public float GetVolume()
     {
         if (volumeVariation <= 0f) return volume;
-        return volume * (1 + Random.Range(-volumeVariation / 2f, volumeVariation / 2f));
+        return volume * (1 + UnityEngine.Random.Range(-volumeVariation / 2f, volumeVariation / 2f));
     }
 
     public float GetPitch()
     {
         if (pitchVariation <= 0f) return pitch;
-        return pitch * (1 + Random.Range(-pitchVariation / 2f, pitchVariation / 2f));
+        return pitch * (1 + UnityEngine.Random.Range(-pitchVariation / 2f, pitchVariation / 2f));
     }
 }

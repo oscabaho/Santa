@@ -2,11 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
+using VContainer;
 
 public class VFXManager : MonoBehaviour, IVFXService
 {
-    private static VFXManager Instance { get; set; }
-    
     [System.Serializable]
     public class VfxPoolConfig
     {
@@ -14,28 +13,36 @@ public class VFXManager : MonoBehaviour, IVFXService
         public GameObject Prefab;
         public int InitialSize = 10;
     }
-    
+
     [Header("VFX Pool Configuration")]
     [SerializeField] private List<VfxPoolConfig> _vfxPoolsConfig;
-    
+
     private Dictionary<string, IObjectPool<PooledParticleSystem>> _vfxPools;
-    
+    private IEventBus _eventBus;
+
+    [Inject]
+    public void Construct(IEventBus eventBus)
+    {
+        _eventBus = eventBus;
+    }
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            InitializePools();
-            ServiceLocator.Register<IVFXService>(this);
+        InitializePools();
+    }
 
-            var eventBus = ServiceLocator.Get<IEventBus>();
-            eventBus?.Subscribe<HitboxImpactEvent>(OnHitboxImpact);
-            eventBus?.Subscribe<PlayVFXRequest>(OnPlayVFXRequest);
+    private void Start()
+    {
+        _eventBus.Subscribe<HitboxImpactEvent>(OnHitboxImpact);
+        _eventBus.Subscribe<PlayVFXRequest>(OnPlayVFXRequest);
+    }
+
+    private void OnDestroy()
+    {
+        if (_eventBus != null)
+        {
+            _eventBus.Unsubscribe<HitboxImpactEvent>(OnHitboxImpact);
+            _eventBus.Unsubscribe<PlayVFXRequest>(OnPlayVFXRequest);
         }
     }
 
@@ -68,24 +75,6 @@ public class VFXManager : MonoBehaviour, IVFXService
         }
     }
 
-    private void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            var registered = ServiceLocator.Get<IVFXService>();
-            if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
-                ServiceLocator.Unregister<IVFXService>();
-
-            var eventBus = ServiceLocator.Get<IEventBus>();
-            if (eventBus != null)
-            {
-                eventBus.Unsubscribe<HitboxImpactEvent>(OnHitboxImpact);
-                eventBus.Unsubscribe<PlayVFXRequest>(OnPlayVFXRequest);
-            }
-            Instance = null;
-        }
-    }
-
     public GameObject PlayEffect(string key, Vector3 position, Quaternion? rotation = null)
     {
         if (!_vfxPools.TryGetValue(key, out var pool))
@@ -93,13 +82,13 @@ public class VFXManager : MonoBehaviour, IVFXService
             GameLog.LogWarning($"VFXManager: No pool found for key '{key}'.");
             return null;
         }
-        
+
         var vfxInstance = pool.Get();
         if (vfxInstance == null) return null; // Should not happen with a properly configured pool
 
         vfxInstance.transform.position = position;
         vfxInstance.transform.rotation = rotation ?? Quaternion.identity;
-        
+
         return vfxInstance.gameObject;
     }
 
@@ -150,12 +139,12 @@ public class VFXManager : MonoBehaviour, IVFXService
     private IEnumerator FadeRoutine(GameObject targetObject, float duration)
     {
         yield return new WaitForSeconds(duration);
-        
+
         if (targetObject != null)
         {
             // This event could be used by other systems to know when the VFX is done.
-            ServiceLocator.Get<IEventBus>()?.Publish(new VFXCompletedEvent(targetObject));
-            
+            _eventBus?.Publish(new VFXCompletedEvent(targetObject));
+
             // If the object has a PooledParticleSystem component, its OnEnable coroutine will handle
             // returning it to the pool. If not, we just deactivate it.
             targetObject.SetActive(false);

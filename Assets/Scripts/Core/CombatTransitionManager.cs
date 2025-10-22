@@ -1,4 +1,5 @@
 using UnityEngine;
+using VContainer;
 
 /// <summary>
 /// Manages the visual transition between the exploration state and the combat state.
@@ -14,6 +15,8 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
     // --- Injected References ---
     private ScreenFade _screenFade;
+    private IUIManager _uiManager;
+    private IGameStateService _gameStateService;
 
     // --- Discovered References ---
     private GameObject _explorationCamera;
@@ -24,9 +27,11 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private TransitionContext _currentContext;
 
     [Inject]
-    public void Construct(ScreenFade screenFade)
+    public void Construct(ScreenFade screenFade, IUIManager uiManager, IGameStateService gameStateService)
     {
         _screenFade = screenFade;
+        _uiManager = uiManager;
+        _gameStateService = gameStateService;
     }
 
     private void Awake()
@@ -66,6 +71,8 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
         _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
         _currentContext.AddToContext("ScreenFade", _screenFade);
+        _currentContext.AddToContext("UIManager", _uiManager);
+        _currentContext.AddToContext("GameStateService", _gameStateService);
         
         if (startCombatSequence != null)
         {

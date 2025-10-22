@@ -18,10 +18,18 @@ public class SwitchUIPanelTask : TransitionTask
             yield break;
         }
 
-        var task = ServiceLocator.Get<IUIManager>()?.SwitchToPanel(panelAddress);
-        if (task != null)
+        var uiManager = context.GetFromContext<IUIManager>("UIManager");
+        if (uiManager != null)
         {
-            yield return new WaitUntil(() => task.IsCompleted);
+            var task = uiManager.SwitchToPanel(panelAddress);
+            if (task != null)
+            {
+                yield return new WaitUntil(() => task.IsCompleted);
+            }
+        }
+        else
+        {
+            GameLog.LogError("SwitchUIPanelTask: IUIManager not found in TransitionContext.");
         }
     }
 }

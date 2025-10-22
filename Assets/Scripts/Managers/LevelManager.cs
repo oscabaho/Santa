@@ -6,40 +6,17 @@ using System.Collections.Generic;
 /// </summary>
 public class LevelManager : MonoBehaviour, ILevelService
 {
-    private static LevelManager Instance { get; set; }
-
-    [Header("Level Configuration")]
-    [Tooltip("The list of all levels/areas in the game, in order.")]
+    [Header("Level Data")]
+    [Tooltip("List of all levels in the game.")]
     [SerializeField] private List<LevelData> levels;
 
-    [Header("Scene References")]
-    [Tooltip("A parent transform for the instantiated level visuals to keep the hierarchy clean.")]
+    [Header("References")]
+    [Tooltip("Optional parent transform for level visuals. If null, uses this GameObject's transform.")]
     [SerializeField] private Transform levelVisualsParent;
 
     private int currentLevelIndex = -1;
     private readonly List<GameObject> _activeGentrifiedVisuals = new List<GameObject>();
     private readonly List<GameObject> _activeLiberatedVisuals = new List<GameObject>();
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-            ServiceLocator.Register<ILevelService>(this);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        var registered = ServiceLocator.Get<ILevelService>();
-        if ((UnityEngine.Object)registered == (UnityEngine.Object)this)
-            ServiceLocator.Unregister<ILevelService>();
-        if (Instance == this) Instance = null;
-    }
 
     private void Start()
     {
