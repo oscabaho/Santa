@@ -9,24 +9,38 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     [SerializeField] private CinemachineCamera _targetSelectionCamera;
 
     private ICombatService _combatService;
+    private IGameStateService _gameStateService;
+    private bool _inCombat = false;
 
     private const int ACTIVE_PRIORITY = 100;
     private const int INACTIVE_PRIORITY = 0;
 
     [Inject]
-    public void Construct(ICombatService combatService)
+    public void Construct(ICombatService combatService, IGameStateService gameStateService)
     {
         _combatService = combatService;
+        _gameStateService = gameStateService;
         if (_combatService != null)
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
-            // Always start with main camera as default
-            SwitchToMainCamera();
         }
         else
         {
             GameLog.LogError("CombatCameraManager could not receive ICombatService via injection.");
         }
+
+        if (_gameStateService != null)
+        {
+            _gameStateService.OnCombatStarted += HandleCombatStarted;
+            _gameStateService.OnCombatEnded += HandleCombatEnded;
+        }
+        else
+        {
+            GameLog.LogError("CombatCameraManager could not receive IGameStateService via injection.");
+        }
+
+        // Start with both combat cameras inactive during Exploration
+        SetBothCamerasInactive();
     }
 
     private void OnDestroy()
@@ -35,10 +49,22 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         {
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
         }
+
+        if (_gameStateService != null)
+        {
+            _gameStateService.OnCombatStarted -= HandleCombatStarted;
+            _gameStateService.OnCombatEnded -= HandleCombatEnded;
+        }
     }
 
     private void HandlePhaseChanged(CombatPhase phase)
     {
+        if (!_inCombat)
+        {
+            // Ignore phase changes when not in combat (defensive)
+            return;
+        }
+
         if (phase == CombatPhase.Targeting)
         {
             SwitchToTargetSelectionCamera();
@@ -48,6 +74,18 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             // In any other phase, always use main camera
             SwitchToMainCamera();
         }
+    }
+
+    private void HandleCombatStarted()
+    {
+        _inCombat = true;
+        SwitchToMainCamera();
+    }
+
+    private void HandleCombatEnded()
+    {
+        _inCombat = false;
+        SetBothCamerasInactive();
     }
 
     public void SwitchToMainCamera()
@@ -98,5 +136,20 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         }
 
         GameLog.Log($"Switched to TARGET-SELECTION camera. Target(active={_targetSelectionCamera?.gameObject.activeSelf}, prio={_targetSelectionCamera?.Priority}), Main(active={_mainCombatCamera?.gameObject.activeSelf}, prio={_mainCombatCamera?.Priority})");
+    }
+
+    private void SetBothCamerasInactive()
+    {
+        if (_mainCombatCamera != null)
+        {
+            _mainCombatCamera.Priority = INACTIVE_PRIORITY;
+            _mainCombatCamera.gameObject.SetActive(false);
+        }
+        if (_targetSelectionCamera != null)
+        {
+            _targetSelectionCamera.Priority = INACTIVE_PRIORITY;
+            _targetSelectionCamera.gameObject.SetActive(false);
+        }
+        GameLog.Log("Combat cameras set to INACTIVE (Exploration mode).");
     }
 }
