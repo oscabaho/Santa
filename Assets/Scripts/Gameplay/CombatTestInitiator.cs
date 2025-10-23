@@ -9,6 +9,10 @@ using VContainer;
 /// </summary>
 public class CombatTestInitiator : MonoBehaviour
 {
+    [Header("Testing Options")]
+    [Tooltip("If enabled, combat will auto-start on Play using scene objects tagged as Player/Enemy. Leave OFF when testing Exploration.")]
+    [SerializeField] private bool _autoStartOnPlay = false;
+
     [SerializeField] private string _playerTag = "Player";
     [SerializeField] private string _enemyTag = "Enemy";
 
@@ -22,6 +26,12 @@ public class CombatTestInitiator : MonoBehaviour
 
     void Start()
     {
+        // Allow using TestScene for Exploration: do nothing unless explicitly enabled
+        if (!_autoStartOnPlay)
+        {
+            return;
+        }
+
         if (_combatService == null)
         {
             GameLog.LogError("CombatTestInitiator could not find ICombatService. Make sure it is registered in a LifetimeScope.");
