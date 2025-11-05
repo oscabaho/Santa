@@ -1,3 +1,5 @@
+// This helper is editor-only to avoid shipping auto-combat in builds.
+#if UNITY_EDITOR
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,3 +66,4 @@ public class CombatTestInitiator : MonoBehaviour
         _combatService.StartCombat(participants);
     }
 }
+#endif

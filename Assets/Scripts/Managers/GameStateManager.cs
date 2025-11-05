@@ -46,31 +46,4 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         OnCombatEnded?.Invoke();
     }
 
-    /// <summary>
-    /// Sets the game state. Fires combat start/end events when transitioning into or out of Combat.
-    /// Implements IGameStateService.SetState.
-    /// </summary>
-    public void SetState(GameState state)
-    {
-        if (CurrentState == state) return;
-
-        var previous = CurrentState;
-
-        if (state == GameState.Combat)
-        {
-            StartCombat();
-            return;
-        }
-
-        if (previous == GameState.Combat)
-        {
-            CurrentState = state;
-            GameLog.Log($"Game State changed to: {state}");
-            OnCombatEnded?.Invoke();
-            return;
-        }
-
-        CurrentState = state;
-        GameLog.Log($"Game State changed to: {state}");
-    }
 }

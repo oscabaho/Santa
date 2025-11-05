@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using VContainer;
 
@@ -25,6 +26,8 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     // --- Runtime State ---
     private GameObject _currentCombatSceneParent;
     private TransitionContext _currentContext;
+    private Coroutine _startSequenceRoutine;
+    private Coroutine _endSequenceRoutine;
 
     [Inject]
     public void Construct(ScreenFade screenFade, IUIManager uiManager, IGameStateService gameStateService)
@@ -74,10 +77,17 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentContext.AddToContext("UIManager", _uiManager);
         _currentContext.AddToContext("GameStateService", _gameStateService);
         
-        if (startCombatSequence != null)
+        if (startCombatSequence == null)
         {
-            StartCoroutine(startCombatSequence.Execute(_currentContext));
+            return;
         }
+
+        if (_startSequenceRoutine != null)
+        {
+            StopCoroutine(_startSequenceRoutine);
+        }
+
+        _startSequenceRoutine = StartCoroutine(ExecuteStartSequence());
     }
 
     public void EndCombat()
@@ -85,15 +95,43 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         if (_currentCombatSceneParent == null || _currentContext == null)
         {
             GameLog.LogWarning("EndCombat was called but there is no active combat or context.", this);
+            _gameStateService?.EndCombat();
+            CleanupContext();
             return;
+        }
+
+        if (_endSequenceRoutine != null)
+        {
+            StopCoroutine(_endSequenceRoutine);
         }
 
         if (endCombatSequence != null)
         {
-            StartCoroutine(endCombatSequence.Execute(_currentContext));
+            _endSequenceRoutine = StartCoroutine(ExecuteEndSequence());
         }
+        else
+        {
+            _gameStateService?.EndCombat();
+            CleanupContext();
+        }
+    }
 
-        // Clean up context after use
+    private IEnumerator ExecuteStartSequence()
+    {
+        yield return startCombatSequence.Execute(_currentContext);
+        _startSequenceRoutine = null;
+    }
+
+    private IEnumerator ExecuteEndSequence()
+    {
+        yield return endCombatSequence.Execute(_currentContext);
+        _gameStateService?.EndCombat();
+        CleanupContext();
+        _endSequenceRoutine = null;
+    }
+
+    private void CleanupContext()
+    {
         _currentCombatSceneParent = null;
         _currentContext = null;
     }

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -37,24 +36,6 @@ public class AudioData : ScriptableObject
     [Tooltip("Variación aleatoria del pitch (0 = sin variación).")]
     [Range(0f, 1f)]
     public float pitchVariation = 0f;
-
-    /// <summary>
-    /// Reproduce este sonido como un sonido 2D.
-    /// </summary>
-    [Obsolete("Use IAudioService.PlaySound2D(audioData) instead. This method relies on ServiceLocator which is being phased out.")]
-    public void Play()
-    {
-        ServiceLocator.Get<IAudioService>()?.PlaySound2D(this);
-    }
-
-    /// <summary>
-    /// Reproduce este sonido en una posición 3D específica.
-    /// </summary>
-    [Obsolete("Use IAudioService.PlaySound3D(audioData, position) instead. This method relies on ServiceLocator which is being phased out.")]
-    public void PlayAtPoint(Vector3 position)
-    {
-        ServiceLocator.Get<IAudioService>()?.PlaySound3D(this, position);
-    }
 
     public AudioClip GetClip()
     {

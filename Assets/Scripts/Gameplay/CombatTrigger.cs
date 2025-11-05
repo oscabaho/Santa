@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using VContainer;
 
@@ -15,13 +17,21 @@ public class CombatTrigger : MonoBehaviour
     private IGameStateService _gameStateService;
     private ICombatTransitionService _combatTransitionService;
     private CombatScenePool _combatScenePool;
+    private ICombatService _combatService;
+    private Collider _interactionCollider;
+    private bool _isListeningForCombatEnd;
 
     [Inject]
-    public void Construct(IGameStateService gameStateService, ICombatTransitionService combatTransitionService, CombatScenePool combatScenePool)
+    public void Construct(
+        IGameStateService gameStateService,
+        ICombatTransitionService combatTransitionService,
+        CombatScenePool combatScenePool,
+        ICombatService combatService)
     {
         _gameStateService = gameStateService;
         _combatTransitionService = combatTransitionService;
         _combatScenePool = combatScenePool;
+        _combatService = combatService;
     }
 
     private void Awake()
@@ -34,8 +44,16 @@ public class CombatTrigger : MonoBehaviour
             return;
         }
 
+        _interactionCollider = GetComponent<Collider>();
+        if (_interactionCollider == null)
+        {
+            GameLog.LogError("CombatTrigger requires a Collider component to function.");
+            enabled = false;
+            return;
+        }
+
         // Ensure the collider is set to be a trigger.
-        GetComponent<Collider>().isTrigger = true;
+        _interactionCollider.isTrigger = true;
     }
 
     public async void StartCombatInteraction()
@@ -43,10 +61,22 @@ public class CombatTrigger : MonoBehaviour
         if (_combatHasBeenTriggered) return;
         _combatHasBeenTriggered = true;
 
+        if (_interactionCollider != null)
+        {
+            _interactionCollider.enabled = false;
+        }
+
         if (_combatTransitionService == null)
         {
             GameLog.LogError("CombatTrigger: ICombatTransitionService not found when starting combat.");
-            _combatHasBeenTriggered = false; // Allow retry
+            ResetTriggerState();
+            return;
+        }
+
+        if (_combatService == null)
+        {
+            GameLog.LogError("CombatTrigger: ICombatService not found. Cannot start combat.");
+            ResetTriggerState();
             return;
         }
         
@@ -56,7 +86,7 @@ public class CombatTrigger : MonoBehaviour
         if (_combatScenePool == null) 
         {
             GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
-            _combatHasBeenTriggered = false; // Allow retry
+            ResetTriggerState();
             return; 
         }
 
@@ -66,42 +96,97 @@ public class CombatTrigger : MonoBehaviour
             if (_activeCombatInstance == null)
             {
                 GameLog.LogError("Failed to get instance from pool.");
-                _combatHasBeenTriggered = false;
+                ResetTriggerState();
                 return;
             }
 
             _activeCombatInstance.SetActive(true); // Activate the instance
             _activeCombatPoolKey = poolKey;
+
+            var combatArena = _activeCombatInstance.GetComponentInChildren<CombatArena>(true);
+            if (combatArena == null)
+            {
+                GameLog.LogError($"CombatTrigger: Could not find CombatArena inside '{_activeCombatInstance.name}'.");
+                HandleCombatStartFailure();
+                return;
+            }
+
+            List<GameObject> participants = combatArena.Combatants
+                .Where(go => go != null)
+                .Distinct()
+                .ToList();
+
+            if (participants.Count == 0)
+            {
+                GameLog.LogError("CombatTrigger: CombatArena returned zero participants.");
+                HandleCombatStartFailure();
+                return;
+            }
             
             _gameStateService.OnCombatEnded += OnCombatEnded;
+            _isListeningForCombatEnd = true;
             _combatTransitionService.StartCombat(_activeCombatInstance);
+            _combatService.StartCombat(participants);
             _gameStateService.StartCombat();
-
-            gameObject.SetActive(false);
         }
         catch (System.Exception ex)
         {
             GameLog.LogError("Failed to start combat interaction.");
             GameLog.LogException(ex);
-            _combatHasBeenTriggered = false; // Allow retry on failure
+            HandleCombatStartFailure();
         }
     }
 
     private void OnCombatEnded()
     {
         // Release the instance back to the pool
+        ReleaseActiveInstance();
+        CleanupActiveCombatInstance();
+
+        // Unsubscribe
+        if (_gameStateService != null && _isListeningForCombatEnd)
+        {
+            _gameStateService.OnCombatEnded -= OnCombatEnded;
+            _isListeningForCombatEnd = false;
+        }
+
+        ResetTriggerState();
+    }
+
+    private void HandleCombatStartFailure()
+    {
+        if (_gameStateService != null && _isListeningForCombatEnd)
+        {
+            _gameStateService.OnCombatEnded -= OnCombatEnded;
+            _isListeningForCombatEnd = false;
+        }
+
+        ReleaseActiveInstance();
+        CleanupActiveCombatInstance();
+        ResetTriggerState();
+    }
+
+    private void ReleaseActiveInstance()
+    {
+        if (_combatScenePool == null) return;
         if (_activeCombatInstance != null && !string.IsNullOrEmpty(_activeCombatPoolKey))
         {
             _combatScenePool.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance);
         }
+    }
 
-        // Unsubscribe
-        if (_gameStateService != null)
-        {
-            _gameStateService.OnCombatEnded -= OnCombatEnded;
-        }
-
+    private void CleanupActiveCombatInstance()
+    {
         _activeCombatInstance = null;
         _activeCombatPoolKey = null;
+    }
+
+    private void ResetTriggerState()
+    {
+        _combatHasBeenTriggered = false;
+        if (_interactionCollider != null)
+        {
+            _interactionCollider.enabled = true;
+        }
     }
 }
