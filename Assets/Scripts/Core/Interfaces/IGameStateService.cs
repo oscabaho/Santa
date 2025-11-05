@@ -4,11 +4,6 @@ public interface IGameStateService
 {
 
     /// <summary>
-    /// Sets the game state.
-    /// </summary>
-    void SetState(GameState state);
-
-    /// <summary>
     /// Gets the current state of the game.
     /// </summary>
     GameState CurrentState { get; }

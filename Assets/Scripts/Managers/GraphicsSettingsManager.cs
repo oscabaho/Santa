@@ -35,9 +35,21 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
         Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
         var bestResolution = Screen.resolutions.Last();
         Screen.SetResolution(bestResolution.width, bestResolution.height, true);
+        ConfigureMobileOrientation();
         GameLog.Log($"Platform: Mobile. Applied native graphics settings ({bestResolution.width}x{bestResolution.height} @ {Application.targetFrameRate} FPS).");
 #endif
     }
+
+#if UNITY_ANDROID || UNITY_IOS
+    private void ConfigureMobileOrientation()
+    {
+        Screen.orientation = ScreenOrientation.AutoRotation;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.autorotateToLandscapeLeft = true;
+        Screen.autorotateToLandscapeRight = true;
+    }
+#endif
 
     public void SetFullscreen(bool isFullscreen)
     {
