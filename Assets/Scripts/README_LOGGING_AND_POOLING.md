@@ -1,30 +1,33 @@
-GameLog (centralised logging)
+# Logging y Pooling
 
-- Location: Assets/Scripts/Core/GameLog.cs
-- Purpose: A thin wrapper around UnityEngine.Debug that is enabled in the Editor, Development builds, or when the GAME_LOGS_ENABLED symbol is defined.
-- Usage: Call GameLog.Log(...), GameLog.LogWarning(...), GameLog.LogError(...), GameLog.LogFormat(...), GameLog.LogException(...)
-- Why: Avoids accidental logging in release/mobile builds. To enable logs in release builds, define the GAME_LOGS_ENABLED symbol in Player Settings or project build configuration.
+## GameLog (registro centralizado)
 
-CombatScenePool and Addressables policy
+- Ubicación: `Assets/Scripts/Core/GameLog.cs`
+- Propósito: Wrapper ligero sobre `UnityEngine.Debug` habilitado en Editor, builds de Development o cuando se define el símbolo `GAME_LOGS_ENABLED`.
+- Uso: `GameLog.Log(...)`, `GameLog.LogWarning(...)`, `GameLog.LogError(...)`, `GameLog.LogFormat(...)`, `GameLog.LogException(...)`.
+- Por qué: Evita logs accidentales en builds de release/mobile. Para habilitarlos en release, define `GAME_LOGS_ENABLED` en Player Settings o configuración de build.
 
-- Location: Assets/Scripts/Core/CombatScenePool.cs and Assets/Scripts/Gameplay/CombatEncounter.cs
-- Behavior:
-  - The pool tries to reuse inactive instances keyed by a string (the encounter pool key).
-  - If Addressables is available and the encounter has an address, the pool will instantiate via Addressables.InstantiateAsync and track the returned AsyncOperationHandle so it can ReleaseInstance properly.
-  - Fallback: if Addressables not available or instantiation failed, the pool uses the fallback prefab or Resources path exposed in the encounter.
-  - Per-encounter release policy: `CombatEncounter` exposes a flag `releaseAddressablesInstances` which tells the pool whether to call Addressables.ReleaseInstance when that instance is released back to the pool. This helps control memory usage for mobile devices.
+## CombatScenePool y Addressables
 
-- Best practices:
-  - Prefer providing an Addressable entry for large combat scenes to leverage async loading and smaller initial APK sizes.
-  - Use `CombatEncounter.autoPrewarm` and `prewarmCount` to create one or two instances at level load if you want to avoid a hitch on first combat. For mobile, `prewarmCount = 1` is usually a good compromise.
-  - When creating new encounters, choose a stable `poolKey` that identifies the content; avoid dynamic keys that change each run.
+- Ubicación: `Assets/Scripts/Core/CombatScenePool.cs` y `Assets/Scripts/Gameplay/CombatEncounter.cs`
+- Comportamiento:
+  - El pool reutiliza instancias inactivas agrupadas por una key (el address de Addressables).
+  - **Las arenas de combate se configuran EXCLUSIVAMENTE mediante Addressables** usando `combatSceneAddress`.
+  - El sistema instancia con `Addressables.InstantiateAsync` y guarda el `AsyncOperationHandle` para hacer `ReleaseInstance` correctamente.
+  - Política por encuentro: `CombatEncounter` expone el flag `releaseAddressablesInstances` para decidir si llamar `Addressables.ReleaseInstance` al liberar. Útil para controlar memoria en mobile.
 
-Examples
+- Buenas prácticas:
+  - **OBLIGATORIO:** Todas las arenas de combate deben estar marcadas como Addressables en Unity.
+  - El campo `combatSceneAddress` debe contener el address exacto configurado en Addressables.
+  - Usar `autoPrewarm = true` y `prewarmCount` para crear 1-2 instancias al cargar nivel y evitar hitch en el primer combate. En mobile, `prewarmCount = 1` es buen balance.
+  - Para optimizar memoria en mobile, activar `releaseAddressablesInstances = true` en encuentros pesados o que no se repiten frecuentemente.
 
-- Instantiating a combat scene via the pool (simplified):
+## Ejemplos
+
+- Instanciar una escena de combate vía pool (simplificado):
 
 ```csharp
-// In a class where CombatScenePool is injected
+// En una clase donde se inyecta CombatScenePool
 public class MyCombatClass : MonoBehaviour
 {
     private CombatScenePool _combatScenePool;
@@ -50,13 +53,13 @@ public class MyCombatClass : MonoBehaviour
 }
 ```
 
-- Releasing an instance:
+- Liberar una instancia:
 
   `_combatScenePool.ReleaseInstance(encounter.GetPoolKey(), instanceGameObject);`
 
-Notes
+## Notas
 
-- Samples folder still contains Debug.Log calls; these are left untouched because they are third-party sample files and are not part of the production code path.
-- We keep a thin compatibility wrapper `Assets/Scripts/Gameplay/GameLog.cs` (Obsolete) to ease migration. New code should use the Core `GameLog` directly.
+- La carpeta Samples puede contener `Debug.Log`; se dejan intactos por ser terceros y no ruta de producción.
+- Se mantiene un wrapper de compatibilidad `Assets/Scripts/Gameplay/GameLog.cs` (Obsoleto) para migración. Nuevo código debe usar el `GameLog` de Core.
 
-If you'd like, I can add a small automated script to scan for Debug.* usages and optionally create a patch to migrate them across non-sample folders.
+Si quieres, puedo añadir un script para escanear usos de `Debug.*` y proponer un parche de migración en carpetas no-sample.

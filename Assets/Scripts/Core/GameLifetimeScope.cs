@@ -76,12 +76,24 @@ public class GameLifetimeScope : LifetimeScope
         // Registramos VFXManager
         // builder.RegisterComponent(vfxManagerInstance).As<IVFXService>().AsSelf();
 
+        // --- UI Dinámica con Addressables ---
+        // UpgradeUI se carga via Addressables, igual que las otras UIs del proyecto
+        // La instancia la maneja UpgradeUILoader que se registra como IUpgradeUI
+        builder.Register<UpgradeUILoader>(Lifetime.Singleton)
+            .As<IUpgradeUI>()
+            .AsSelf();
+
+            // Registrar el lifecycle manager (OPCIONAL) para preload y release automático
+            // Comenta esta línea si prefieres controlar manualmente el preload/release
+            builder.RegisterEntryPoint<UpgradeUILifecycleManager>();
+            // Preload frequently used panels like CombatUI at startup
+            builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
+
         // --- Componentes en la jerarquía ---
         builder.RegisterComponentInHierarchy<GameInitializer>();
-        builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
-        builder.RegisterComponentInHierarchy<CombatTestInitiator>();
+    builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
         builder.RegisterComponentInHierarchy<CombatUI>();
-        builder.RegisterComponentInHierarchy<UpgradeUI>().As<IUpgradeUI>();
+        // NOTA: UpgradeUI ahora se instancia dinámicamente desde el prefab (ver arriba)
         builder.RegisterComponentInHierarchy<CombatCameraManager>().As<ICombatCameraManager>().AsSelf();
         builder.RegisterComponentInHierarchy<CombatScenePool>().AsSelf();
         builder.RegisterComponentInHierarchy<ScreenFade>().AsSelf();

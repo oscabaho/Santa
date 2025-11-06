@@ -237,8 +237,16 @@ Con **CombatTrigger_01** seleccionado:
 ### 4.4 Configurar CombatEncounter
 
 1. En el componente `CombatEncounter`:
-2. Configura el **Pool Key** o la referencia al encuentro que quieras usar
-3. Si usas pooling, asegúrate de que la key coincida con tu configuración en `CombatScenePool`
+2. **IMPORTANTE:** Configura **Combat Scene Address** con el address de Addressables de tu arena de combate
+   - Ejemplo: `"CombatArena_Forest"`, `"CombatArena_Desert"`, etc.
+   - Este es el **ÚNICO** campo necesario para referenciar la arena
+3. **Opciones de pooling:**
+   - **Auto Prewarm**: Activar para precargar instancias al inicio (recomendado para primera arena)
+   - **Prewarm Count**: `1` para mobile, `2-3` para PC
+   - **Release Addressables Instances**: Activar si la arena es pesada y no se repite frecuentemente
+4. **Requisito previo:** La arena debe estar marcada como Addressable en Unity con el mismo address
+
+**Nota:** Los campos `Combat Scene Prefab`, `Combat Scene Resource Path` y `Combat Scene Parent` han sido eliminados. Solo se usa Addressables.
 
 ---
 

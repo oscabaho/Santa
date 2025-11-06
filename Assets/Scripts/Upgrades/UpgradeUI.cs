@@ -5,20 +5,24 @@ using VContainer;
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
+/// Now refactored to work as a prefab with modular card components.
 /// </summary>
 public class UpgradeUI : MonoBehaviour, IUpgradeUI
 {
-    [Header("UI Elements")]
+    [Header("Panel References")]
     [SerializeField] private GameObject upgradePanel;
-    [SerializeField] private Button option1Button;
-    [SerializeField] private TextMeshProUGUI option1NameText;
-    [SerializeField] private TextMeshProUGUI option1DescriptionText;
-    [SerializeField] private Button option2Button;
-    [SerializeField] private TextMeshProUGUI option2NameText;
-    [SerializeField] private TextMeshProUGUI option2DescriptionText;
+    [SerializeField] private CanvasGroup canvasGroup;
+    
+    [Header("Card Components")]
+    [SerializeField] private UpgradeCardUI option1Card;
+    [SerializeField] private UpgradeCardUI option2Card;
 
-    private AbilityUpgrade _upgrade1;
-    private AbilityUpgrade _upgrade2;
+    [Header("Optional Elements")]
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private Button closeButton; // Para cerrar sin elegir (opcional)
+
+    [Header("Animation Settings")]
+    [SerializeField] private float fadeInDuration = 0.3f;
 
     private IUpgradeService _upgradeService;
     private ILevelService _levelService;
@@ -32,11 +36,38 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         _combatTransitionService = combatTransitionService;
     }
 
-    private void Start()
+    private void Awake()
     {
-        option1Button.onClick.AddListener(OnOption1Clicked);
-        option2Button.onClick.AddListener(OnOption2Clicked);
-        upgradePanel.SetActive(false); // Start with the panel hidden
+        // Suscribirse a los eventos de las tarjetas
+        if (option1Card != null)
+            option1Card.OnUpgradeSelected += OnUpgradeChosen;
+
+        if (option2Card != null)
+            option2Card.OnUpgradeSelected += OnUpgradeChosen;
+
+        // Botón de cerrar opcional
+        if (closeButton != null)
+            closeButton.onClick.AddListener(OnCloseButtonClicked);
+
+        // Asegurarse de que el canvas group existe
+        if (canvasGroup == null)
+            canvasGroup = upgradePanel?.GetComponent<CanvasGroup>();
+
+        // Iniciar oculto
+        HideImmediate();
+    }
+
+    private void OnDestroy()
+    {
+        // Desuscribirse para evitar memory leaks
+        if (option1Card != null)
+            option1Card.OnUpgradeSelected -= OnUpgradeChosen;
+
+        if (option2Card != null)
+            option2Card.OnUpgradeSelected -= OnUpgradeChosen;
+
+        if (closeButton != null)
+            closeButton.onClick.RemoveListener(OnCloseButtonClicked);
     }
 
     /// <summary>
@@ -44,41 +75,142 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     /// </summary>
     public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
     {
-        _upgrade1 = upgrade1;
-        _upgrade2 = upgrade2;
+        if (upgrade1 == null || upgrade2 == null)
+        {
+            GameLog.LogWarning("Cannot show upgrades: one or both upgrades are null.");
+            return;
+        }
 
-        option1NameText.text = _upgrade1.UpgradeName;
-        option1DescriptionText.text = _upgrade1.UpgradeDescription;
+        // Configurar las tarjetas
+        option1Card?.Setup(upgrade1);
+        option2Card?.Setup(upgrade2);
 
-        option2NameText.text = _upgrade2.UpgradeName;
-        option2DescriptionText.text = _upgrade2.UpgradeDescription;
-
-        upgradePanel.SetActive(true);
+        // Mostrar el panel
+        Show();
     }
 
-    private void OnOption1Clicked()
+    /// <summary>
+    /// Muestra el panel con un fade-in suave.
+    /// </summary>
+    private void Show()
     {
-        ChooseUpgrade(_upgrade1);
+        if (upgradePanel != null)
+            upgradePanel.SetActive(true);
+
+        // Fade in con CanvasGroup
+        if (canvasGroup != null)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeIn());
+        }
     }
 
-    private void OnOption2Clicked()
+    /// <summary>
+    /// Oculta el panel inmediatamente.
+    /// </summary>
+    private void HideImmediate()
     {
-        ChooseUpgrade(_upgrade2);
+        if (upgradePanel != null)
+            upgradePanel.SetActive(false);
+
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
     }
 
-    private void ChooseUpgrade(AbilityUpgrade chosenUpgrade)
+    /// <summary>
+    /// Oculta el panel con un fade-out suave.
+    /// </summary>
+    private void Hide()
     {
+        if (canvasGroup != null)
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeOut());
+        }
+        else
+        {
+            HideImmediate();
+        }
+    }
+
+    private System.Collections.IEnumerator FadeIn()
+    {
+        float elapsed = 0f;
+        canvasGroup.interactable = false; // Deshabilitar durante la animación
+
+        while (elapsed < fadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
+            yield return null;
+        }
+
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+    }
+
+    private System.Collections.IEnumerator FadeOut()
+    {
+        float elapsed = 0f;
+        canvasGroup.interactable = false;
+
+        while (elapsed < fadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeInDuration));
+            yield return null;
+        }
+
+        canvasGroup.alpha = 0f;
+        canvasGroup.blocksRaycasts = false;
+        
+        if (upgradePanel != null)
+            upgradePanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Callback cuando se selecciona un upgrade desde cualquier tarjeta.
+    /// </summary>
+    private void OnUpgradeChosen(AbilityUpgrade chosenUpgrade)
+    {
+        if (chosenUpgrade == null)
+        {
+            GameLog.LogWarning("Chosen upgrade is null.");
+            return;
+        }
+
+        // Deshabilitar ambas tarjetas para evitar doble-click
+        option1Card?.SetInteractable(false);
+        option2Card?.SetInteractable(false);
+
         // 1. Apply the stat upgrade
         _upgradeService?.ApplyUpgrade(chosenUpgrade);
-        upgradePanel.SetActive(false);
 
-        // 2. Liberate the current level (change visuals)
+        // 2. Hide the UI
+        Hide();
+
+        // 3. Liberate the current level (change visuals)
         _levelService?.LiberateCurrentLevel();
 
-        // 3. End the combat state (this was already here)
+        // 4. End the combat state
         _combatTransitionService?.EndCombat();
 
-        // 4. Prepare the next level/area
+        // 5. Prepare the next level/area
         _levelService?.AdvanceToNextLevel();
+    }
+
+    /// <summary>
+    /// Callback para cerrar sin elegir (opcional, puede usarse para testing).
+    /// </summary>
+    private void OnCloseButtonClicked()
+    {
+        GameLog.LogWarning("Upgrade selection closed without choosing.");
+        Hide();
+        _combatTransitionService?.EndCombat();
     }
 }

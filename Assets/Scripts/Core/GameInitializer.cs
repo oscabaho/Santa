@@ -3,7 +3,7 @@ using VContainer;
 
 public class GameInitializer : MonoBehaviour
 {
-    private const string InitialUIPanelAddress = "VirtualGamepad";
+    private const string InitialUIPanelAddress = UIPanelAddresses.VirtualGamepad;
     private IUIManager _uiManager;
 
     [Inject]
