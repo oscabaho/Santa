@@ -8,7 +8,7 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
 
 /// <summary>
-/// Simple pool for combat scene prefabs. Tries to use Addressables when available; falls back to Resources/prefab.
+/// Pool for combat scene prefabs loaded via Addressables. Reuses instances to optimize performance.
 /// </summary>
 public class CombatScenePool : MonoBehaviour
 {
@@ -75,22 +75,14 @@ public class CombatScenePool : MonoBehaviour
                 GameLog.LogError($"Addressables.InstantiateAsync failed for '{encounter.CombatSceneAddress}'");
             }
         }
+        else
+        {
+            GameLog.LogError($"CombatScenePool: No valid CombatSceneAddress configured for key '{key}'. Combat arenas MUST be loaded via Addressables.");
+        }
+#else
+        GameLog.LogError($"CombatScenePool: UNITY_ADDRESSABLES is not defined. Combat arenas require Addressables package.");
 #endif
 
-        if (encounter != null)
-        {
-            var inst = await encounter.InstantiateCombatSceneFallbackAsync();
-            if (inst != null)
-            {
-                // On fallback, manually set the position and parent
-                inst.transform.position = _combatSceneOffset;
-                inst.transform.SetParent(transform);
-                inst.SetActive(false);
-                return inst;
-            }
-        }
-
-        GameLog.LogWarning($"Could not create instance for key '{key}'");
         return null;
     }
 

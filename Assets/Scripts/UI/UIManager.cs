@@ -106,4 +106,48 @@ public class UIManager : MonoBehaviour, IUIManager
         // Show the target panel
         await ShowPanel(panelAddress);
     }
+
+    /// <summary>
+    /// Preloads a UI panel by address without showing it, caching the instance for later use.
+    /// If the panel is already cached, this is a no-op.
+    /// </summary>
+    public async Task PreloadPanel(string panelAddress)
+    {
+        if (string.IsNullOrEmpty(panelAddress))
+        {
+            GameLog.LogError("UIManager: Panel address is null or empty for preloading.");
+            return;
+        }
+
+        if (_addressToInstanceMap.ContainsKey(panelAddress))
+        {
+            // Already cached
+            return;
+        }
+
+        var handle = Addressables.InstantiateAsync(panelAddress, transform);
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            var instance = handle.Result;
+            _addressToInstanceMap[panelAddress] = instance;
+
+            var panel = instance.GetComponent<UIPanel>();
+            if (panel != null)
+            {
+                // Ensure panel remains hidden after preload
+                panel.Hide();
+                GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");
+            }
+            else
+            {
+                GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' is missing UIPanel component on root.");
+            }
+        }
+        else
+        {
+            GameLog.LogError($"UIManager: Failed to preload panel with address '{panelAddress}'.");
+        }
+    }
 }

@@ -22,4 +22,10 @@ public interface IUIManager
     /// </summary>
     /// <param name="panelAddress">The addressable address of the panel prefab to switch to.</param>
     Task SwitchToPanel(string panelAddress);
+
+    /// <summary>
+    /// Preloads a panel instance into cache without showing it.
+    /// </summary>
+    /// <param name="panelAddress">The addressable address of the panel prefab to preload.</param>
+    Task PreloadPanel(string panelAddress);
 }
