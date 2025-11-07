@@ -27,8 +27,18 @@ public class GraphicsSettingsController : MonoBehaviour
     {
         if (_graphicsService == null)
         {
-            GameLog.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionar\u00e1.", this);
+            GameLog.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionará.", this);
             gameObject.SetActive(false);
+            return;
+        }
+
+        // Verificar si los elementos de UI están asignados
+        // Si no están, este componente no hace nada (útil para escenas de prueba o móvil sin UI de opciones)
+        if (qualityDropdown == null && resolutionDropdown == null && fullscreenToggle == null && vsyncToggle == null)
+        {
+            // On mobile or simple scenes, it's valid to omit these UI elements.
+            GameLog.Log("GraphicsSettingsController: No UI elements assigned. Disabling component (intended on mobile/test scenes).", this);
+            enabled = false;
             return;
         }
 
@@ -40,6 +50,8 @@ public class GraphicsSettingsController : MonoBehaviour
 
     private void SetupQualityDropdown()
     {
+        if (qualityDropdown == null) return;
+        
         qualityDropdown.ClearOptions();
         qualityDropdown.AddOptions(QualitySettings.names.ToList());
         qualityDropdown.value = QualitySettings.GetQualityLevel();
@@ -48,6 +60,8 @@ public class GraphicsSettingsController : MonoBehaviour
 
     private void SetupResolutionDropdown(IGraphicsSettingsService graphicsService)
     {
+        if (resolutionDropdown == null) return;
+        
         #if UNITY_STANDALONE
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
@@ -60,7 +74,7 @@ public class GraphicsSettingsController : MonoBehaviour
         resolutionDropdown.RefreshShownValue();
         #else
         // On mobile, hide the resolution dropdown as it's not needed.
-        if (resolutionDropdown != null) resolutionDropdown.gameObject.SetActive(false);
+        resolutionDropdown.gameObject.SetActive(false);
         #endif
     }
 

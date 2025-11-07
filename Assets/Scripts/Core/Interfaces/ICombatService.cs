@@ -28,4 +28,5 @@ public interface ICombatService
     // Methods
     void StartCombat(List<GameObject> participants);
     void SubmitPlayerAction(Ability ability, GameObject primaryTarget = null);
+    void CancelTargeting();
 }

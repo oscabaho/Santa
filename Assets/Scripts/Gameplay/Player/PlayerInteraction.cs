@@ -12,12 +12,18 @@ public class PlayerInteraction : MonoBehaviour
     private CombatTrigger _currentCombatTrigger;
     private IGameplayUIService _gameplayUIService;
     private IObjectResolver _resolver;
+    private bool? _desiredActionVisible; // null = no preference yet
+    private bool _readyHooked;
 
     [Inject]
-    public void Construct(IGameplayUIService gameplayUIService, IObjectResolver resolver)
+    public void Construct(IGameplayUIService gameplayUIService, IObjectResolver resolver, InputReader injectedInputReader)
     {
         _gameplayUIService = gameplayUIService;
         _resolver = resolver;
+        if (injectedInputReader != null)
+        {
+            inputReader = injectedInputReader; // Ensure shared InputReader instance
+        }
     }
 
     private void Awake()
@@ -30,9 +36,24 @@ public class PlayerInteraction : MonoBehaviour
 
     private void OnEnable()
     {
+        GameLog.Log($"PlayerInteraction: OnEnable. InputReader={inputReader?.name ?? "NULL"}", this);
+        
         if (inputReader != null)
         {
             inputReader.InteractEvent += OnInteract;
+            GameLog.Log($"PlayerInteraction: Subscribed to InteractEvent on InputReader '{inputReader.name}'.", this);
+        }
+        // Hook a single ready handler to apply latest desired state when UI becomes ready
+        if (_gameplayUIService != null && !_readyHooked)
+        {
+            _readyHooked = true;
+            _gameplayUIService.WhenReady(this, () =>
+            {
+                if (_desiredActionVisible.HasValue)
+                {
+                    _gameplayUIService.ShowActionButton(_desiredActionVisible.Value);
+                }
+            });
         }
     }
 
@@ -46,9 +67,16 @@ public class PlayerInteraction : MonoBehaviour
 
     private void OnInteract()
     {
+        GameLog.Log($"PlayerInteraction: OnInteract called. CurrentTrigger={_currentCombatTrigger?.name ?? "NULL"}", this);
+        
         if (_currentCombatTrigger != null)
         {
+            GameLog.Log($"PlayerInteraction: Starting combat interaction on trigger '{_currentCombatTrigger.name}'.", this);
             _currentCombatTrigger.StartCombatInteraction();
+        }
+        else
+        {
+            GameLog.LogWarning("PlayerInteraction: OnInteract called but no CombatTrigger is set. Player might not be inside a trigger zone.", this);
         }
     }
 
@@ -58,7 +86,13 @@ public class PlayerInteraction : MonoBehaviour
         {
             _resolver.Inject(combatTrigger);
             _currentCombatTrigger = combatTrigger;
-            _gameplayUIService?.ShowActionButton(true);
+            GameLog.Log($"PlayerInteraction: Entered trigger zone '{combatTrigger.name}'. Setting as current trigger.", this);
+            
+            _desiredActionVisible = true;
+            if (_gameplayUIService != null && _gameplayUIService.IsReady)
+            {
+                _gameplayUIService.ShowActionButton(true);
+            }
         }
     }
 
@@ -67,7 +101,11 @@ public class PlayerInteraction : MonoBehaviour
         if (other.TryGetComponent<CombatTrigger>(out var combatTrigger) && combatTrigger == _currentCombatTrigger)
         {
             _currentCombatTrigger = null;
-            _gameplayUIService?.ShowActionButton(false);
+            _desiredActionVisible = false;
+            if (_gameplayUIService != null && _gameplayUIService.IsReady)
+            {
+                _gameplayUIService.ShowActionButton(false);
+            }
         }
     }
 }

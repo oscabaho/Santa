@@ -32,7 +32,15 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        // Persist only if attached to a root object; otherwise rely on the root holder (e.g., GameLifetimeScope)
+        if (transform.parent == null)
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            GameLog.Log("UpgradeManager: Running as child object; lifetime managed by root holder (no DontDestroyOnLoad needed).", this);
+        }
         LoadStats();
     }
 

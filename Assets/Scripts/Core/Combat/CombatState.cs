@@ -42,7 +42,7 @@ public class CombatState
             if (ap != null)
             {
                 _apComponents[combatant] = ap;
-                ap.SetValue(100);
+                ap.SetValue(ap.MaxValue);
             }
 
             var brain = combatant.GetComponent<IBrain>();

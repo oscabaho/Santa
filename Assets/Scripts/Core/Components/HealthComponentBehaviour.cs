@@ -27,6 +27,10 @@ public class HealthComponentBehaviour : MonoBehaviour, IHealthController
 
     private void Awake()
     {
-        // Inicialización si es necesario
+        if (health != null)
+        {
+            // Ensure health starts at a valid value; default serialized value is zero.
+            health.SetToMax();
+        }
     }
 }

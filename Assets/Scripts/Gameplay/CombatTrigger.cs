@@ -171,7 +171,8 @@ public class CombatTrigger : MonoBehaviour
         if (_combatScenePool == null) return;
         if (_activeCombatInstance != null && !string.IsNullOrEmpty(_activeCombatPoolKey))
         {
-            _combatScenePool.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance);
+            bool releaseAddressables = _encounter != null && _encounter.ReleaseAddressablesInstances;
+            _combatScenePool.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance, releaseAddressables);
         }
     }
 

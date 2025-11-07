@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -32,11 +31,41 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
 
 #elif UNITY_ANDROID || UNITY_IOS
         // --- MOBILE SPECIFIC LOGIC ---
-        Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
-        var bestResolution = Screen.resolutions.Last();
-        Screen.SetResolution(bestResolution.width, bestResolution.height, true);
+        var availableResolutions = Screen.resolutions;
+        Resolution selectedResolution;
+
+        if (availableResolutions != null && availableResolutions.Length > 0)
+        {
+            selectedResolution = availableResolutions[availableResolutions.Length - 1];
+        }
+        else
+        {
+            selectedResolution = Screen.currentResolution;
+
+            if (selectedResolution.width == 0 || selectedResolution.height == 0)
+            {
+                selectedResolution = new Resolution
+                {
+                    width = Screen.width,
+                    height = Screen.height
+                };
+            }
+        }
+
+        double refreshRate = Screen.currentResolution.refreshRateRatio.value;
+        if (refreshRate <= 0d)
+        {
+            refreshRate = selectedResolution.refreshRateRatio.value;
+            if (refreshRate <= 0d)
+            {
+                refreshRate = 60d;
+            }
+        }
+
+        Application.targetFrameRate = (int)System.Math.Round(refreshRate);
+        Screen.SetResolution(selectedResolution.width, selectedResolution.height, true);
         ConfigureMobileOrientation();
-        GameLog.Log($"Platform: Mobile. Applied native graphics settings ({bestResolution.width}x{bestResolution.height} @ {Application.targetFrameRate} FPS).");
+        GameLog.Log($"Platform: Mobile. Applied graphics settings ({selectedResolution.width}x{selectedResolution.height} @ {Application.targetFrameRate} FPS).");
 #endif
     }
 

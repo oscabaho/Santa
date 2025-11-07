@@ -24,4 +24,13 @@ public class ActionPointComponentBehaviour : MonoBehaviour, IActionPointControll
     {
         actionPoints.Refill();
     }
+
+    private void Awake()
+    {
+        if (actionPoints != null)
+        {
+            // Ensure combatants start with full action points unless explicitly configured otherwise.
+            actionPoints.SetToMax();
+        }
+    }
 }

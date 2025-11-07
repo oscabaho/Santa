@@ -173,6 +173,23 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         ProcessActionSubmission(ability, primaryTarget);
     }
 
+    public void CancelTargeting()
+    {
+        if (CurrentPhase != CombatPhase.Targeting)
+        {
+            return;
+        }
+
+        GameLog.Log("Player cancelled targeting. Returning to selection phase.");
+
+        _abilityPendingTarget = null;
+        SetEnemyTargetsActive(false);
+
+        CurrentPhase = CombatPhase.Selection;
+        OnPhaseChanged?.Invoke(CurrentPhase);
+        OnPlayerTurnStarted?.Invoke();
+    }
+
     private void ProcessActionSubmission(Ability ability, GameObject primaryTarget)
     {
         if (!CombatIsInitialized)
@@ -225,7 +242,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         SetEnemyTargetsActive(false); // Disable targets after selection
 
         // If the action was a full submission (not just entering targeting), end the player's turn.
-        
+
         OnPlayerTurnEnded?.Invoke();
         FinalizeSelectionAndExecuteTurn();
     }

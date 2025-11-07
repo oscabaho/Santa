@@ -3,6 +3,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Threading.Tasks;
 using VContainer;
+using VContainer.Unity;
 
 /// <summary>
 /// Loader que gestiona la carga y acceso de la UpgradeUI via Addressables.
@@ -11,26 +12,26 @@ using VContainer;
 /// </summary>
 public class UpgradeUILoader : IUpgradeUI
 {
-    private const string UPGRADE_UI_ADDRESS = "UpgradeUI"; // Nombre del addressable
+    private const string UPGRADE_UI_ADDRESS = UIPanelAddresses.UpgradeUI; // Nombre del addressable
 
     private UpgradeUI _upgradeUIInstance;
     private AsyncOperationHandle<GameObject> _loadHandle;
     private bool _isLoading;
     private bool _isLoaded;
 
-    private IUpgradeService _upgradeService;
     private ILevelService _levelService;
     private ICombatTransitionService _combatTransitionService;
+    private IObjectResolver _resolver;
 
     [Inject]
     public void Construct(
-        IUpgradeService upgradeService, 
-        ILevelService levelService, 
-        ICombatTransitionService combatTransitionService)
+        ILevelService levelService,
+        ICombatTransitionService combatTransitionService,
+        IObjectResolver resolver)
     {
-        _upgradeService = upgradeService;
         _levelService = levelService;
         _combatTransitionService = combatTransitionService;
+        _resolver = resolver;
     }
 
     /// <summary>
@@ -69,33 +70,33 @@ public class UpgradeUILoader : IUpgradeUI
         }
     }
 
-        /// <summary>
-        /// Precarga la UI de upgrades en background sin mostrarla.
-        /// Útil para llamar al inicio de un nivel de combate para evitar delay posterior.
-        /// </summary>
-        public async Task PreloadAsync()
+    /// <summary>
+    /// Precarga la UI de upgrades en background sin mostrarla.
+    /// Útil para llamar al inicio de un nivel de combate para evitar delay posterior.
+    /// </summary>
+    public async Task PreloadAsync()
+    {
+        if (_isLoaded)
         {
-            if (_isLoaded)
-            {
-                GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
-                return;
-            }
-
-            if (_isLoading)
-            {
-                GameLog.Log("UpgradeUILoader: Already loading, waiting...");
-                await WaitForLoad();
-                return;
-            }
-
-            GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
-            await LoadUpgradeUI();
-        
-            if (_isLoaded)
-            {
-                GameLog.Log("UpgradeUILoader: Preload completed successfully.");
-            }
+            GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
+            return;
         }
+
+        if (_isLoading)
+        {
+            GameLog.Log("UpgradeUILoader: Already loading, waiting...");
+            await WaitForLoad();
+            return;
+        }
+
+        GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
+        await LoadUpgradeUI();
+
+        if (_isLoaded)
+        {
+            GameLog.Log("UpgradeUILoader: Preload completed successfully.");
+        }
+    }
 
     /// <summary>
     /// Carga el prefab de UpgradeUI via Addressables.
@@ -122,10 +123,15 @@ public class UpgradeUILoader : IUpgradeUI
 
                 if (_upgradeUIInstance != null)
                 {
-                    // Inyectar dependencias manualmente
-                    _upgradeUIInstance.Construct(_upgradeService, _levelService, _combatTransitionService);
+                    if (_resolver != null)
+                    {
+                        _resolver.InjectGameObject(instantiatedObject);
+                    }
+                    else
+                    {
+                        GameLog.LogWarning("UpgradeUILoader: IObjectResolver not available, dependencies will not be injected into UpgradeUI instance.");
+                    }
 
-                    // Marcar como persistente entre escenas
                     Object.DontDestroyOnLoad(instantiatedObject);
 
                     _isLoaded = true;
