@@ -4,6 +4,9 @@ using System.Linq;
 using TMPro;
 using System.Collections.Generic;
 using VContainer;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Manages the combat UI, including player stats display, action buttons, and target selection.
@@ -25,15 +28,12 @@ public class CombatUI : UIPanel
     [SerializeField] private Button specialAttackButton;
     [SerializeField] private Button meditateButton;
 
-    [Header("Ability Assets")]
-    [Tooltip("Assign the ScriptableObject for the Direct Attack here.")]
-    [SerializeField] private Ability directAttackAbility;
-    [Tooltip("Assign the ScriptableObject for the Area Attack here.")]
-    [SerializeField] private Ability areaAttackAbility;
-    [Tooltip("Assign the ScriptableObject for the Special Attack here.")]
-    [SerializeField] private Ability specialAttackAbility;
-    [Tooltip("Assign the ScriptableObject for the Meditate Ability here.")]
-    [SerializeField] private Ability meditateAbility;
+    // Abilities loaded dynamically via Addressables
+    private Ability directAttackAbility;
+    private Ability areaAttackAbility;
+    private Ability specialAttackAbility;
+    private Ability meditateAbility;
+    private bool _abilitiesLoaded = false;
 
     private IHealthController _playerHealth;
     private IActionPointController _playerAP;
@@ -46,7 +46,35 @@ public class CombatUI : UIPanel
     {
         GameLog.Log("CombatUI.Awake called.");
         base.Awake(); // Caches the CanvasGroup from UIPanel
-        SetupButtonListeners();
+        _ = LoadAbilitiesAsync();
+    }
+
+    private async Task LoadAbilitiesAsync()
+    {
+        try
+        {
+            GameLog.Log("CombatUI: Loading abilities via Addressables...");
+
+            var directTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.Direct).Task;
+            var areaTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.Area).Task;
+            var specialTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.Special).Task;
+            var meditateTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.GainAP).Task;
+
+            await Task.WhenAll(directTask, areaTask, specialTask, meditateTask);
+
+            directAttackAbility = directTask.Result;
+            areaAttackAbility = areaTask.Result;
+            specialAttackAbility = specialTask.Result;
+            meditateAbility = meditateTask.Result;
+
+            _abilitiesLoaded = true;
+            SetupButtonListeners();
+            GameLog.Log("CombatUI: Abilities loaded successfully.");
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"CombatUI: Failed to load abilities via Addressables. {ex.Message}");
+        }
     }
 
     [Inject]
@@ -61,11 +89,14 @@ public class CombatUI : UIPanel
         if (_combatService != null)
         {
             _combatService.OnPhaseChanged += HandlePhaseChanged;
+            HandlePhaseChanged(_combatService.CurrentPhase);
         }
         else
         {
-            GameLog.LogError("CombatUI has not been injected with ICombatService.", this);
+            // Inyección tardía: UIManager inyecta después de instanciar el prefab.
+            // Evitar error ruidoso; dejar el panel oculto hasta que llegue la inyección.
             if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
+            GameLog.Log("CombatUI: Waiting for DI to complete (ICombatService not yet injected).", this);
         }
     }
 
@@ -76,6 +107,15 @@ public class CombatUI : UIPanel
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
         }
         UnsubscribeFromPlayerEvents();
+    }
+
+    private void OnDestroy()
+    {
+        // Release Addressables assets
+        if (directAttackAbility != null) Addressables.Release(directAttackAbility);
+        if (areaAttackAbility != null) Addressables.Release(areaAttackAbility);
+        if (specialAttackAbility != null) Addressables.Release(specialAttackAbility);
+        if (meditateAbility != null) Addressables.Release(meditateAbility);
     }
 
     private void HandlePhaseChanged(CombatPhase newPhase)
@@ -96,6 +136,13 @@ public class CombatUI : UIPanel
 
         if (inSelection)
         {
+            // Evitar suscripción si aún no hay jugador asignado (p.ej., antes de que empiece el combate)
+            if (_combatService == null || _combatService.Player == null)
+            {
+                GameLog.Log("CombatUI: Player is not available yet; will subscribe when combat initializes.", this);
+                if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
+                return;
+            }
             SubscribeToPlayerEvents();
             // If we return to selection phase, cancel any pending targeting
             if (_pendingAbility != null)
@@ -111,12 +158,13 @@ public class CombatUI : UIPanel
 
     private void SubscribeToPlayerEvents()
     {
-        if (_combatService == null || _playerHealth != null) return; // Already subscribed
+        if (_combatService == null || _playerHealth != null) return; // Already subscribed or no service yet
 
         GameObject player = _combatService.Player;
         if (player == null)
         {
-            GameLog.LogError("ICombatService returned a null player reference.", this);
+            // Aún no se inicializa el combate; esperar a próximo cambio de fase.
+            GameLog.Log("CombatUI: Service returned null player; deferring player subscription.", this);
             return;
         }
 
@@ -153,17 +201,42 @@ public class CombatUI : UIPanel
 
     private void SetupButtonListeners()
     {
+        if (!_abilitiesLoaded)
+        {
+            GameLog.LogWarning("CombatUI: Abilities not loaded yet, deferring button setup.");
+            return;
+        }
+
         if (directAttackButton == null) GameLog.LogWarning("Direct Attack Button is NULL");
         if (areaAttackButton == null) GameLog.LogWarning("Area Attack Button is NULL");
         if (specialAttackButton == null) GameLog.LogWarning("Special Attack Button is NULL");
         if (meditateButton == null) GameLog.LogWarning("Meditate Button is NULL");
 
-        directAttackButton.onClick.AddListener(() => RequestAbility(directAttackAbility));
-        areaAttackButton.onClick.AddListener(() => RequestAbility(areaAttackAbility));
-        specialAttackButton.onClick.AddListener(() => RequestAbility(specialAttackAbility));
-        meditateButton.onClick.AddListener(() => RequestAbility(meditateAbility));
+        _actionButtons = new List<Button>();
 
-        _actionButtons = new List<Button> { directAttackButton, areaAttackButton, specialAttackButton, meditateButton };
+        if (directAttackButton != null)
+        {
+            directAttackButton.onClick.AddListener(() => RequestAbility(directAttackAbility));
+            _actionButtons.Add(directAttackButton);
+        }
+
+        if (areaAttackButton != null)
+        {
+            areaAttackButton.onClick.AddListener(() => RequestAbility(areaAttackAbility));
+            _actionButtons.Add(areaAttackButton);
+        }
+
+        if (specialAttackButton != null)
+        {
+            specialAttackButton.onClick.AddListener(() => RequestAbility(specialAttackAbility));
+            _actionButtons.Add(specialAttackButton);
+        }
+
+        if (meditateButton != null)
+        {
+            meditateButton.onClick.AddListener(() => RequestAbility(meditateAbility));
+            _actionButtons.Add(meditateButton);
+        }
     }
 
     private void UpdateHealthUI(int current, int max)
@@ -246,6 +319,7 @@ public class CombatUI : UIPanel
 
     private void CancelTargetingMode()
     {
+        bool hadPendingAbility = _pendingAbility != null;
         _pendingAbility = null;
         ToggleActionButtons(true);
         if (statusText != null)
@@ -254,10 +328,20 @@ public class CombatUI : UIPanel
         }
         // Restore UI raycast blocking
         if (CanvasGroup != null) CanvasGroup.blocksRaycasts = true;
+
+        if (hadPendingAbility && _combatService != null && _combatService.CurrentPhase == CombatPhase.Targeting)
+        {
+            _combatService.CancelTargeting();
+        }
     }
 
     private void ToggleActionButtons(bool interactable)
     {
+        if (_actionButtons == null)
+        {
+            return;
+        }
+
         foreach (var button in _actionButtons)
         {
             if (button != null) button.interactable = interactable;

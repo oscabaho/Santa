@@ -4,10 +4,30 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VContainer;
 
 public class UIManager : MonoBehaviour, IUIManager
 {
     private readonly Dictionary<string, GameObject> _addressToInstanceMap = new Dictionary<string, GameObject>();
+    private IObjectResolver _resolver;
+
+    [Inject]
+    public void Construct(IObjectResolver resolver)
+    {
+        _resolver = resolver;
+    }
+
+    /// <summary>
+    /// Inyecta dependencias recursivamente en todos los MonoBehaviour del GameObject y sus hijos
+    /// </summary>
+    private void InjectRecursively(GameObject instance)
+    {
+        var components = instance.GetComponentsInChildren<MonoBehaviour>(true);
+        foreach (var component in components)
+        {
+            _resolver.Inject(component);
+        }
+    }
 
     private void OnDestroy()
     {
@@ -50,6 +70,12 @@ public class UIManager : MonoBehaviour, IUIManager
         {
             var newPanelInstance = handle.Result;
             _addressToInstanceMap[panelAddress] = newPanelInstance;
+            
+            // Inyectar dependencias en el panel cargado dinámicamente
+            if (_resolver != null)
+            {
+                InjectRecursively(newPanelInstance);
+            }
             
             var panelComponent = newPanelInstance.GetComponent<UIPanel>();
             if (panelComponent != null)
@@ -132,6 +158,12 @@ public class UIManager : MonoBehaviour, IUIManager
         {
             var instance = handle.Result;
             _addressToInstanceMap[panelAddress] = instance;
+
+            // Inyectar dependencias en el panel precargado
+            if (_resolver != null)
+            {
+                InjectRecursively(instance);
+            }
 
             var panel = instance.GetComponent<UIPanel>();
             if (panel != null)

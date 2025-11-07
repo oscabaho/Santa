@@ -14,7 +14,7 @@ public class CombatScenePool : MonoBehaviour
 {
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
-        private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
+    private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
     private readonly Vector3 _combatSceneOffset = new Vector3(0f, -2000f, 0f);
 
     /// <summary>
@@ -88,12 +88,26 @@ public class CombatScenePool : MonoBehaviour
 
 
     /// <summary>
-    /// Release an instance back to the pool (deactivate and store). If Addressables was used to instantiate,
-    /// caller is responsible for Addressables.ReleaseInstance if desired (we keep the instance alive for pooling).
+    /// Release an instance back to the pool (deactivate and store).
+    /// If <paramref name="releaseAddressablesInstance"/> is true, the instance is released back to Addressables instead.
     /// </summary>
-    public void ReleaseInstance(string key, GameObject instance)
+    public void ReleaseInstance(string key, GameObject instance, bool releaseAddressablesInstance = false)
     {
         if (instance == null || string.IsNullOrEmpty(key)) return;
+
+#if UNITY_ADDRESSABLES
+        if (releaseAddressablesInstance)
+        {
+            Addressables.ReleaseInstance(instance);
+            return;
+        }
+#else
+        if (releaseAddressablesInstance)
+        {
+            GameLog.LogWarning("CombatScenePool: Requested to release Addressables instance, but UNITY_ADDRESSABLES is not defined. Instance will remain pooled.");
+        }
+#endif
+
         instance.SetActive(false);
         if (!_pool.TryGetValue(key, out var q))
         {

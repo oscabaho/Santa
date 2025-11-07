@@ -4,6 +4,9 @@ using VContainer.Unity;
 
 public class GameLifetimeScope : LifetimeScope
 {
+    [Header("Shared Assets")]
+    [SerializeField]
+    private InputReader inputReaderAsset;
     [SerializeField]
     private UIManager uiManagerInstance;
 
@@ -44,43 +47,126 @@ public class GameLifetimeScope : LifetimeScope
 
     protected override void Configure(IContainerBuilder builder)
     {
-        // Registramos UIManager
-        builder.RegisterComponent(uiManagerInstance).As<IUIManager>().AsSelf();
+        // Registrar InputReader compartido si está asignado (evita desincronización entre UI y gameplay)
+        if (inputReaderAsset != null)
+        {
+            builder.RegisterInstance(inputReaderAsset).AsSelf();
+        }
+        else
+        {
+            GameLog.Log("GameLifetimeScope: InputReader asset not assigned. Ensure consumers reference the same asset.");
+        }
+        // Registramos UIManager (preferimos instancia asignada, si no, buscamos en jerarquía)
+        if (uiManagerInstance != null)
+        {
+            builder.RegisterComponent(uiManagerInstance).As<IUIManager>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<UIManager>().As<IUIManager>().AsSelf();
+            GameLog.Log("GameLifetimeScope: UIManager instance not assigned in inspector. Registered UIManager found in hierarchy.");
+        }
 
-        // Registramos TurnBasedCombatManager
-        builder.RegisterComponent(turnBasedCombatManagerInstance).As<ICombatService>().AsSelf();
+        // Registramos TurnBasedCombatManager (instancia o jerarquía)
+        if (turnBasedCombatManagerInstance != null)
+        {
+            builder.RegisterComponent(turnBasedCombatManagerInstance).As<ICombatService>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<TurnBasedCombatManager>().As<ICombatService>().AsSelf();
+            GameLog.Log("GameLifetimeScope: TurnBasedCombatManager not assigned. Registered from hierarchy.");
+        }
 
         // TODO: Descomentar cuando el sistema de audio esté implementado
-        // Registramos AudioManager
-        // builder.RegisterComponent(audioManagerInstance).As<IAudioService>().AsSelf();
+    // Registramos AudioManager (instancia o jerarquía)
+    // if (audioManagerInstance != null)
+    // {
+    //     builder.RegisterComponent(audioManagerInstance).As<IAudioService>().AsSelf();
+    // }
+    // else
+    // {
+    //     builder.RegisterComponentInHierarchy<AudioManager>().As<IAudioService>().AsSelf();
+    //     GameLog.Log("GameLifetimeScope: AudioManager not assigned. Registered from hierarchy.");
+    // }
 
-        // Registramos CombatTransitionManager
-        builder.RegisterComponent(combatTransitionManagerInstance).As<ICombatTransitionService>().AsSelf();
+        // Registramos CombatTransitionManager (instancia o jerarquía)
+        if (combatTransitionManagerInstance != null)
+        {
+            builder.RegisterComponent(combatTransitionManagerInstance).As<ICombatTransitionService>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<CombatTransitionManager>().As<ICombatTransitionService>().AsSelf();
+            GameLog.Log("GameLifetimeScope: CombatTransitionManager not assigned. Registered from hierarchy.");
+        }
 
-        // Registramos UpgradeManager
-        builder.RegisterComponent(upgradeManagerInstance).As<IUpgradeService>().As<IUpgradeTarget>().AsSelf();
+        // Registramos UpgradeManager (instancia o jerarquía)
+        if (upgradeManagerInstance != null)
+        {
+            builder.RegisterComponent(upgradeManagerInstance).As<IUpgradeService>().As<IUpgradeTarget>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<UpgradeManager>().As<IUpgradeService>().As<IUpgradeTarget>().AsSelf();
+            GameLog.Log("GameLifetimeScope: UpgradeManager not assigned. Registered from hierarchy.");
+        }
 
         // Registramos GameEventBus como Singleton
         builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
-        // Registramos GameStateManager
-        builder.RegisterComponent(gameStateManagerInstance).As<IGameStateService>().AsSelf();
+        // Registramos GameStateManager (instancia o jerarquía)
+        if (gameStateManagerInstance != null)
+        {
+            builder.RegisterComponent(gameStateManagerInstance).As<IGameStateService>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<GameStateManager>().As<IGameStateService>().AsSelf();
+            GameLog.Log("GameLifetimeScope: GameStateManager not assigned. Registered from hierarchy.");
+        }
 
-        // Registramos GameplayUIManager
-        builder.RegisterComponent(gameplayUIManagerInstance).As<IGameplayUIService>().AsSelf();
+        // Registramos GameplayUIManager (instancia o jerarquía)
+        if (gameplayUIManagerInstance != null)
+        {
+            builder.RegisterComponent(gameplayUIManagerInstance).As<IGameplayUIService>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<GameplayUIManager>().As<IGameplayUIService>().AsSelf();
+            GameLog.Log("GameLifetimeScope: GameplayUIManager not assigned. Registered from hierarchy.");
+        }
 
-        // Registramos LevelManager
-        builder.RegisterComponent(levelManagerInstance).As<ILevelService>().AsSelf();
+        // Registramos LevelManager (instancia o jerarquía)
+        if (levelManagerInstance != null)
+        {
+            builder.RegisterComponent(levelManagerInstance).As<ILevelService>().AsSelf();
+        }
+        else
+        {
+            builder.RegisterComponentInHierarchy<LevelManager>().As<ILevelService>().AsSelf();
+            GameLog.Log("GameLifetimeScope: LevelManager not assigned. Registered from hierarchy.");
+        }
 
         // TODO: Descomentar cuando el sistema de VFX esté implementado
-        // Registramos VFXManager
-        // builder.RegisterComponent(vfxManagerInstance).As<IVFXService>().AsSelf();
+    // Registramos VFXManager (instancia o jerarquía)
+    // if (vfxManagerInstance != null)
+    // {
+    //     builder.RegisterComponent(vfxManagerInstance).As<IVFXService>().AsSelf();
+    // }
+    // else
+    // {
+    //     builder.RegisterComponentInHierarchy<VFXManager>().As<IVFXService>().AsSelf();
+    //     GameLog.Log("GameLifetimeScope: VFXManager not assigned. Registered from hierarchy.");
+    // }
 
         // --- UI Dinámica con Addressables ---
         // UpgradeUI se carga via Addressables, igual que las otras UIs del proyecto
         // La instancia la maneja UpgradeUILoader que se registra como IUpgradeUI
         builder.Register<UpgradeUILoader>(Lifetime.Singleton)
             .As<IUpgradeUI>()
+            .WithParameter(typeof(ILevelService), resolver => resolver.Resolve<ILevelService>())
+            .WithParameter(typeof(ICombatTransitionService), resolver => resolver.Resolve<ICombatTransitionService>())
             .AsSelf();
 
             // Registrar el lifecycle manager (OPCIONAL) para preload y release automático
@@ -91,9 +177,11 @@ public class GameLifetimeScope : LifetimeScope
 
         // --- Componentes en la jerarquía ---
         builder.RegisterComponentInHierarchy<GameInitializer>();
-    builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
-        builder.RegisterComponentInHierarchy<CombatUI>();
-        // NOTA: UpgradeUI ahora se instancia dinámicamente desde el prefab (ver arriba)
+        builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
+        
+        // NOTA: CombatUI y UpgradeUI se instancian dinámicamente via Addressables (ver UIManager)
+        // No deben estar registrados aquí ni en la escena base
+        
         builder.RegisterComponentInHierarchy<CombatCameraManager>().As<ICombatCameraManager>().AsSelf();
         builder.RegisterComponentInHierarchy<CombatScenePool>().AsSelf();
         builder.RegisterComponentInHierarchy<ScreenFade>().AsSelf();
