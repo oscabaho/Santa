@@ -42,28 +42,12 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
         actionButtonGameObject = button;
         GameLog.Log("Action Button was registered successfully.", this);
 
-            // If a state was queued before the button was ready, apply it now.
-            if (_queuedShowState.HasValue)
-            {
-                GameLog.Log($"GameplayUIManager: Applying queued ShowActionButton={_queuedShowState.Value} on registration.", this);
-                actionButtonGameObject.SetActive(_queuedShowState.Value);
-                _queuedShowState = null; // Clear the queued state
-            }
-            else
-            {
-                if (_lastRequestedShowState.HasValue)
-                {
-                    // Apply the last requested state even if it was made before registration but not queued (e.g., race where button reference was mistaken as present).
-                    actionButtonGameObject.SetActive(_lastRequestedShowState.Value);
-                    GameLog.Log($"GameplayUIManager: No queued state, but last requested state={_lastRequestedShowState.Value} applied on registration.", this);
-                }
-                else
-                {
-                    // If no state was queued and nothing requested yet, start inactive.
-                    actionButtonGameObject.SetActive(false);
-                    GameLog.Log("GameplayUIManager: No queued or last requested state. Forcing Action Button inactive on registration.", this);
-                }
-            }
+        // Apply the last known desired state, with a preference for a recently queued state.
+        // If no state has ever been requested, default to inactive.
+        bool initialState = _queuedShowState ?? _lastRequestedShowState ?? false;
+        actionButtonGameObject.SetActive(initialState);
+        GameLog.Log($"GameplayUIManager: Applied initial state ShowActionButton={initialState} on registration.", this);
+        _queuedShowState = null; // Clear the queued state
 
         // Mark as ready and notify listeners
         if (!_isReady)
