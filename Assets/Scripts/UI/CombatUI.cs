@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using VContainer;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.Exceptions;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -71,9 +72,13 @@ public class CombatUI : UIPanel
             SetupButtonListeners();
             GameLog.Log("CombatUI: Abilities loaded successfully.");
         }
+        catch (OperationException ex)
+        {
+            GameLog.LogError($"CombatUI: Failed to load abilities via Addressables. Operation failed: {ex.Message}");
+        }
         catch (System.Exception ex)
         {
-            GameLog.LogError($"CombatUI: Failed to load abilities via Addressables. {ex.Message}");
+            GameLog.LogError($"CombatUI: Unexpected error while loading abilities. {ex.Message}");
         }
     }
 
@@ -214,29 +219,20 @@ public class CombatUI : UIPanel
 
         _actionButtons = new List<Button>();
 
-        if (directAttackButton != null)
+        // Local helper to reduce duplication
+        void AddButtonListener(Button button, Ability ability)
         {
-            directAttackButton.onClick.AddListener(() => RequestAbility(directAttackAbility));
-            _actionButtons.Add(directAttackButton);
+            if (button != null)
+            {
+                button.onClick.AddListener(() => RequestAbility(ability));
+                _actionButtons.Add(button);
+            }
         }
 
-        if (areaAttackButton != null)
-        {
-            areaAttackButton.onClick.AddListener(() => RequestAbility(areaAttackAbility));
-            _actionButtons.Add(areaAttackButton);
-        }
-
-        if (specialAttackButton != null)
-        {
-            specialAttackButton.onClick.AddListener(() => RequestAbility(specialAttackAbility));
-            _actionButtons.Add(specialAttackButton);
-        }
-
-        if (meditateButton != null)
-        {
-            meditateButton.onClick.AddListener(() => RequestAbility(meditateAbility));
-            _actionButtons.Add(meditateButton);
-        }
+        AddButtonListener(directAttackButton, directAttackAbility);
+        AddButtonListener(areaAttackButton, areaAttackAbility);
+        AddButtonListener(specialAttackButton, specialAttackAbility);
+        AddButtonListener(meditateButton, meditateAbility);
     }
 
     private void UpdateHealthUI(int current, int max)

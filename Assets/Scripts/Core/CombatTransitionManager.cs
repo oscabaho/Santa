@@ -118,13 +118,21 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
     private IEnumerator ExecuteStartSequence()
     {
+        // Show loading hint while running the transition
+        _screenFade?.ShowLoading();
         yield return startCombatSequence.Execute(_currentContext);
+        // Ensure loading hint is hidden after sequence completes
+        _screenFade?.HideLoading();
         _startSequenceRoutine = null;
     }
 
     private IEnumerator ExecuteEndSequence()
     {
+        // Show loading hint while running the transition
+        _screenFade?.ShowLoading();
         yield return endCombatSequence.Execute(_currentContext);
+        // Ensure loading hint is hidden after sequence completes
+        _screenFade?.HideLoading();
         _gameStateService?.EndCombat();
         CleanupContext();
         _endSequenceRoutine = null;
