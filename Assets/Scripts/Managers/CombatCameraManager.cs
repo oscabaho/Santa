@@ -79,6 +79,13 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     private void HandleCombatStarted()
     {
         _inCombat = true;
+        
+        // If cameras are not manually assigned, find them automatically.
+        if (_mainCombatCamera == null || _targetSelectionCamera == null)
+        {
+            FindAndAssignCameras();
+        }
+
         SwitchToMainCamera();
     }
 
@@ -86,6 +93,43 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     {
         _inCombat = false;
         SetBothCamerasInactive();
+    }
+
+    /// <summary>
+    /// Finds and assigns combat cameras by looking for their tags in the scene.
+    /// This allows for robust, automatic setup without manual assignments in the inspector.
+    /// </summary>
+    private void FindAndAssignCameras()
+    {
+        GameLog.Log("CombatCameraManager is searching for cameras by tag...");
+
+        if (_mainCombatCamera == null)
+        {
+            GameObject mainCamObj = GameObject.FindWithTag("MainCombatCamera");
+            if (mainCamObj != null)
+            {
+                _mainCombatCamera = mainCamObj.GetComponent<CinemachineCamera>();
+                GameLog.Log("Found and assigned MainCombatCamera.");
+            }
+            else
+            {
+                GameLog.LogError("Could not find GameObject with tag 'MainCombatCamera'.");
+            }
+        }
+
+        if (_targetSelectionCamera == null)
+        {
+            GameObject targetCamObj = GameObject.FindWithTag("TargetSelectionCamera");
+            if (targetCamObj != null)
+            {
+                _targetSelectionCamera = targetCamObj.GetComponent<CinemachineCamera>();
+                GameLog.Log("Found and assigned TargetSelectionCamera.");
+            }
+            else
+            {
+                GameLog.LogError("Could not find GameObject with tag 'TargetSelectionCamera'.");
+            }
+        }
     }
 
     public void SwitchToMainCamera()
