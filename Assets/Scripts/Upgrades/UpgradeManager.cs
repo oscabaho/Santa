@@ -22,6 +22,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
     public int SpecialAttackDamage { get; private set; } = 75;
     public float SpecialAttackMissChance { get; private set; } = 0.2f;
     public int EnergyGainedPerTurn { get; private set; } = 34;
+    public int MaxActionPoints { get; private set; } = 100;
 
     [Inject]
     public void Construct(IUpgradeUI upgradeUI, ICombatTransitionService combatTransitionService)
@@ -87,6 +88,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
     public void IncreaseSpecialAttackDamage(int amount) => SpecialAttackDamage += amount;
     public void IncreaseEnergyGainedPerTurn(int amount) => EnergyGainedPerTurn += amount;
     public void ReduceSpecialAttackMissChance(float amount) => SpecialAttackMissChance = Mathf.Max(0, SpecialAttackMissChance - amount);
+    public void IncreaseMaxActionPoints(int amount) => MaxActionPoints += amount;
 
     private void SaveStats()
     {
@@ -95,6 +97,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         PlayerPrefs.SetInt(nameof(SpecialAttackDamage), SpecialAttackDamage);
         PlayerPrefs.SetFloat(nameof(SpecialAttackMissChance), SpecialAttackMissChance);
         PlayerPrefs.SetInt(nameof(EnergyGainedPerTurn), EnergyGainedPerTurn);
+        PlayerPrefs.SetInt(nameof(MaxActionPoints), MaxActionPoints);
         PlayerPrefs.Save();
     }
 
@@ -105,5 +108,6 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         SpecialAttackDamage = PlayerPrefs.GetInt(nameof(SpecialAttackDamage), SpecialAttackDamage);
         SpecialAttackMissChance = PlayerPrefs.GetFloat(nameof(SpecialAttackMissChance), SpecialAttackMissChance);
         EnergyGainedPerTurn = PlayerPrefs.GetInt(nameof(EnergyGainedPerTurn), EnergyGainedPerTurn);
+        MaxActionPoints = PlayerPrefs.GetInt(nameof(MaxActionPoints), MaxActionPoints);
     }
 }

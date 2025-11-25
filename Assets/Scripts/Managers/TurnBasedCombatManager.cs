@@ -89,6 +89,22 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
 
+        // Sync Player AP with UpgradeService
+        if (_upgradeService != null)
+        {
+            if (_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
+            {
+                int maxAP = _upgradeService.MaxActionPoints;
+                playerAP.SetMaxValue(maxAP);
+                playerAP.SetValue(maxAP); // Set to max AP (base value)
+                GameLog.Log($"TurnBasedCombatManager: Synced Player AP to UpgradeService. MaxAP set to {maxAP}.");
+            }
+            else
+            {
+                GameLog.LogWarning("TurnBasedCombatManager: Player has no ActionPointComponent to sync upgrades to.");
+            }
+        }
+
         gameObject.SetActive(true);
         StartNewTurn();
             // Log all received participants and their tags
@@ -159,7 +175,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (CurrentPhase != CombatPhase.Selection) return;
 
         // If the ability requires a target but none was provided, switch to Targeting phase.
-        if (ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
+        if (ability.Targeting != null && ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
         {
             _abilityPendingTarget = ability;
             CurrentPhase = CombatPhase.Targeting;
@@ -228,7 +244,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         }
 
         // Re-validate targeting here for the final submission
-        if (ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
+        if (ability.Targeting != null && ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
         {
             GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No target specified for a single-target ability.");
             OnPlayerTurnStarted?.Invoke(); // Allow player to try again

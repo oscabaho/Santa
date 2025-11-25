@@ -15,9 +15,9 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     [SerializeField] private TransitionSequence endCombatSequence;
 
     // --- Injected References ---
-    private ScreenFade _screenFade;
     private IUIManager _uiManager;
     private IGameStateService _gameStateService;
+    private ICombatCameraManager _combatCameraManager;
 
     // --- Discovered References ---
     private GameObject _explorationCamera;
@@ -30,11 +30,11 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private Coroutine _endSequenceRoutine;
 
     [Inject]
-    public void Construct(ScreenFade screenFade, IUIManager uiManager, IGameStateService gameStateService)
+    public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null)
     {
-        _screenFade = screenFade;
         _uiManager = uiManager;
         _gameStateService = gameStateService;
+        _combatCameraManager = combatCameraManager; // May be null; will log on use.
     }
 
     private void Awake()
@@ -67,13 +67,30 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             return;
         }
 
+        // --- DYNAMIC CAMERA ASSIGNMENT ---
+        var arenaSettings = _currentCombatSceneParent.GetComponent<CombatArenaSettings>();
+        if (arenaSettings != null)
+        {
+            if (_combatCameraManager != null)
+            {
+                _combatCameraManager.SetCombatCameras(arenaSettings.MainCombatCamera, arenaSettings.TargetSelectionCamera);
+            }
+            else
+            {
+                GameLog.LogWarning("CombatTransitionManager: ICombatCameraManager not injected; cameras will rely on fallback tag search inside CombatCameraManager.");
+            }
+        }
+        else
+        {
+            GameLog.LogWarning($"CombatTransitionManager: No CombatArenaSettings found on {_currentCombatSceneParent.name}. CombatCameraManager will attempt fallback tag search.");
+        }
+
         // Build and store the context for both start and end transitions
         _currentContext = new TransitionContext();
         _currentContext.AddTarget(TargetId.ExplorationCamera, _explorationCamera);
         _currentContext.AddTarget(TargetId.ExplorationPlayer, _explorationPlayer);
         _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
         _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
-        _currentContext.AddToContext("ScreenFade", _screenFade);
         _currentContext.AddToContext("UIManager", _uiManager);
         _currentContext.AddToContext("GameStateService", _gameStateService);
         
@@ -118,21 +135,13 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
     private IEnumerator ExecuteStartSequence()
     {
-        // Show loading hint while running the transition
-        _screenFade?.ShowLoading();
         yield return startCombatSequence.Execute(_currentContext);
-        // Ensure loading hint is hidden after sequence completes
-        _screenFade?.HideLoading();
         _startSequenceRoutine = null;
     }
 
     private IEnumerator ExecuteEndSequence()
     {
-        // Show loading hint while running the transition
-        _screenFade?.ShowLoading();
         yield return endCombatSequence.Execute(_currentContext);
-        // Ensure loading hint is hidden after sequence completes
-        _screenFade?.HideLoading();
         _gameStateService?.EndCombat();
         CleanupContext();
         _endSequenceRoutine = null;

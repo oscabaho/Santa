@@ -14,6 +14,8 @@ public class PlayerInteraction : MonoBehaviour
     private IObjectResolver _resolver;
     private bool? _desiredActionVisible; // null = no preference yet
     private bool _readyHooked;
+    private float _lastNoTriggerLogTime;
+    private const float NoTriggerLogCooldown = 2f; // seconds between warning logs
 
     [Inject]
     public void Construct(IGameplayUIService gameplayUIService, IObjectResolver resolver, InputReader injectedInputReader)
@@ -76,7 +78,13 @@ public class PlayerInteraction : MonoBehaviour
         }
         else
         {
-            GameLog.LogWarning("PlayerInteraction: OnInteract called but no CombatTrigger is set. Player might not be inside a trigger zone.", this);
+            // Throttle warning spam if player repeatedly interacts outside a trigger zone.
+            float t = Time.unscaledTime;
+            if (t - _lastNoTriggerLogTime > NoTriggerLogCooldown)
+            {
+                _lastNoTriggerLogTime = t;
+                GameLog.LogWarning("PlayerInteraction: OnInteract called but no CombatTrigger is set. Player might not be inside a trigger zone.", this);
+            }
         }
     }
 

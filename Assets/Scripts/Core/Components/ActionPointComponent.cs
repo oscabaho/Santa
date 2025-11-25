@@ -34,4 +34,15 @@ public class ActionPointComponent : StatComponent
     {
         SetToMax();
     }
+
+    /// <summary>
+    /// Override SetValue to allow AP to exceed MaxValue (uncapped).
+    /// MaxValue acts as the base starting value.
+    /// </summary>
+    public override void SetValue(int newValue)
+    {
+        // Only clamp the lower bound to 0. Upper bound is uncapped.
+        currentValue = UnityEngine.Mathf.Max(0, newValue);
+        TriggerValueChanged();
+    }
 }

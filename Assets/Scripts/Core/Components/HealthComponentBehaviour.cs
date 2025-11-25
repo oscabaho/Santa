@@ -16,6 +16,7 @@ public class HealthComponentBehaviour : MonoBehaviour, IHealthController
     public int MaxValue => health.MaxValue;
     public void AffectValue(int value) => health.AffectValue(value);
     public void SetValue(int value) => health.SetValue(value);
+    public void SetMaxValue(int value) => health.SetMaxValue(value);
 
     /// <summary>
     /// Establece la vida al máximo.

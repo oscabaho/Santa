@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -9,13 +10,21 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 
 /// <summary>
 /// Pool for combat scene prefabs loaded via Addressables. Reuses instances to optimize performance.
+/// Injects VContainer dependencies into all components of instantiated arenas.
 /// </summary>
 public class CombatScenePool : MonoBehaviour
 {
+    private IObjectResolver _resolver;
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
     private readonly Vector3 _combatSceneOffset = new Vector3(0f, -2000f, 0f);
+
+    [Inject]
+    public void Construct(IObjectResolver resolver)
+    {
+        _resolver = resolver;
+    }
 
     /// <summary>
     /// Get an instance for the given key. If pool has available instance, returns it.
@@ -68,6 +77,8 @@ public class CombatScenePool : MonoBehaviour
 
             if (handle.Status == AsyncOperationStatus.Succeeded && inst != null)
             {
+                // Inject VContainer dependencies into all components in the arena
+                InjectDependenciesRecursively(inst);
                 return inst;
             }
             else
@@ -84,6 +95,41 @@ public class CombatScenePool : MonoBehaviour
 #endif
 
         return null;
+    }
+
+    /// <summary>
+    /// Injects VContainer dependencies recursively into all MonoBehaviour components.
+    /// This ensures dynamically instantiated objects receive their dependencies.
+    /// </summary>
+    private void InjectDependenciesRecursively(GameObject instance)
+    {
+        if (_resolver == null)
+        {
+            GameLog.LogWarning("CombatScenePool: IObjectResolver is null, cannot inject dependencies into combat arena.");
+            return;
+        }
+
+        var components = instance.GetComponentsInChildren<MonoBehaviour>(true);
+        int successCount = 0;
+        int failCount = 0;
+        
+        foreach (var component in components)
+        {
+            try
+            {
+                _resolver.Inject(component);
+                successCount++;
+            }
+            catch (System.Exception ex)
+            {
+                // Log warning but continue injecting other components
+                // Some dependencies (like CombatUI) may not be available yet
+                GameLog.LogWarning($"CombatScenePool: Failed to inject dependencies into {component.GetType().Name} on {component.gameObject.name}. Error: {ex.Message}");
+                failCount++;
+            }
+        }
+        
+        GameLog.Log($"CombatScenePool: Injected dependencies into {successCount}/{components.Length} components in arena '{instance.name}'. {failCount} failed (may be optional dependencies).");
     }
 
 
