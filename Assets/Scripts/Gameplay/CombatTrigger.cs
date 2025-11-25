@@ -79,15 +79,15 @@ public class CombatTrigger : MonoBehaviour
             ResetTriggerState();
             return;
         }
-        
+
         GameLog.Log("Player has interacted with a combat trigger.");
 
         var poolKey = _encounter.GetPoolKey();
-        if (_combatScenePool == null) 
+        if (_combatScenePool == null)
         {
             GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
             ResetTriggerState();
-            return; 
+            return;
         }
 
         try
@@ -122,7 +122,7 @@ public class CombatTrigger : MonoBehaviour
                 HandleCombatStartFailure();
                 return;
             }
-            
+
             _gameStateService.OnCombatEnded += OnCombatEnded;
             _isListeningForCombatEnd = true;
             _combatTransitionService.StartCombat(_activeCombatInstance);
@@ -137,7 +137,7 @@ public class CombatTrigger : MonoBehaviour
         }
     }
 
-    private void OnCombatEnded()
+    private void OnCombatEnded(bool playerWon)
     {
         // Release the instance back to the pool
         ReleaseActiveInstance();
@@ -150,7 +150,24 @@ public class CombatTrigger : MonoBehaviour
             _isListeningForCombatEnd = false;
         }
 
-        ResetTriggerState();
+        if (playerWon)
+        {
+            GameLog.Log($"Player won combat initiated by '{gameObject.name}'. Destroying enemy.");
+
+            // Disable collider before destroying to trigger OnTriggerExit on PlayerInteraction
+            // This ensures the interaction button is hidden
+            if (_interactionCollider != null)
+            {
+                _interactionCollider.enabled = false;
+            }
+
+            Destroy(gameObject);
+        }
+        else
+        {
+            GameLog.Log($"Player lost combat initiated by '{gameObject.name}'. Resetting trigger.");
+            ResetTriggerState();
+        }
     }
 
     private void HandleCombatStartFailure()

@@ -1,13 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using System.Linq;
-using TMPro;
 using System.Collections.Generic;
-using VContainer;
+using System.Linq;
+using System.Threading.Tasks;
+using TMPro;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.Exceptions;
-using System.Threading.Tasks;
+using UnityEngine.UI;
+using VContainer;
 
 /// <summary>
 /// Manages the combat UI, including player stats display, action buttons, and target selection.
@@ -22,6 +22,11 @@ public class CombatUI : UIPanel
     [SerializeField] private Slider playerHealthSlider;
     [SerializeField] private TextMeshProUGUI playerAPText;
     [SerializeField] private TextMeshProUGUI statusText; // To show "Select a target"
+
+    [Header("Enemy Stat Displays")]
+    [SerializeField] private Slider rightEnemyHealthSlider;
+    [SerializeField] private Slider leftEnemyHealthSlider;
+    [SerializeField] private Slider centralEnemyHealthSlider;
 
     [Header("Action Buttons")]
     [SerializeField] private Button directAttackButton;
@@ -39,6 +44,9 @@ public class CombatUI : UIPanel
     private IHealthController _playerHealth;
     private IActionPointController _playerAP;
     private ICombatService _combatService;
+
+    // Callbacks for enemy health updates
+    private Dictionary<IHealthController, System.Action<int, int>> _enemyHealthCallbacks = new Dictionary<IHealthController, System.Action<int, int>>();
 
     private Ability _pendingAbility;
     private List<Button> _actionButtons;
@@ -112,6 +120,7 @@ public class CombatUI : UIPanel
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
         }
         UnsubscribeFromPlayerEvents();
+        UnsubscribeFromEnemyEvents();
     }
 
     private void OnDestroy()
@@ -138,6 +147,9 @@ public class CombatUI : UIPanel
         {
             statusText.text = "";
         }
+
+        // Always try to subscribe to enemies if not already subscribed
+        SubscribeToEnemyEvents();
 
         if (inSelection)
         {
@@ -199,9 +211,70 @@ public class CombatUI : UIPanel
     {
         if (_playerHealth != null) _playerHealth.OnValueChanged -= UpdateHealthUI;
         if (_playerAP != null) _playerAP.OnValueChanged -= UpdateAPUI;
-        
+
         _playerHealth = null;
         _playerAP = null;
+    }
+
+    private void SubscribeToEnemyEvents()
+    {
+        if (_combatService == null || _enemyHealthCallbacks.Count > 0) return; // Already subscribed or no service
+
+        var enemies = _combatService.Enemies;
+        if (enemies == null || enemies.Count == 0) return;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy == null) continue;
+
+            var registry = enemy.GetComponent<IComponentRegistry>();
+            if (registry != null && registry.HealthController != null)
+            {
+                var health = registry.HealthController;
+                System.Action<int, int> callback = null;
+
+                if (enemy.name.Contains("Right", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    callback = (curr, max) => UpdateSlider(rightEnemyHealthSlider, curr, max);
+                }
+                else if (enemy.name.Contains("Left", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    callback = (curr, max) => UpdateSlider(leftEnemyHealthSlider, curr, max);
+                }
+                else if (enemy.name.Contains("Central", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    callback = (curr, max) => UpdateSlider(centralEnemyHealthSlider, curr, max);
+                }
+
+                if (callback != null)
+                {
+                    health.OnValueChanged += callback;
+                    _enemyHealthCallbacks[health] = callback;
+                    // Initial update
+                    callback(health.CurrentValue, health.MaxValue);
+                }
+            }
+        }
+    }
+
+    private void UnsubscribeFromEnemyEvents()
+    {
+        foreach (var kvp in _enemyHealthCallbacks)
+        {
+            if (kvp.Key != null)
+            {
+                kvp.Key.OnValueChanged -= kvp.Value;
+            }
+        }
+        _enemyHealthCallbacks.Clear();
+    }
+
+    private void UpdateSlider(Slider slider, int current, int max)
+    {
+        if (slider != null && max > 0)
+        {
+            slider.value = (float)current / max;
+        }
     }
 
     private void SetupButtonListeners()
@@ -302,7 +375,7 @@ public class CombatUI : UIPanel
         }
 
         _combatService.SubmitPlayerAction(_pendingAbility, target);
-        
+
         // Exit targeting mode
         _pendingAbility = null;
         if (statusText != null)

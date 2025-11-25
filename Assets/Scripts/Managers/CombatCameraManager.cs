@@ -1,5 +1,5 @@
-using UnityEngine;
 using Unity.Cinemachine;
+using UnityEngine;
 using VContainer;
 
 public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
@@ -15,6 +15,8 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 
     private const int ACTIVE_PRIORITY = 1000;
     private const int INACTIVE_PRIORITY = 0;
+
+    private readonly WaitForSeconds _debugWait = new WaitForSeconds(0.5f);
 
     [Inject]
     public void Construct(IGameStateService gameStateService, IObjectResolver resolver = null)
@@ -98,7 +100,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         SwitchToMainCamera();
     }
 
-    private void HandleCombatEnded()
+    private void HandleCombatEnded(bool playerWon)
     {
         _inCombat = false;
         if (_combatService != null)
@@ -120,7 +122,10 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         if (_mainCombatCamera == null) GameLog.LogError("SetCombatCameras received a null Main Camera.");
         if (_targetSelectionCamera == null) GameLog.LogError("SetCombatCameras received a null Target Camera.");
         SetBothCamerasInactive();
-        GameLog.Log($"CombatCameraManager: Cameras assigned dynamically. Main='{main?.name}', Target='{target?.name}'");
+
+        string mainName = main != null ? main.name : "null";
+        string targetName = target != null ? target.name : "null";
+        GameLog.Log($"CombatCameraManager: Cameras assigned dynamically. Main='{mainName}', Target='{targetName}'");
     }
 
     /// <summary>
@@ -188,19 +193,40 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 
     private System.Collections.IEnumerator DebugActiveCamera()
     {
-        yield return new WaitForSeconds(0.5f);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        yield return _debugWait;
         var brain = CinemachineBrain.GetActiveBrain(0);
         if (brain != null)
         {
             var activeCam = brain.ActiveVirtualCamera as UnityEngine.Object;
-            GameLog.Log($"[CM DEBUG] Active Brain Camera: {activeCam?.name ?? "NULL"}");
-            GameLog.Log($"[CM DEBUG] MainCam Priority: {_mainCombatCamera?.Priority}, Active: {_mainCombatCamera?.gameObject.activeInHierarchy}");
-            GameLog.Log($"[CM DEBUG] TargetCam Priority: {_targetSelectionCamera?.Priority}, Active: {_targetSelectionCamera?.gameObject.activeInHierarchy}");
+            string activeCamName = activeCam != null ? activeCam.name : "NULL";
+            GameLog.Log($"[CM DEBUG] Active Brain Camera: {activeCamName}");
+
+            if (_mainCombatCamera != null)
+            {
+                GameLog.Log($"[CM DEBUG] MainCam Priority: {_mainCombatCamera.Priority}, Active: {_mainCombatCamera.gameObject.activeInHierarchy}");
+            }
+            else
+            {
+                GameLog.Log("[CM DEBUG] MainCam is NULL");
+            }
+
+            if (_targetSelectionCamera != null)
+            {
+                GameLog.Log($"[CM DEBUG] TargetCam Priority: {_targetSelectionCamera.Priority}, Active: {_targetSelectionCamera.gameObject.activeInHierarchy}");
+            }
+            else
+            {
+                GameLog.Log("[CM DEBUG] TargetCam is NULL");
+            }
         }
         else
         {
             GameLog.LogError("[CM DEBUG] No Active CinemachineBrain found!");
         }
+#else
+        yield break;
+#endif
     }
 
     private void SwitchCamera(CinemachineCamera activeCam, CinemachineCamera inactiveCam)
@@ -226,11 +252,23 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 
     private System.Collections.IEnumerator DisableCameraAfterBlend(CinemachineCamera cam)
     {
+        // Wait one frame to allow CinemachineBrain to detect the priority change and start the blend
+        yield return null;
+
         float blendTime = 0f;
         var brain = CinemachineBrain.GetActiveBrain(0);
         if (brain != null)
         {
-            blendTime = brain.DefaultBlend.Time;
+            if (brain.IsBlending)
+            {
+                blendTime = brain.ActiveBlend.Duration;
+                GameLog.Log($"[CM DEBUG] Detected Active Blend. Duration: {blendTime}s");
+            }
+            else
+            {
+                blendTime = brain.DefaultBlend.Time;
+                GameLog.Log($"[CM DEBUG] No Active Blend. Using Default Duration: {blendTime}s");
+            }
         }
 
         // Wait for the blend to finish plus a small buffer

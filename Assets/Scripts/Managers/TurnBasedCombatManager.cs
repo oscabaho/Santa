@@ -1,9 +1,9 @@
-using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -107,39 +107,39 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         gameObject.SetActive(true);
         StartNewTurn();
-            // Log all received participants and their tags
-            if (participants == null || participants.Count == 0)
+        // Log all received participants and their tags
+        if (participants == null || participants.Count == 0)
+        {
+            GameLog.LogError("StartCombat called with null or empty participants list!");
+        }
+        else
+        {
+            GameLog.Log($"StartCombat received {participants.Count} participants:");
+            for (int i = 0; i < participants.Count; i++)
             {
-                GameLog.LogError("StartCombat called with null or empty participants list!");
-            }
-            else
-            {
-                GameLog.Log($"StartCombat received {participants.Count} participants:");
-                for (int i = 0; i < participants.Count; i++)
+                var obj = participants[i];
+                if (obj == null)
                 {
-                    var obj = participants[i];
-                    if (obj == null)
-                    {
-                        GameLog.LogWarning($"Participant {i}: NULL");
-                    }
-                    else
-                    {
-                        GameLog.Log($"Participant {i}: name={obj.name}, tag={obj.tag}");
-                    }
+                    GameLog.LogWarning($"Participant {i}: NULL");
+                }
+                else
+                {
+                    GameLog.Log($"Participant {i}: name={obj.name}, tag={obj.tag}");
                 }
             }
+        }
 
-            // Log result of player detection
-            if (_combatState.Player == null)
-            {
-                GameLog.LogError("CombatState.Player is null after initialization! No participant with tag 'Player' was found.");
-                GameLog.LogError("Combat cannot start without a player!");
-                return;
-            }
-            else
-            {
-                GameLog.Log($"CombatState.Player assigned: name={_combatState.Player.name}, tag={_combatState.Player.tag}");
-            }
+        // Log result of player detection
+        if (_combatState.Player == null)
+        {
+            GameLog.LogError("CombatState.Player is null after initialization! No participant with tag 'Player' was found.");
+            GameLog.LogError("Combat cannot start without a player!");
+            return;
+        }
+        else
+        {
+            GameLog.Log($"CombatState.Player assigned: name={_combatState.Player.name}, tag={_combatState.Player.tag}");
+        }
     }
 
     private void StartNewTurn()
@@ -316,8 +316,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private async Task<CombatResult> ProcessActionAsync(PendingAction action)
     {
         _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
-        
+
         // Wait for a moment to let players see the action
+
         await Task.Delay(TimeSpan.FromSeconds(_delayBetweenActions));
 
         return _winConditionChecker.Check(_combatState);
@@ -344,7 +345,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         else
         {
             GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
-            _combatTransitionService?.EndCombat();
+            _combatTransitionService.EndCombat(false);
         }
         gameObject.SetActive(false);
     }

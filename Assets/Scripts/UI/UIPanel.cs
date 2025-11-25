@@ -30,8 +30,7 @@ public class UIPanel : MonoBehaviour
     public virtual void Show()
     {
         GameLog.Log($"UIPanel.Show() called for {gameObject.name}", gameObject);
-        gameObject.SetActive(true);
-        
+
         // Ensure canvas group is fetched, as Awake might not have been called if the object was inactive.
         if (CanvasGroup == null)
         {
@@ -43,10 +42,12 @@ public class UIPanel : MonoBehaviour
             GameLog.LogError($"UIPanel.Show() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
             return;
         }
-        
+
         CanvasGroup.alpha = 1f;
         CanvasGroup.interactable = true;
         CanvasGroup.blocksRaycasts = true;
+
+        gameObject.SetActive(true);
         GameLog.Log($"UIPanel.Show() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
     }
 
@@ -55,9 +56,9 @@ public class UIPanel : MonoBehaviour
     /// Can be overridden for custom hide animations (e.g., fading out).
     /// </summary>
     public virtual void Hide()
-     {
+    {
         GameLog.Log($"UIPanel.Hide() called for {gameObject.name}", gameObject);
-        
+
         if (CanvasGroup == null)
         {
             CanvasGroup = GetComponent<CanvasGroup>();
