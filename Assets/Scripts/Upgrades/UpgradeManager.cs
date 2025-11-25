@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 using VContainer;
 
 /// <summary>
@@ -51,7 +51,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget
         if (randomUpgrades.Count < 2)
         {
             GameLog.LogWarning("Not enough unique upgrades available to present a choice.");
-            _combatTransitionService?.EndCombat();
+            _combatTransitionService?.EndCombat(true);
             return;
         }
         _upgradeUI?.ShowUpgrades(randomUpgrades[0], randomUpgrades[1]);

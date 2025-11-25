@@ -11,6 +11,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private CombatTrigger _currentCombatTrigger;
     private IGameplayUIService _gameplayUIService;
+    private IGameStateService _gameStateService;
     private IObjectResolver _resolver;
     private bool? _desiredActionVisible; // null = no preference yet
     private bool _readyHooked;
@@ -18,9 +19,10 @@ public class PlayerInteraction : MonoBehaviour
     private const float NoTriggerLogCooldown = 2f; // seconds between warning logs
 
     [Inject]
-    public void Construct(IGameplayUIService gameplayUIService, IObjectResolver resolver, InputReader injectedInputReader)
+    public void Construct(IGameplayUIService gameplayUIService, IGameStateService gameStateService, IObjectResolver resolver, InputReader injectedInputReader)
     {
         _gameplayUIService = gameplayUIService;
+        _gameStateService = gameStateService;
         _resolver = resolver;
         if (injectedInputReader != null)
         {
@@ -39,12 +41,19 @@ public class PlayerInteraction : MonoBehaviour
     private void OnEnable()
     {
         GameLog.Log($"PlayerInteraction: OnEnable. InputReader={inputReader?.name ?? "NULL"}", this);
-        
+
         if (inputReader != null)
         {
             inputReader.InteractEvent += OnInteract;
             GameLog.Log($"PlayerInteraction: Subscribed to InteractEvent on InputReader '{inputReader.name}'.", this);
         }
+
+        // Subscribe to combat end event to clear interaction state
+        if (_gameStateService != null)
+        {
+            _gameStateService.OnCombatEnded += OnCombatEnded;
+        }
+
         // Hook a single ready handler to apply latest desired state when UI becomes ready
         if (_gameplayUIService != null && !_readyHooked)
         {
@@ -65,12 +74,33 @@ public class PlayerInteraction : MonoBehaviour
         {
             inputReader.InteractEvent -= OnInteract;
         }
+
+        // Unsubscribe from combat end event
+        if (_gameStateService != null)
+        {
+            _gameStateService.OnCombatEnded -= OnCombatEnded;
+        }
+    }
+
+    private void OnCombatEnded(bool playerWon)
+    {
+        // Clear interaction state when combat ends
+        // This ensures the button is hidden when returning to exploration
+        _currentCombatTrigger = null;
+        _desiredActionVisible = false;
+
+        if (_gameplayUIService != null && _gameplayUIService.IsReady)
+        {
+            _gameplayUIService.ShowActionButton(false);
+        }
+
+        GameLog.Log("PlayerInteraction: Combat ended, cleared interaction state and hid action button.", this);
     }
 
     private void OnInteract()
     {
         GameLog.Log($"PlayerInteraction: OnInteract called. CurrentTrigger={_currentCombatTrigger?.name ?? "NULL"}", this);
-        
+
         if (_currentCombatTrigger != null)
         {
             GameLog.Log($"PlayerInteraction: Starting combat interaction on trigger '{_currentCombatTrigger.name}'.", this);
@@ -95,7 +125,7 @@ public class PlayerInteraction : MonoBehaviour
             _resolver.Inject(combatTrigger);
             _currentCombatTrigger = combatTrigger;
             GameLog.Log($"PlayerInteraction: Entered trigger zone '{combatTrigger.name}'. Setting as current trigger.", this);
-            
+
             _desiredActionVisible = true;
             if (_gameplayUIService != null && _gameplayUIService.IsReady)
             {

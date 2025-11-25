@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using VContainer;
 
 /// <summary>
@@ -12,7 +12,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     [Header("Panel References")]
     [SerializeField] private GameObject upgradePanel;
     [SerializeField] private CanvasGroup canvasGroup;
-    
+
     [Header("Card Components")]
     [SerializeField] private UpgradeCardUI option1Card;
     [SerializeField] private UpgradeCardUI option2Card;
@@ -168,7 +168,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
         canvasGroup.alpha = 0f;
         canvasGroup.blocksRaycasts = false;
-        
+
         if (upgradePanel != null)
             upgradePanel.SetActive(false);
     }
@@ -198,7 +198,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         _levelService?.LiberateCurrentLevel();
 
         // 4. End the combat state
-        _combatTransitionService?.EndCombat();
+        _combatTransitionService?.EndCombat(true);
 
         // 5. Prepare the next level/area
         _levelService?.AdvanceToNextLevel();
@@ -211,6 +211,6 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     {
         GameLog.LogWarning("Upgrade selection closed without choosing.");
         Hide();
-        _combatTransitionService?.EndCombat();
+        _combatTransitionService?.EndCombat(true);
     }
 }
