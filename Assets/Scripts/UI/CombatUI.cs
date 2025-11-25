@@ -243,6 +243,7 @@ public class CombatUI : UIPanel
     private void UpdateAPUI(int current, int max)
     {
         if (playerAPText != null) playerAPText.text = $"PA: {current}";
+        RefreshButtonInteractability();
     }
 
     private void RequestAbility(Ability ability)
@@ -342,5 +343,22 @@ public class CombatUI : UIPanel
         {
             if (button != null) button.interactable = interactable;
         }
+    }
+
+    private void RefreshButtonInteractability()
+    {
+        if (_playerAP == null || !_abilitiesLoaded) return;
+        int currentAP = _playerAP.CurrentValue;
+
+        void SetButtonState(Button button, Ability ability)
+        {
+            if (button != null && ability != null)
+                button.interactable = currentAP >= ability.ApCost;
+        }
+
+        SetButtonState(directAttackButton, directAttackAbility);
+        SetButtonState(areaAttackButton, areaAttackAbility);
+        SetButtonState(specialAttackButton, specialAttackAbility);
+        SetButtonState(meditateButton, meditateAbility);
     }
 }

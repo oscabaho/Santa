@@ -32,6 +32,9 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private LevelManager levelManagerInstance;
 
+    [SerializeField]
+    private CombatCameraManager combatCameraManagerInstance;
+
     // TODO: Descomentar cuando el sistema de VFX esté implementado
     // [SerializeField]
     // private VFXManager vfxManagerInstance;
@@ -73,6 +76,25 @@ public class GameLifetimeScope : LifetimeScope
         RegisterService<IGameStateService, GameStateManager>(builder, gameStateManagerInstance);
         RegisterService<IGameplayUIService, GameplayUIManager>(builder, gameplayUIManagerInstance);
         RegisterService<ILevelService, LevelManager>(builder, levelManagerInstance);
+        // CombatCameraManager es crítico para CombatTransitionManager; proporcionar Null object si falta.
+        if (combatCameraManagerInstance != null)
+        {
+            builder.RegisterComponent(combatCameraManagerInstance).As<ICombatCameraManager>().AsSelf();
+        }
+        else
+        {
+            var found = FindFirstObjectByType<CombatCameraManager>(FindObjectsInactive.Include);
+            if (found != null)
+            {
+                builder.RegisterComponent(found).As<ICombatCameraManager>().AsSelf();
+                GameLog.Log("GameLifetimeScope: CombatCameraManager found in hierarchy.");
+            }
+            else
+            {
+                builder.Register<NullCombatCameraManager>(Lifetime.Singleton).As<ICombatCameraManager>().AsSelf();
+                GameLog.LogWarning("GameLifetimeScope: CombatCameraManager missing. Registered NullCombatCameraManager placeholder.");
+            }
+        }
 
         // TODO: Descomentar cuando el sistema de VFX esté implementado
         // RegisterService<IVFXService, VFXManager>(builder, vfxManagerInstance);
@@ -99,13 +121,19 @@ public class GameLifetimeScope : LifetimeScope
         // NOTA: CombatUI y UpgradeUI se instancian dinámicamente via Addressables (ver UIManager)
         // No deben estar registrados aquí ni en la escena base
         
-        builder.RegisterComponentInHierarchy<CombatCameraManager>().As<ICombatCameraManager>().AsSelf();
         builder.RegisterComponentInHierarchy<CombatScenePool>().AsSelf();
-        builder.RegisterComponentInHierarchy<ScreenFade>().AsSelf();
         builder.RegisterComponentInHierarchy<GraphicsSettingsManager>().As<IGraphicsSettingsService>().AsSelf();
         builder.RegisterComponentInHierarchy<GraphicsSettingsController>().AsSelf();
 
         GameLog.Log("GameLifetimeScope CONFIGURED!");
+    }
+
+    // Null object implementation to avoid DI chain failures
+    private class NullCombatCameraManager : ICombatCameraManager
+    {
+        public void SwitchToMainCamera() { }
+        public void SwitchToTargetSelectionCamera() { }
+        public void SetCombatCameras(Unity.Cinemachine.CinemachineCamera main, Unity.Cinemachine.CinemachineCamera target) { }
     }
 
     /// <summary>

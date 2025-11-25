@@ -8,4 +8,5 @@ public interface IStatController
     event System.Action<int, int> OnValueChanged;
     void AffectValue(int value);
     void SetValue(int value);
+    void SetMaxValue(int value);
 }

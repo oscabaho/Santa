@@ -17,10 +17,10 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     private CombatUI _combatUI;
 
     [Inject]
-    public void Construct(ICombatService combatService, CombatUI combatUI)
+    public void Construct(ICombatService combatService)
     {
         _combatService = combatService;
-        _combatUI = combatUI;
+        // CombatUI is loaded dynamically via Addressables, so we'll find it at runtime
     }
 
     private void Awake()
@@ -60,10 +60,15 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     {
         GameLog.Log($"EnemyTarget TrySelect on {gameObject.name}");
 
+        // Try to find CombatUI if not already set
         if (_combatUI == null)
         {
-            GameLog.LogWarning("EnemyTarget: CombatUI has not been injected.");
-            return;
+            _combatUI = FindAnyObjectByType<CombatUI>();
+            if (_combatUI == null)
+            {
+                GameLog.LogWarning("EnemyTarget: CombatUI could not be found in the scene.");
+                return;
+            }
         }
 
         if (_combatService == null)

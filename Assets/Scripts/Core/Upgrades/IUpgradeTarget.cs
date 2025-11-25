@@ -11,4 +11,5 @@ public interface IUpgradeTarget
     void IncreaseSpecialAttackDamage(int amount);
     void IncreaseEnergyGainedPerTurn(int amount);
     void ReduceSpecialAttackMissChance(float amount);
+    void IncreaseMaxActionPoints(int amount);
 }

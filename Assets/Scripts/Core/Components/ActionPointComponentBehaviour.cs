@@ -16,6 +16,7 @@ public class ActionPointComponentBehaviour : MonoBehaviour, IActionPointControll
     public int MaxValue => actionPoints.MaxValue;
     public void AffectValue(int value) => actionPoints.AffectValue(value);
     public void SetValue(int value) => actionPoints.SetValue(value);
+    public void SetMaxValue(int value) => actionPoints.SetMaxValue(value);
 
     /// <summary>
     /// Rellena los Puntos de Acción al máximo.
