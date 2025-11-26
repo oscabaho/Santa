@@ -53,13 +53,17 @@ public class VFXManager : MonoBehaviour, IVFXService
         {
             if (config.Prefab == null)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"VFXManager: Prefab for key '{config.Key}' is not assigned.");
+#endif
                 continue;
             }
 
             if (config.Prefab.GetComponent<PooledParticleSystem>() == null)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"VFXManager: Prefab for key '{config.Key}' is missing the 'PooledParticleSystem' component.");
+#endif
                 continue;
             }
 
@@ -79,7 +83,9 @@ public class VFXManager : MonoBehaviour, IVFXService
     {
         if (!_vfxPools.TryGetValue(key, out var pool))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"VFXManager: No pool found for key '{key}'.");
+#endif
             return null;
         }
 

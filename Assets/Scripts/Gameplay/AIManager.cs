@@ -55,7 +55,9 @@ public class AIManager : MonoBehaviour, IAIManager
                 {
                     aiAP.AffectValue(-aiAction.Ability.ApCost);
                     pendingActions.Add(aiAction);
+                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
+                    #endif
                 }
             }
         }
