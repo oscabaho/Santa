@@ -28,7 +28,9 @@ public class UIEventSystemConfigurator : MonoBehaviour
             if (es == null)
             {
                 es = gameObject.AddComponent<EventSystem>();
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("UIEventSystemConfigurator: Added EventSystem.", this);
+                #endif
             }
         }
 
@@ -38,27 +40,37 @@ public class UIEventSystemConfigurator : MonoBehaviour
         if (inputModule == null)
         {
             inputModule = go.AddComponent<InputSystemUIInputModule>();
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("UIEventSystemConfigurator: Added InputSystemUIInputModule.", this);
+            #endif
         }
 
         if (actionsAsset != null)
         {
             inputModule.actionsAsset = actionsAsset;
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"UIEventSystemConfigurator: Assigned actions asset '{actionsAsset.name}' to InputSystemUIInputModule.", this);
+            #endif
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("UIEventSystemConfigurator: No actions asset assigned. Drag 'ActionMap.inputactions' into the component.", this);
+            #endif
         }
 
         var standalone = go.GetComponent<StandaloneInputModule>();
         if (standalone != null && standalone.enabled)
         {
             standalone.enabled = false; // Old input module not needed with New input system
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("UIEventSystemConfigurator: Disabled StandaloneInputModule (using New Input System).", this);
+            #endif
         }
 #else
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.LogWarning("UIEventSystemConfigurator: New Input System not enabled in this build. Consider switching Active Input Handling to 'Input System Package (New)'.", this);
+#endif
 #endif
     }
 }

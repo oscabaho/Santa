@@ -9,7 +9,11 @@ public interface IUpgradeTarget
     void IncreaseDirectAttackDamage(int amount);
     void IncreaseAreaAttackDamage(int amount);
     void IncreaseSpecialAttackDamage(int amount);
-    void IncreaseEnergyGainedPerTurn(int amount);
+    void IncreaseAPRecoveryAmount(int amount);
     void ReduceSpecialAttackMissChance(float amount);
     void IncreaseMaxActionPoints(int amount);
+    void IncreaseMaxHealth(int amount);
+    void IncreaseGlobalAPCostReduction(int amount);
+    void IncreaseGlobalActionSpeed(int amount);
+    void IncreaseCriticalHitChance(float amount);
 }

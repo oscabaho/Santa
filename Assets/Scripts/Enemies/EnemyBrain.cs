@@ -24,7 +24,16 @@ public class EnemyBrain : MonoBehaviour, IBrain
         List<GameObject> allAllies)
     {
         // Simple AI: Find a target from the allies list (usually just the player).
-        GameObject target = allAllies.FirstOrDefault(a => a.activeInHierarchy);
+        GameObject target = null;
+        for (int i = 0; i < allAllies.Count; i++)
+        {
+            var a = allAllies[i];
+            if (a != null && a.activeInHierarchy)
+            {
+                target = a;
+                break;
+            }
+        }
         if (target == null)
         {
             return new PendingAction(); // No target, do nothing.
@@ -32,10 +41,21 @@ public class EnemyBrain : MonoBehaviour, IBrain
 
         // Simple AI: Find the most expensive ability it can afford and use it.
         var ap = GetComponent<ActionPointComponentBehaviour>();
-        Ability chosenAbility = _abilityHolder.Abilities
-            .Where(a => ap.ActionPoints.HasEnough(a.ApCost)) // Find all affordable abilities
-            .OrderByDescending(a => a.ApCost) // Order by most expensive
-            .FirstOrDefault(); // Take the best one, or null if none are affordable
+        Ability chosenAbility = null;
+        int bestCost = -1;
+        var abilities = _abilityHolder.Abilities;
+        for (int i = 0; i < abilities.Count; i++)
+        {
+            var ability = abilities[i];
+            if (ability != null && ap.ActionPoints.HasEnough(ability.ApCost))
+            {
+                if (ability.ApCost > bestCost)
+                {
+                    bestCost = ability.ApCost;
+                    chosenAbility = ability;
+                }
+            }
+        }
 
         if (chosenAbility != null)
         {

@@ -1,42 +1,69 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// A special, powerful attack that costs energy and has a chance to miss.
-/// Inherits base properties like AP cost, speed, and targeting from the Ability class.
+/// Damage and miss chance are determined by the UpgradeService.
 /// </summary>
 [CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
 public class SpecialAttackAbility : Ability
 {
-    [Header("Special Damage")]
-    [SerializeField] private int _damage = 50;
-
-    [Header("Special Properties")]
-    [SerializeField] [Range(0f, 1f)] private float _missChance = 0.1f;
-
-    public override void Execute(List<GameObject> targets, GameObject caster)
+    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService)
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
+#endif
 
-        if (Random.value < _missChance)
+        // Get miss chance and damage from UpgradeService
+        float missChance = upgradeService?.SpecialAttackMissChance ?? 0.2f;
+        int baseDamage = upgradeService?.SpecialAttackDamage ?? 75;
+
+        if (Random.value < missChance)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("...but it MISSED!");
+#endif
             return;
         }
 
         if (targets == null) return;
 
-    GameLog.Log("It's a direct hit!");
-        foreach (var target in targets)
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log("It's a direct hit!");
+#endif
+
+        // Use for loop instead of foreach for mobile performance
+        for (int i = 0; i < targets.Count; i++)
         {
+            GameObject target = targets[i];
             if (target == null) continue;
 
-            var healthComponent = target.GetComponent<HealthComponentBehaviour>();
-            if (healthComponent != null)
-            { 
-                healthComponent.AffectValue(-_damage);
-                GameLog.Log($"{target.name} takes a massive {_damage} damage!");
+            if (target.TryGetComponent<HealthComponentBehaviour>(out var healthComponent))
+            {
+                // Check for critical hit
+                bool isCritical = RollCriticalHit(upgradeService);
+                int finalDamage = isCritical ? baseDamage * 2 : baseDamage;
+
+                healthComponent.AffectValue(-finalDamage);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (isCritical)
+                {
+                    GameLog.Log($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!");
+                }
+                else
+                {
+                    GameLog.Log($"{target.name} takes a massive {finalDamage} damage!");
+                }
+#endif
             }
         }
+    }
+
+    private bool RollCriticalHit(IUpgradeService upgradeService)
+    {
+        return upgradeService != null
+            && upgradeService.CriticalHitChance > 0f
+            && Random.value < upgradeService.CriticalHitChance;
     }
 }

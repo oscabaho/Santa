@@ -26,7 +26,9 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
     void IStartable.Start()
     {
         _previousState = _gameStateService.CurrentState;
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Initialized and monitoring game state.");
+        #endif
     }
 
     void ITickable.Tick()
@@ -52,14 +54,18 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         if (_hasPreloadedForCombat)
             return;
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Entering combat. Preloading UpgradeUI...");
+        #endif
         await _upgradeUILoader.PreloadAsync();
         _hasPreloadedForCombat = true;
     }
 
         private void OnExitCombat()
     {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("UpgradeUILifecycleManager: Exiting combat. Releasing UpgradeUI resources (optional)...");
+            #endif
         _upgradeUILoader.Release();
         _hasPreloadedForCombat = false;
     }

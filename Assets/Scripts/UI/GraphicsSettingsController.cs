@@ -25,9 +25,11 @@ public class GraphicsSettingsController : MonoBehaviour
 
     private void Start()
     {
-        if (_graphicsService == null)
+        if (_graphicsSettings == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("GraphicsSettingsController: IGraphicsSettingsService no registrado. El panel de opciones no funcionará.", this);
+#endif
             gameObject.SetActive(false);
             return;
         }
@@ -37,7 +39,9 @@ public class GraphicsSettingsController : MonoBehaviour
         if (qualityDropdown == null && resolutionDropdown == null && fullscreenToggle == null && vsyncToggle == null)
         {
             // On mobile or simple scenes, it's valid to omit these UI elements.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("GraphicsSettingsController: No UI elements assigned. Disabling component (intended on mobile/test scenes).", this);
+#endif
             enabled = false;
             return;
         }

@@ -39,7 +39,9 @@ public class CombatTrigger : MonoBehaviour
         _encounter = GetComponent<CombatEncounter>();
         if (_encounter == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger requires a CombatEncounter component.");
+            #endif
             enabled = false;
             return;
         }
@@ -47,7 +49,9 @@ public class CombatTrigger : MonoBehaviour
         _interactionCollider = GetComponent<Collider>();
         if (_interactionCollider == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger requires a Collider component to function.");
+            #endif
             enabled = false;
             return;
         }
@@ -68,24 +72,32 @@ public class CombatTrigger : MonoBehaviour
 
         if (_combatTransitionService == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger: ICombatTransitionService not found when starting combat.");
+            #endif
             ResetTriggerState();
             return;
         }
 
         if (_combatService == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger: ICombatService not found. Cannot start combat.");
+            #endif
             ResetTriggerState();
             return;
         }
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Player has interacted with a combat trigger.");
+        #endif
 
         var poolKey = _encounter.GetPoolKey();
         if (_combatScenePool == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
+            #endif
             ResetTriggerState();
             return;
         }
@@ -95,7 +107,9 @@ public class CombatTrigger : MonoBehaviour
             _activeCombatInstance = await _combatScenePool.GetInstanceAsync(poolKey, _encounter);
             if (_activeCombatInstance == null)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("Failed to get instance from pool.");
+                #endif
                 ResetTriggerState();
                 return;
             }
@@ -106,7 +120,9 @@ public class CombatTrigger : MonoBehaviour
             var combatArena = _activeCombatInstance.GetComponentInChildren<CombatArena>(true);
             if (combatArena == null)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"CombatTrigger: Could not find CombatArena inside '{_activeCombatInstance.name}'.");
+                #endif
                 HandleCombatStartFailure();
                 return;
             }
@@ -118,7 +134,9 @@ public class CombatTrigger : MonoBehaviour
 
             if (participants.Count == 0)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("CombatTrigger: CombatArena returned zero participants.");
+                #endif
                 HandleCombatStartFailure();
                 return;
             }
@@ -131,8 +149,10 @@ public class CombatTrigger : MonoBehaviour
         }
         catch (System.Exception ex)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Failed to start combat interaction.");
             GameLog.LogException(ex);
+            #endif
             HandleCombatStartFailure();
         }
     }
@@ -152,7 +172,9 @@ public class CombatTrigger : MonoBehaviour
 
         if (playerWon)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Player won combat initiated by '{gameObject.name}'. Destroying enemy.");
+            #endif
 
             // Disable collider before destroying to trigger OnTriggerExit on PlayerInteraction
             // This ensures the interaction button is hidden
@@ -165,7 +187,9 @@ public class CombatTrigger : MonoBehaviour
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Player lost combat initiated by '{gameObject.name}'. Resetting trigger.");
+            #endif
             ResetTriggerState();
         }
     }

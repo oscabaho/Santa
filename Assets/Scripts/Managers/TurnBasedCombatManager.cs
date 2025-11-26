@@ -56,20 +56,26 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (_actionExecutor == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"Could not find a component implementing IActionExecutor in children of {gameObject.name}.", this);
+            #endif
             enabled = false;
         }
 
         if (_aiManager == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"Could not find a component implementing IAIManager in children of {gameObject.name}.", this);
+            #endif
             enabled = false;
         }
     }
 
     public void StartCombat(List<GameObject> participants)
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("--- COMBAT STARTED ---");
+#endif
         _combatState.Initialize(participants);
         CombatIsInitialized = true; // Set the flag
 
@@ -85,7 +91,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (_combatState.Player == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Combat cannot start without a player!");
+#endif
             return;
         }
 
@@ -97,11 +105,35 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 int maxAP = _upgradeService.MaxActionPoints;
                 playerAP.SetMaxValue(maxAP);
                 playerAP.SetValue(maxAP); // Set to max AP (base value)
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"TurnBasedCombatManager: Synced Player AP to UpgradeService. MaxAP set to {maxAP}.");
+                #endif
             }
             else
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("TurnBasedCombatManager: Player has no ActionPointComponent to sync upgrades to.");
+                #endif
+            }
+        }
+
+        // Sync Player Health with UpgradeService
+        if (_upgradeService != null)
+        {
+            if (_combatState.HealthComponents.TryGetValue(_combatState.Player, out var playerHealth))
+            {
+                int maxHealth = _upgradeService.MaxHealth;
+                playerHealth.SetMaxValue(maxHealth);
+                playerHealth.SetValue(maxHealth); // Heal to full at start of combat
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"TurnBasedCombatManager: Synced Player Health to UpgradeService. MaxHealth set to {maxHealth}.");
+                #endif
+            }
+            else
+            {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("TurnBasedCombatManager: Player has no HealthComponent to sync upgrades to.");
+                #endif
             }
         }
 
@@ -110,21 +142,29 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         // Log all received participants and their tags
         if (participants == null || participants.Count == 0)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("StartCombat called with null or empty participants list!");
+            #endif
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"StartCombat received {participants.Count} participants:");
+            #endif
             for (int i = 0; i < participants.Count; i++)
             {
                 var obj = participants[i];
                 if (obj == null)
                 {
+                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.LogWarning($"Participant {i}: NULL");
+                    #endif
                 }
                 else
                 {
+                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.Log($"Participant {i}: name={obj.name}, tag={obj.tag}");
+                    #endif
                 }
             }
         }
@@ -132,19 +172,25 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         // Log result of player detection
         if (_combatState.Player == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatState.Player is null after initialization! No participant with tag 'Player' was found.");
             GameLog.LogError("Combat cannot start without a player!");
+            #endif
             return;
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"CombatState.Player assigned: name={_combatState.Player.name}, tag={_combatState.Player.tag}");
+            #endif
         }
     }
 
     private void StartNewTurn()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("--- SELECTION PHASE ---: Starting new turn.");
+        #endif
         CurrentPhase = CombatPhase.Selection;
         OnPhaseChanged?.Invoke(CurrentPhase);
         _combatState.PendingActions.Clear();
@@ -160,7 +206,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         {
             if (_abilityPendingTarget == null)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("Received a target submission but no ability was pending.");
+                #endif
                 StartNewTurn(); // Reset the turn state
                 return;
             }
@@ -181,7 +229,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             CurrentPhase = CombatPhase.Targeting;
             SetEnemyTargetsActive(true); // Directly enable targets
             OnPhaseChanged?.Invoke(CurrentPhase);
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Player selected ability '{ability.AbilityName}'. Waiting for target selection.");
+            #endif
             return;
         }
 
@@ -196,7 +246,9 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             return;
         }
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Player cancelled targeting. Returning to selection phase.");
+        #endif
 
         _abilityPendingTarget = null;
         SetEnemyTargetsActive(false);
@@ -210,13 +262,17 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     {
         if (!CombatIsInitialized)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("ProcessActionSubmission called but combat is not initialized!");
+            #endif
             return;
         }
 
         if (ability == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Player tried to submit a null ability.");
+            #endif
             OnPlayerTurnStarted?.Invoke();
             return;
         }
@@ -224,36 +280,50 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         // Defensive: ensure we have a valid player reference before using it as a dictionary key.
         if (_combatState.Player == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Cannot process action submission: CombatState.Player is null.");
+            #endif
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
         if (!_combatState.APComponents.TryGetValue(_combatState.Player, out var playerAP))
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Player does not have an ActionPointComponent cached!");
+            #endif
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
         if (playerAP.CurrentValue < ability.ApCost)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Player cannot afford action: {ability.AbilityName}. Cost: {ability.ApCost}, Has: {playerAP.CurrentValue}");
+            #endif
             OnPlayerTurnStarted?.Invoke();
             return;
         }
 
+        // Apply global AP cost reduction from upgrades (minimum cost is 1)
+        int actualCost = Mathf.Max(1, ability.ApCost - (_upgradeService?.GlobalAPCostReduction ?? 0));
+
         // Re-validate targeting here for the final submission
+
         if (ability.Targeting != null && ability.Targeting.Style == TargetingStyle.SingleEnemy && primaryTarget == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Cannot perform {ability.AbilityName}: No target specified for a single-target ability.");
+            #endif
             OnPlayerTurnStarted?.Invoke(); // Allow player to try again
             return;
         }
 
-        playerAP.AffectValue(-ability.ApCost);
+        playerAP.AffectValue(-actualCost);
         _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
-        GameLog.Log($"Player submitted action: {ability.AbilityName} targeting {primaryTarget?.name ?? "self/area"}.");
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"Player submitted action: {ability.AbilityName} targeting {primaryTarget?.name ?? "self/area"}. Cost: {actualCost} AP.");
+        #endif
 
         SetEnemyTargetsActive(false); // Disable targets after selection
 
@@ -265,11 +335,22 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void FinalizeSelectionAndExecuteTurn()
     {
-        PendingAction? playerAction = _combatState.PendingActions.FirstOrDefault(action => action.Caster == _combatState.Player);
+        // Find player action without LINQ allocation
+        PendingAction? playerAction = null;
+        for (int i = 0; i < _combatState.PendingActions.Count; i++)
+        {
+            if (_combatState.PendingActions[i].Caster == _combatState.Player)
+            {
+                playerAction = _combatState.PendingActions[i];
+                break;
+            }
+        }
 
         if (playerAction == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Could not find player's action for AI planning context.");
+#endif
         }
 
         _aiManager.PlanActions(
@@ -298,24 +379,44 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         }
 
         // If the loop completes, it means no one won or lost, so start a new turn.
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Execution phase finished.");
+        #endif
         StartNewTurn();
     }
 
     private void PrepareExecutionPhase()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("--- EXECUTION PHASE ---");
+        #endif
         CurrentPhase = CombatPhase.Execution;
         OnPhaseChanged?.Invoke(CurrentPhase);
 
         _sortedActions.Clear();
         _sortedActions.AddRange(_combatState.PendingActions);
-        _sortedActions.Sort((a, b) => b.Ability.ActionSpeed.CompareTo(a.Ability.ActionSpeed));
+
+        // Apply global action speed bonus to player actions
+
+        int speedBonus = _upgradeService?.GlobalActionSpeedBonus ?? 0;
+        _sortedActions.Sort((a, b) =>
+        {
+            int speedA = a.Ability.ActionSpeed;
+            int speedB = b.Ability.ActionSpeed;
+
+            // Add speed bonus to player actions
+
+            if (a.Caster == _combatState.Player) speedA += speedBonus;
+            if (b.Caster == _combatState.Player) speedB += speedBonus;
+
+
+            return speedB.CompareTo(speedA);
+        });
     }
 
     private async Task<CombatResult> ProcessActionAsync(PendingAction action)
     {
-        _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents);
+        _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents, _upgradeService);
 
         // Wait for a moment to let players see the action
 
@@ -339,12 +440,16 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         if (playerWon)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("--- COMBAT ENDED: VICTORY ---");
+            #endif
             _upgradeService?.PresentUpgradeOptions();
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
+            #endif
             _combatTransitionService.EndCombat(false);
         }
         gameObject.SetActive(false);
@@ -352,10 +457,20 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private void SetEnemyTargetsActive(bool isActive)
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Setting EnemyTarget colliders to: {isActive}");
+        #endif
         foreach (var target in _enemyTargets)
         {
             target.SetColliderActive(isActive);
         }
+    }
+
+    private void OnDestroy()
+    {
+        OnPhaseChanged = null;
+        OnPlayerTurnStarted = null;
+        OnPlayerTurnEnded = null;
+        CombatIsInitialized = false;
     }
 }

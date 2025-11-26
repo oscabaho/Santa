@@ -43,7 +43,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty.");
+            #endif
             return;
         }
 
@@ -57,7 +59,9 @@ public class UIManager : MonoBehaviour, IUIManager
             }
             else
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"UIManager: Cached panel with address '{panelAddress}' is missing its UIPanel component. The panel will not be shown.");
+                #endif
             }
             return;
         }
@@ -81,17 +85,23 @@ public class UIManager : MonoBehaviour, IUIManager
             if (panelComponent != null)
             {
                 panelComponent.Show();
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"UIManager: Panel with address '{panelAddress}' loaded and shown.");
+                #endif
             }
             else
             {
                 // If the component is missing, log an error. The prefab is likely misconfigured.
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' does not have a UIPanel component on its root object. The panel will not be shown.");
+                #endif
             }
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UIManager: Failed to load panel with address '{panelAddress}'.");
+            #endif
         }
     }
 
@@ -99,18 +109,24 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for hiding.");
+            #endif
             return;
         }
 
         if (_addressToInstanceMap.TryGetValue(panelAddress, out var panelInstance))
         {
             panelInstance.GetComponent<UIPanel>()?.Hide();
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"UIManager: Panel with address '{panelAddress}' hidden.");
+            #endif
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"UIManager: Panel with address '{panelAddress}' not found or not instantiated.");
+            #endif
         }
     }
 
@@ -118,7 +134,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for switching.");
+            #endif
             return;
         }
 
@@ -141,7 +159,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for preloading.");
+            #endif
             return;
         }
 
@@ -170,16 +190,22 @@ public class UIManager : MonoBehaviour, IUIManager
             {
                 // Ensure panel remains hidden after preload
                 panel.Hide();
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");
+                #endif
             }
             else
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' is missing UIPanel component on root.");
+                #endif
             }
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UIManager: Failed to preload panel with address '{panelAddress}'.");
+            #endif
         }
     }
 }

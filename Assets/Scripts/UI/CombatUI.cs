@@ -53,7 +53,9 @@ public class CombatUI : UIPanel
 
     protected override void Awake()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("CombatUI.Awake called.");
+        #endif
         base.Awake(); // Caches the CanvasGroup from UIPanel
         _ = LoadAbilitiesAsync();
     }
@@ -62,7 +64,9 @@ public class CombatUI : UIPanel
     {
         try
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("CombatUI: Loading abilities via Addressables...");
+            #endif
 
             var directTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.Direct).Task;
             var areaTask = Addressables.LoadAssetAsync<Ability>(AbilityAddresses.Area).Task;
@@ -78,22 +82,30 @@ public class CombatUI : UIPanel
 
             _abilitiesLoaded = true;
             SetupButtonListeners();
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("CombatUI: Abilities loaded successfully.");
+            #endif
         }
         catch (OperationException ex)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"CombatUI: Failed to load abilities via Addressables. Operation failed: {ex.Message}");
+            #endif
         }
         catch (System.Exception ex)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"CombatUI: Unexpected error while loading abilities. {ex.Message}");
+            #endif
         }
     }
 
     [Inject]
     public void Construct(ICombatService combatService)
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("CombatUI.Construct called.");
+        #endif
         _combatService = combatService;
     }
 
@@ -109,7 +121,9 @@ public class CombatUI : UIPanel
             // Inyección tardía: UIManager inyecta después de instanciar el prefab.
             // Evitar error ruidoso; dejar el panel oculto hasta que llegue la inyección.
             if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("CombatUI: Waiting for DI to complete (ICombatService not yet injected).", this);
+            #endif
         }
     }
 
@@ -136,7 +150,9 @@ public class CombatUI : UIPanel
     {
         if (actionButtonsPanel == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("ActionButtonsPanel is not assigned in the inspector.", this);
+            #endif
             return;
         }
 
@@ -156,7 +172,9 @@ public class CombatUI : UIPanel
             // Evitar suscripción si aún no hay jugador asignado (p.ej., antes de que empiece el combate)
             if (_combatService == null || _combatService.Player == null)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("CombatUI: Player is not available yet; will subscribe when combat initializes.", this);
+                #endif
                 if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
                 return;
             }
@@ -181,7 +199,9 @@ public class CombatUI : UIPanel
         if (player == null)
         {
             // Aún no se inicializa el combate; esperar a próximo cambio de fase.
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("CombatUI: Service returned null player; deferring player subscription.", this);
+            #endif
             return;
         }
 
@@ -281,7 +301,9 @@ public class CombatUI : UIPanel
     {
         if (!_abilitiesLoaded)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("CombatUI: Abilities not loaded yet, deferring button setup.");
+            #endif
             return;
         }
 
@@ -321,13 +343,17 @@ public class CombatUI : UIPanel
 
     private void RequestAbility(Ability ability)
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"CombatUI.RequestAbility called with ability: {ability?.AbilityName ?? "NULL"}");
+        #endif
         if (ability == null || _combatService == null) return;
 
         // Only allow initiating abilities during the Selection phase
         if (_combatService.CurrentPhase != CombatPhase.Selection)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Cannot request ability '{ability.AbilityName}': combat is not in Selection phase (current: {_combatService.CurrentPhase}).");
+            #endif
             return;
         }
 
@@ -363,12 +389,16 @@ public class CombatUI : UIPanel
 
     public void OnTargetSelected(GameObject target)
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"CombatUI.OnTargetSelected called with target: {target?.name ?? "NULL"}");
+        #endif
         if (_pendingAbility == null) return;
         // Ensure the combat manager is in Targeting phase before submitting the selected target
         if (_combatService == null || _combatService.CurrentPhase != CombatPhase.Targeting)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Cannot submit target: CombatService not in Targeting phase or is null.");
+            #endif
             // Cancel UI-side targeting to avoid stuck state
             CancelTargetingMode();
             return;

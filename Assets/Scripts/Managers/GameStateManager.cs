@@ -30,7 +30,9 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         if (CurrentState == GameState.Combat) return;
 
         CurrentState = GameState.Combat;
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Game State changed to: Combat");
+        #endif
         OnCombatStarted?.Invoke();
     }
 
@@ -42,7 +44,9 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         if (CurrentState == GameState.Exploration) return;
 
         CurrentState = GameState.Exploration;
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Game State changed to: Exploration. Player Won: {playerWon}");
+        #endif
         OnCombatEnded?.Invoke(playerWon);
     }
 }

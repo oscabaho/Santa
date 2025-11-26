@@ -77,7 +77,9 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     {
         if (upgrade1 == null || upgrade2 == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Cannot show upgrades: one or both upgrades are null.");
+            #endif
             return;
         }
 
@@ -180,7 +182,9 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     {
         if (chosenUpgrade == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Chosen upgrade is null.");
+            #endif
             return;
         }
 
@@ -209,7 +213,9 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     /// </summary>
     private void OnCloseButtonClicked()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.LogWarning("Upgrade selection closed without choosing.");
+        #endif
         Hide();
         _combatTransitionService?.EndCombat(true);
     }

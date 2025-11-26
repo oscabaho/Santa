@@ -35,18 +35,17 @@ public class CombatState
             if (combatant == null) continue;
 
             // Cache components
-            var health = combatant.GetComponent<IHealthController>();
-            if (health != null) _healthComponents[combatant] = health;
+            if (combatant.TryGetComponent<IHealthController>(out var health))
+                _healthComponents[combatant] = health;
 
-            var ap = combatant.GetComponent<IActionPointController>();
-            if (ap != null)
+            if (combatant.TryGetComponent<IActionPointController>(out var ap))
             {
                 _apComponents[combatant] = ap;
                 ap.SetValue(ap.MaxValue);
             }
 
-            var brain = combatant.GetComponent<IBrain>();
-            if (brain != null) _brains[combatant] = brain;
+            if (combatant.TryGetComponent<IBrain>(out var brain))
+                _brains[combatant] = brain;
 
             // Identify player and enemies
             if (combatant.CompareTag("Player"))

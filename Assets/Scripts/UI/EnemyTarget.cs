@@ -30,7 +30,9 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
 
     private void OnEnable()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget OnEnable on {gameObject.name}");
+        #endif
         // Always start with the collider disabled. It will be enabled by the combat manager.
         if (_collider != null) _collider.enabled = false;
     }
@@ -40,11 +42,15 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         if (_collider != null)
         {
             _collider.enabled = isActive;
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"EnemyTarget on {gameObject.name}: Collider explicitly set to {isActive}.");
+            #endif
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"EnemyTarget on {gameObject.name}: Tried to set collider active, but _collider is null.");
+            #endif
         }
     }
 
@@ -52,13 +58,17 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log($"¡CLIC DETECTADO en {gameObject.name} por el EventSystem!", this);
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget OnPointerClick on {gameObject.name}");
+        #endif
         TrySelect();
     }
 
     private void TrySelect()
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget TrySelect on {gameObject.name}");
+        #endif
 
         // Try to find CombatUI if not already set
         if (_combatUI == null)
@@ -66,14 +76,18 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
             _combatUI = FindAnyObjectByType<CombatUI>();
             if (_combatUI == null)
             {
+                #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("EnemyTarget: CombatUI could not be found in the scene.");
+                #endif
                 return;
             }
         }
 
         if (_combatService == null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("EnemyTarget: ICombatService has not been injected.");
+            #endif
             return;
         }
 
