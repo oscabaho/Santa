@@ -1,7 +1,7 @@
 using System;
+using Santa.Core.Security;
 using UnityEngine;
 using VContainer;
-using Santa.Core.Security;
 
 namespace Santa.Core.Save
 {
@@ -97,7 +97,7 @@ namespace Santa.Core.Save
 
         private void WriteContributors(ref SaveData data)
         {
-            var contributors = Resources.FindObjectsOfTypeAll<MonoBehaviour>();
+            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             var list = new System.Collections.Generic.List<SerializableKV>();
             foreach (var mb in contributors)
             {
@@ -111,7 +111,7 @@ namespace Santa.Core.Save
 
         private void ReadContributors(in SaveData data)
         {
-            var contributors = Resources.FindObjectsOfTypeAll<MonoBehaviour>();
+            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var mb in contributors)
             {
                 if (mb is ISaveContributor sc)

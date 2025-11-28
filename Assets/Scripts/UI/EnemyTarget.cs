@@ -30,9 +30,9 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
 
     private void OnEnable()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget OnEnable on {gameObject.name}");
-        #endif
+#endif
         // Always start with the collider disabled. It will be enabled by the combat manager.
         if (_collider != null) _collider.enabled = false;
     }
@@ -42,35 +42,33 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         if (_collider != null)
         {
             _collider.enabled = isActive;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"EnemyTarget on {gameObject.name}: Collider explicitly set to {isActive}.");
-            #endif
+#endif
         }
         else
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"EnemyTarget on {gameObject.name}: Tried to set collider active, but _collider is null.");
-            #endif
+#endif
         }
     }
 
     // Called by Unity's EventSystem when a pointer click hits this object's collider.
     public void OnPointerClick(PointerEventData eventData)
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log($"¡CLIC DETECTADO en {gameObject.name} por el EventSystem!", this);
-        #endif
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget OnPointerClick on {gameObject.name}");
-        #endif
+#endif
         TrySelect();
     }
 
     private void TrySelect()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget TrySelect on {gameObject.name}");
-        #endif
+#endif
 
         // Try to find CombatUI if not already set
         if (_combatUI == null)
@@ -78,18 +76,18 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
             _combatUI = FindAnyObjectByType<CombatUI>();
             if (_combatUI == null)
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("EnemyTarget: CombatUI could not be found in the scene.");
-                #endif
+#endif
                 return;
             }
         }
 
         if (_combatService == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("EnemyTarget: ICombatService has not been injected.");
-            #endif
+#endif
             return;
         }
 

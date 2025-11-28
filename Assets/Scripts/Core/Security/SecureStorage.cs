@@ -74,17 +74,24 @@ namespace Santa.Core.Security
 
         private static byte[] Protect(byte[] data)
         {
-            // Cross-platform AES encryption (mobile-first). Avoid Windows DPAPI to keep build targets simple.
+            // Cross-platform AES encryption (mobile-first).
             using (var aes = Aes.Create())
             {
                 aes.Key = DeriveKey(32);
-                aes.IV = DeriveKey(16, iv:true);
+                // Generate a random IV for each encryption
+                aes.GenerateIV();
+                var iv = aes.IV;
+
                 using (var ms = new MemoryStream())
-                using (var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
                 {
-                    cs.Write(data, 0, data.Length);
-                    cs.FlushFinalBlock();
-                    return ms.ToArray();
+                    // Prepend the IV to the stream
+                    ms.Write(iv, 0, iv.Length);
+                    using (var cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(data, 0, data.Length);
+                        cs.FlushFinalBlock();
+                        return ms.ToArray();
+                    }
                 }
             }
         }
@@ -94,44 +101,36 @@ namespace Santa.Core.Security
             using (var aes = Aes.Create())
             {
                 aes.Key = DeriveKey(32);
-                aes.IV = DeriveKey(16, iv:true);
+
+                // Read the IV from the beginning of the data
+                var iv = new byte[aes.BlockSize / 8];
+                if (data.Length < iv.Length) throw new CryptographicException("Invalid ciphertext length.");
+                Buffer.BlockCopy(data, 0, iv, 0, iv.Length);
+                aes.IV = iv;
+
                 using (var ms = new MemoryStream())
-                using (var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
                 {
-                    cs.Write(data, 0, data.Length);
-                    cs.FlushFinalBlock();
-                    return ms.ToArray();
+                    using (var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        // Decrypt the data that comes after the IV
+                        cs.Write(data, iv.Length, data.Length - iv.Length);
+                        cs.FlushFinalBlock();
+                        return ms.ToArray();
+                    }
                 }
             }
         }
 
-        private static byte[] DeriveKey(int length, bool iv = false)
+        private static byte[] DeriveKey(int length)
         {
             // Derive per-device key material from deviceUniqueIdentifier plus an app-scoped salt.
             var deviceId = SystemInfo.deviceUniqueIdentifier ?? "unknown-device";
-            var salt = iv ? "santa-sec-iv" : "santa-sec-key";
-            using (var sha256 = SHA256.Create())
+            var salt = Encoding.UTF8.GetBytes("santa-sec-key"); // A constant salt is fine here.
+
+            // Use PBKDF2 for stronger key derivation. 10000 iterations is a reasonable starting point.
+            using (var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(deviceId, salt, 10000, System.Security.Cryptography.HashAlgorithmName.SHA256))
             {
-                var material = Encoding.UTF8.GetBytes(deviceId + ":" + salt);
-                var digest = sha256.ComputeHash(material);
-                if (length <= digest.Length)
-                {
-                    var key = new byte[length];
-                    Buffer.BlockCopy(digest, 0, key, 0, length);
-                    return key;
-                }
-                // Expand deterministically if longer needed
-                var keyBytes = new byte[length];
-                var offset = 0;
-                var counter = 0;
-                while (offset < length)
-                {
-                    var block = sha256.ComputeHash(Encoding.UTF8.GetBytes(deviceId + ":" + salt + ":" + counter++));
-                    var toCopy = Math.Min(block.Length, length - offset);
-                    Buffer.BlockCopy(block, 0, keyBytes, offset, toCopy);
-                    offset += toCopy;
-                }
-                return keyBytes;
+                return pbkdf2.GetBytes(length);
             }
         }
     }

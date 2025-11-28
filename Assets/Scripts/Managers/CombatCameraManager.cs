@@ -112,7 +112,8 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             _combatService.OnPhaseChanged -= HandlePhaseChanged;
             _combatService = null;
         }
-        SetBothCamerasInactive();
+        // Removed SetBothCamerasInactive() to allow visual transition to complete first.
+        // DeactivateCameras() must be called explicitly by the transition manager.
     }
 
     /// <summary>
@@ -196,6 +197,11 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         GameLog.Log($"Switched to TARGET-SELECTION camera. Target(prio={ACTIVE_PRIORITY}), Main(prio={INACTIVE_PRIORITY})");
 #endif
         StartCoroutine(DebugActiveCamera());
+    }
+
+    public void DeactivateCameras()
+    {
+        SetBothCamerasInactive();
     }
 
     private void SetBothCamerasInactive()
