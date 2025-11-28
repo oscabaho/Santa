@@ -17,9 +17,12 @@ public class LevelManager : MonoBehaviour, ILevelService
     private int currentLevelIndex = -1;
     private readonly List<GameObject> _activeGentrifiedVisuals = new List<GameObject>();
     private readonly List<GameObject> _activeLiberatedVisuals = new List<GameObject>();
+    private Santa.Core.Save.EnvironmentDecorState _decorState;
 
     private void Start()
     {
+        // Locate EnvironmentDecorState to persist liberation changes
+        _decorState = FindFirstObjectByType<Santa.Core.Save.EnvironmentDecorState>(FindObjectsInactive.Include);
         if (levels != null && levels.Count > 0)
         {
             SetLevel(0);
@@ -63,6 +66,12 @@ public class LevelManager : MonoBehaviour, ILevelService
             foreach (var visual in _activeLiberatedVisuals)
             {
                 if (visual != null) visual.SetActive(true);
+            }
+
+            // Record liberation change for save/load replay
+            if (!string.IsNullOrEmpty(currentLevel.levelName))
+            {
+                _decorState?.ApplyChange($"liberated:{currentLevel.levelName}");
             }
         }
     }

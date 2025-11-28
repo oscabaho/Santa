@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Componente MonoBehaviour para exponer y gestionar ActionPointComponent en un GameObject.
+/// MonoBehaviour component exposing and managing an ActionPointComponent on a GameObject.
 /// </summary>
 [DisallowMultipleComponent]
 public class ActionPointComponentBehaviour : MonoBehaviour, IActionPointController
@@ -19,7 +19,7 @@ public class ActionPointComponentBehaviour : MonoBehaviour, IActionPointControll
     public void SetMaxValue(int value) => actionPoints.SetMaxValue(value);
 
     /// <summary>
-    /// Rellena los Puntos de Acción al máximo.
+    /// Refills Action Points to the maximum.
     /// </summary>
     public void Refill()
     {

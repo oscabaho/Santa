@@ -152,6 +152,11 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
     private IEnumerator ExecuteEndSequence(bool playerWon)
     {
+        // Change game state FIRST, before visual transitions
+        // This ensures that events (OnCombatEnded) fire before UI changes
+        _gameStateService?.EndCombat(playerWon);
+
+        // Now execute visual transitions (UI switch, camera transitions, etc.)
         yield return endCombatSequence.Execute(_currentContext);
 
         // Reposition player AFTER the camera transition is complete
@@ -160,7 +165,6 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             RepositionPlayerOnDefeat();
         }
 
-        _gameStateService?.EndCombat(playerWon);
         CleanupContext();
         _endSequenceRoutine = null;
     }

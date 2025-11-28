@@ -44,19 +44,17 @@ public class VirtualGamepadUI : MonoBehaviour
         _externalController = GetComponentInChildren<ActionButtonController>(true);
         if (_externalController != null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("VirtualGamepadUI: External ActionButtonController found; skipping internal wiring.", this);
 #endif
-            #endif
         }
         else
         {
             if (actionButton == null)
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("The 'actionButton' is not assigned in the VirtualGamepadUI script.", this);
-                #endif
+#endif
                 return;
             }
 
@@ -64,16 +62,16 @@ public class VirtualGamepadUI : MonoBehaviour
             _actionBtn = actionButton.GetComponent<Button>();
             if (_actionBtn == null)
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("VirtualGamepadUI: The actionButton GameObject has no Button component.", this);
-                #endif
+#endif
             }
             else
             {
                 _actionBtn.onClick.AddListener(OnActionButtonPressed);
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"VirtualGamepadUI: Button listener added. Button interactable={_actionBtn.interactable}", this);
-                #endif
+#endif
             }
         }
 
@@ -85,24 +83,25 @@ public class VirtualGamepadUI : MonoBehaviour
             if (readers != null && readers.Length > 0)
             {
                 inputReader = readers[0];
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("VirtualGamepadUI: Auto-acquired InputReader in Editor.", this);
-                #endif
+#endif
             }
         }
 #endif
 
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"VirtualGamepadUI: OnEnable complete. InputReader={inputReader?.name ?? "NULL"}, GameplayUIService={(_gameplayUIService != null ? "SET" : "NULL")}", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"VirtualGamepadUI: OnEnable complete. InputReader={inputReader?.name ?? "NULL"}, GameplayUIService={(_gameplayUIService != null ? "SET" : "NULL")}", this);
+#endif
 
         // EventSystem diagnostics
+
         var es = EventSystem.current;
         if (es == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("VirtualGamepadUI: No EventSystem present in scene. UI clicks will not work.", this);
-            #endif
+#endif
         }
         else
         {
@@ -112,9 +111,9 @@ public class VirtualGamepadUI : MonoBehaviour
             var hasInputSystemModule = false;
 #endif
             var hasStandaloneModule = es.GetComponent<StandaloneInputModule>() != null;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"VirtualGamepadUI: EventSystem modules -> InputSystemUIInputModule={hasInputSystemModule}, StandaloneInputModule={hasStandaloneModule}", this);
-            #endif
+#endif
         }
 
         if (_externalController == null)
@@ -126,10 +125,10 @@ public class VirtualGamepadUI : MonoBehaviour
             }
             else if (_gameplayUIService == null)
             {
-                // Inyección tardía: UIManager inyecta luego de instanciar el prefab
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                // Late injection: UIManager injects after instantiating the prefab
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("VirtualGamepadUI: Waiting for DI to complete (IGameplayUIService not yet injected).", this);
-                #endif
+#endif
             }
         }
     }
@@ -156,33 +155,34 @@ public class VirtualGamepadUI : MonoBehaviour
 
     private void OnActionButtonPressed()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"VirtualGamepadUI: OnActionButtonPressed called. InputReader={inputReader?.name ?? "NULL"}, Button={_actionBtn?.name ?? "NULL"}, ButtonActive={actionButton?.activeInHierarchy ?? false}", this);
-        #endif
-        
+#endif
+
+
         if (inputReader == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("VirtualGamepadUI: InputReader is not assigned. Cannot trigger interaction.", this);
-            #endif
+#endif
             return;
         }
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"VirtualGamepadUI: Calling RaiseInteract() on InputReader '{inputReader.name}'.", this);
-        #endif
+#endif
         inputReader.RaiseInteract();
     }
 
     private void Update()
     {
-        // Debug temporal: detectar cuando el botón cambia de estado
+        // Temporary debug: detect when the button changes visibility
         if (_externalController == null && actionButton != null && _lastButtonState != actionButton.activeInHierarchy)
         {
             _lastButtonState = actionButton.activeInHierarchy;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"VirtualGamepadUI: Action button visibility changed to {_lastButtonState}", this);
-            #endif
+#endif
         }
     }
 

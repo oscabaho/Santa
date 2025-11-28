@@ -18,7 +18,7 @@ public class UIManager : MonoBehaviour, IUIManager
     }
 
     /// <summary>
-    /// Inyecta dependencias recursivamente en todos los MonoBehaviour del GameObject y sus hijos
+    /// Injects dependencies recursively into all MonoBehaviours on the GameObject and its children
     /// </summary>
     private void InjectRecursively(GameObject instance)
     {
@@ -75,7 +75,7 @@ public class UIManager : MonoBehaviour, IUIManager
             var newPanelInstance = handle.Result;
             _addressToInstanceMap[panelAddress] = newPanelInstance;
             
-            // Inyectar dependencias en el panel cargado dinámicamente
+            // Inject dependencies into the dynamically loaded panel
             if (_resolver != null)
             {
                 InjectRecursively(newPanelInstance);
@@ -179,7 +179,7 @@ public class UIManager : MonoBehaviour, IUIManager
             var instance = handle.Result;
             _addressToInstanceMap[panelAddress] = instance;
 
-            // Inyectar dependencias en el panel precargado
+            // Inject dependencies into the preloaded panel
             if (_resolver != null)
             {
                 InjectRecursively(instance);
@@ -188,7 +188,7 @@ public class UIManager : MonoBehaviour, IUIManager
             var panel = instance.GetComponent<UIPanel>();
             if (panel != null)
             {
-                // Ensure panel remains hidden after preload
+                // Ensure the panel remains hidden after preload
                 panel.Hide();
                 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");

@@ -13,7 +13,7 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private TurnBasedCombatManager turnBasedCombatManagerInstance;
 
-    // TODO: Descomentar cuando el sistema de audio esté implementado
+    // TODO: Uncomment when the audio system is implemented
     // [SerializeField]
     // private AudioManager audioManagerInstance;
 
@@ -35,22 +35,22 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private CombatCameraManager combatCameraManagerInstance;
 
-    // TODO: Descomentar cuando el sistema de VFX esté implementado
+    // TODO: Uncomment when the VFX system is implemented
     // [SerializeField]
     // private VFXManager vfxManagerInstance;
 
     protected override void Awake()
     {
-        // Primero, ejecuta la lógica de Awake de la clase base (LifetimeScope)
+        // First, run base Awake logic (LifetimeScope)
         base.Awake();
         
-        // Luego, le decimos a Unity que este GameObject no debe ser destruido al cargar nuevas escenas
+        // Then mark this GameObject as persistent across scene loads
         DontDestroyOnLoad(this.gameObject);
     }
 
     protected override void Configure(IContainerBuilder builder)
     {
-        // Registrar InputReader compartido si está asignado (evita desincronización entre UI y gameplay)
+        // Register shared InputReader if assigned (prevents desync between UI and gameplay)
         if (inputReaderAsset != null)
         {
             builder.RegisterInstance(inputReaderAsset).AsSelf();
@@ -60,11 +60,11 @@ public class GameLifetimeScope : LifetimeScope
             GameLog.Log("GameLifetimeScope: InputReader asset not assigned. Ensure consumers reference the same asset.");
         }
 
-        // Registrar servicios usando helper method para reducir duplicación
+        // Register services using helper method to reduce duplication
         RegisterService<IUIManager, UIManager>(builder, uiManagerInstance);
         RegisterService<ICombatService, TurnBasedCombatManager>(builder, turnBasedCombatManagerInstance);
 
-        // TODO: Descomentar cuando el sistema de audio esté implementado
+        // TODO: Uncomment when the audio system is implemented
         // RegisterService<IAudioService, AudioManager>(builder, audioManagerInstance);
 
         RegisterService<ICombatTransitionService, CombatTransitionManager>(builder, combatTransitionManagerInstance);
@@ -76,7 +76,7 @@ public class GameLifetimeScope : LifetimeScope
         RegisterService<IGameStateService, GameStateManager>(builder, gameStateManagerInstance);
         RegisterService<IGameplayUIService, GameplayUIManager>(builder, gameplayUIManagerInstance);
         RegisterService<ILevelService, LevelManager>(builder, levelManagerInstance);
-        // CombatCameraManager es crítico para CombatTransitionManager; proporcionar Null object si falta.
+        // CombatCameraManager is critical for CombatTransitionManager; provide Null object if missing.
         if (combatCameraManagerInstance != null)
         {
             builder.RegisterComponent(combatCameraManagerInstance).As<ICombatCameraManager>().AsSelf();
@@ -96,30 +96,37 @@ public class GameLifetimeScope : LifetimeScope
             }
         }
 
-        // TODO: Descomentar cuando el sistema de VFX esté implementado
+        // TODO: Uncomment when the VFX system is implemented
         // RegisterService<IVFXService, VFXManager>(builder, vfxManagerInstance);
 
-        // --- UI Dinámica con Addressables ---
-        // UpgradeUI se carga via Addressables, igual que las otras UIs del proyecto
-        // La instancia la maneja UpgradeUILoader que se registra como IUpgradeUI
+        // --- Dynamic UI via Addressables ---
+        // UpgradeUI loads via Addressables like other UIs.
+        // Its instance is managed by UpgradeUILoader registered as IUpgradeUI.
         builder.Register<UpgradeUILoader>(Lifetime.Singleton)
             .As<IUpgradeUI>()
             .WithParameter(typeof(ILevelService), resolver => resolver.Resolve<ILevelService>())
             .WithParameter(typeof(ICombatTransitionService), resolver => resolver.Resolve<ICombatTransitionService>())
             .AsSelf();
 
-            // Registrar el lifecycle manager (OPCIONAL) para preload y release automático
-            // Comenta esta línea si prefieres controlar manualmente el preload/release
+            // Register lifecycle manager (OPTIONAL) for automatic preload & release.
+            // Comment out if you prefer manual preload/release control.
             builder.RegisterEntryPoint<UpgradeUILifecycleManager>();
             // Preload frequently used panels like CombatUI at startup
             builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
 
-        // --- Componentes en la jerarquía ---
+        // --- Save System ---
+        // Register SaveService from hierarchy or create a new GameObject-bound instance.
+        builder.RegisterComponentInHierarchy<Santa.Core.Save.SaveService>().As<Santa.Core.Save.ISaveService>().AsSelf();
+
+        // --- Hierarchy Components ---
         builder.RegisterComponentInHierarchy<GameInitializer>();
         builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
+        builder.RegisterComponentInHierarchy<Santa.UI.PauseMenuController>().AsSelf();
+        builder.RegisterComponentInHierarchy<Santa.UI.VirtualPauseMenuBinder>().AsSelf();
+        builder.RegisterComponentInHierarchy<Santa.UI.VirtualPauseButton>().AsSelf();
         
-        // NOTA: CombatUI y UpgradeUI se instancian dinámicamente via Addressables (ver UIManager)
-        // No deben estar registrados aquí ni en la escena base
+        // NOTE: CombatUI and UpgradeUI are instantiated dynamically via Addressables (see UIManager)
+        // They should not be registered here nor in the base scene.
         
         builder.RegisterComponentInHierarchy<CombatScenePool>().AsSelf();
         builder.RegisterComponentInHierarchy<GraphicsSettingsManager>().As<IGraphicsSettingsService>().AsSelf();

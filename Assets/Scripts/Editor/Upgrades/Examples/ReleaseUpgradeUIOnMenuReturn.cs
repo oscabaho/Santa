@@ -4,12 +4,12 @@ using VContainer;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
 /// <summary>
-/// Ejemplo de cómo liberar los recursos de UpgradeUI al volver al menú principal.
-/// Esto libera memoria que no se necesita en el menú.
+/// Example showing how to release UpgradeUI resources when returning to the main menu.
+/// This releases memory not needed in the menu.
 /// 
 /// INSTRUCCIONES:
-/// 1. Añade este script a un GameObject en tu menú principal
-/// 2. O llámalo desde tu script de transición al menú
+/// 1. Add this script to a GameObject in your main menu
+/// 2. Or call it from your menu transition script
 /// </summary>
 public class ReleaseUpgradeUIOnMenuReturn : MonoBehaviour
 {
@@ -23,7 +23,7 @@ public class ReleaseUpgradeUIOnMenuReturn : MonoBehaviour
 
     private void Start()
     {
-        // Liberar recursos al volver al menú
+        // Release resources when returning to the menu
         GameLog.Log("ReleaseUpgradeUIOnMenuReturn: Releasing UpgradeUI resources...");
         _upgradeUILoader.Release();
         GameLog.Log("ReleaseUpgradeUIOnMenuReturn: Resources released.");

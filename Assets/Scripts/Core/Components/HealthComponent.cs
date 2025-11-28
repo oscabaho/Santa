@@ -2,11 +2,11 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Componente concreto para la vida, hereda de StatComponent.
+/// Concrete component for Health, inherits from StatComponent.
 /// </summary>
 [Serializable]
 public class HealthComponent : StatComponent
 {
-    // Puedes agregar lógica específica de vida aquí si lo necesitas.
-    // El método SetValue(int) se hereda de StatComponent.
+    // You can add specific health logic here if needed.
+    // The SetValue(int) method is inherited from StatComponent.
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Interfaz para ítems que pueden ser "usados" desde el inventario.
+/// Interface for items that can be used from the inventory.
 /// </summary>
 public interface IUsableItem
 {

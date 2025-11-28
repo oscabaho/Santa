@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using VContainer;
+using System.Threading;
 
 /// <summary>
 /// This component starts a turn-based combat encounter when the player interacts with it.
@@ -20,6 +21,7 @@ public class CombatTrigger : MonoBehaviour
     private ICombatService _combatService;
     private Collider _interactionCollider;
     private bool _isListeningForCombatEnd;
+    private CancellationTokenSource _loadCancellation;
 
     [Inject]
     public void Construct(
@@ -64,6 +66,8 @@ public class CombatTrigger : MonoBehaviour
     {
         if (_combatHasBeenTriggered) return;
         _combatHasBeenTriggered = true;
+        _loadCancellation = new CancellationTokenSource();
+        var ct = _loadCancellation.Token;
 
         if (_interactionCollider != null)
         {
@@ -105,6 +109,11 @@ public class CombatTrigger : MonoBehaviour
         try
         {
             _activeCombatInstance = await _combatScenePool.GetInstanceAsync(poolKey, _encounter);
+            if (ct.IsCancellationRequested || this == null || gameObject == null)
+            {
+                // Trigger destroyed or cancelled; abort safely
+                return;
+            }
             if (_activeCombatInstance == null)
             {
                 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -226,9 +235,25 @@ public class CombatTrigger : MonoBehaviour
     private void ResetTriggerState()
     {
         _combatHasBeenTriggered = false;
+        if (_loadCancellation != null)
+        {
+            _loadCancellation.Cancel();
+            _loadCancellation.Dispose();
+            _loadCancellation = null;
+        }
         if (_interactionCollider != null)
         {
             _interactionCollider.enabled = true;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (_loadCancellation != null)
+        {
+            _loadCancellation.Cancel();
+            _loadCancellation.Dispose();
+            _loadCancellation = null;
         }
     }
 }

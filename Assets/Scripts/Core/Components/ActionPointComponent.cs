@@ -1,18 +1,18 @@
 using System;
 
 /// <summary>
-/// Componente concreto para los Puntos de Acción (PA), hereda de StatComponent.
+/// Concrete component for Action Points (AP), inherits from StatComponent.
 /// </summary>
 [Serializable]
 public class ActionPointComponent : StatComponent
 {
     /// <summary>
-    /// Valor actual de Puntos de Acción (alias de CurrentValue).
+    /// Current Action Points value (alias of CurrentValue).
     /// </summary>
     public int CurrentActionPoints => CurrentValue;
 
     /// <summary>
-    /// Gasta Puntos de Acción llamando a AffectValue con valor negativo.
+    /// Spends Action Points by calling AffectValue with a negative value.
     /// </summary>
     public void SpendActionPoints(int amount)
     {
@@ -20,7 +20,7 @@ public class ActionPointComponent : StatComponent
     }
 
     /// <summary>
-    /// Comprueba si hay suficientes Puntos de Acción para una acción.
+    /// Checks whether there are enough Action Points for an action.
     /// </summary>
     public bool HasEnough(int amount)
     {
@@ -28,7 +28,7 @@ public class ActionPointComponent : StatComponent
     }
 
     /// <summary>
-    /// Rellena los Puntos de Acción al máximo. Alias de SetToMax().
+    /// Refills Action Points to maximum (alias of SetToMax()).
     /// </summary>
     public void Refill()
     {

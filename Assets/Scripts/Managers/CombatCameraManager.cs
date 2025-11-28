@@ -16,7 +16,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     private const int ACTIVE_PRIORITY = 1000;
     private const int INACTIVE_PRIORITY = 0;
 
-    private readonly WaitForSeconds _debugWait = new WaitForSeconds(0.5f);
+    private readonly WaitForSeconds _debugWait = new(0.5f);
 
     [Inject]
     public void Construct(IGameStateService gameStateService, IObjectResolver resolver = null)
@@ -31,9 +31,9 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
         }
         else
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatCameraManager could not receive IGameStateService via injection.");
-            #endif
+#endif
         }
 
         // Start with both combat cameras inactive during Exploration
@@ -92,9 +92,9 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             }
             else
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("CombatCameraManager: ICombatService not found on combat start; camera switching will ignore phase changes.");
-                #endif
+#endif
             }
         }
         if (_mainCombatCamera == null || _targetSelectionCamera == null)
@@ -123,17 +123,17 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     {
         _mainCombatCamera = main;
         _targetSelectionCamera = target;
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (_mainCombatCamera == null) GameLog.LogError("SetCombatCameras received a null Main Camera.");
         if (_targetSelectionCamera == null) GameLog.LogError("SetCombatCameras received a null Target Camera.");
-        #endif
+#endif
         SetBothCamerasInactive();
 
         string mainName = main != null ? main.name : "null";
         string targetName = target != null ? target.name : "null";
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"CombatCameraManager: Cameras assigned dynamically. Main='{mainName}', Target='{targetName}'");
-        #endif
+#endif
     }
 
     /// <summary>
@@ -141,41 +141,41 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     /// </summary>
     private void FindAndAssignCameras()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("CombatCameraManager is searching for cameras by tag (Fallback)...");
-        #endif
+#endif
         if (_mainCombatCamera == null)
         {
-            var mainCamObj = GameObject.FindWithTag("MainCombatCamera");
+            var mainCamObj = GameObject.FindWithTag(GameConstants.Tags.MainCombatCamera);
             if (mainCamObj != null)
             {
                 _mainCombatCamera = mainCamObj.GetComponent<CinemachineCamera>();
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("Found and assigned MainCombatCamera.");
-                #endif
+#endif
             }
             else
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError("Could not find GameObject with tag 'MainCombatCamera'.");
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"Could not find GameObject with tag '{GameConstants.Tags.MainCombatCamera}'.");
+#endif
             }
         }
         if (_targetSelectionCamera == null)
         {
-            var targetCamObj = GameObject.FindWithTag("TargetSelectionCamera");
+            var targetCamObj = GameObject.FindWithTag(GameConstants.Tags.TargetSelectionCamera);
             if (targetCamObj != null)
             {
                 _targetSelectionCamera = targetCamObj.GetComponent<CinemachineCamera>();
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log("Found and assigned TargetSelectionCamera.");
-                #endif
+#endif
             }
             else
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError("Could not find GameObject with tag 'TargetSelectionCamera'.");
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"Could not find GameObject with tag '{GameConstants.Tags.TargetSelectionCamera}'.");
+#endif
             }
         }
     }
@@ -183,18 +183,18 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     public void SwitchToMainCamera()
     {
         SwitchCamera(_mainCombatCamera, _targetSelectionCamera);
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Switched to MAIN camera. Main(prio={ACTIVE_PRIORITY}), Target(prio={INACTIVE_PRIORITY})");
-        #endif
+#endif
         StartCoroutine(DebugActiveCamera());
     }
 
     public void SwitchToTargetSelectionCamera()
     {
         SwitchCamera(_targetSelectionCamera, _mainCombatCamera);
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Switched to TARGET-SELECTION camera. Target(prio={ACTIVE_PRIORITY}), Main(prio={INACTIVE_PRIORITY})");
-        #endif
+#endif
         StartCoroutine(DebugActiveCamera());
     }
 
@@ -210,9 +210,9 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             _targetSelectionCamera.Priority = INACTIVE_PRIORITY;
             _targetSelectionCamera.gameObject.SetActive(false);
         }
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Combat cameras set to INACTIVE and deactivated (Exploration mode).");
-        #endif
+#endif
     }
 
     private System.Collections.IEnumerator DebugActiveCamera()
@@ -257,6 +257,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     {
         if (activeCam != null)
         {
+            // Keep cameras enabled; rely on Cinemachine priorities and brain default blend
             activeCam.gameObject.SetActive(true);
             activeCam.enabled = true;
             activeCam.Priority = ACTIVE_PRIORITY;
@@ -268,44 +269,10 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 
         if (inactiveCam != null)
         {
+            inactiveCam.gameObject.SetActive(true);
+            inactiveCam.enabled = true;
             inactiveCam.Priority = INACTIVE_PRIORITY;
-            // Do not deactivate immediately. Wait for blend.
-            StartCoroutine(DisableCameraAfterBlend(inactiveCam));
         }
     }
-
-    private System.Collections.IEnumerator DisableCameraAfterBlend(CinemachineCamera cam)
-    {
-        // Wait one frame to allow CinemachineBrain to detect the priority change and start the blend
-        yield return null;
-
-        float blendTime = 0f;
-        var brain = CinemachineBrain.GetActiveBrain(0);
-        if (brain != null)
-        {
-            if (brain.IsBlending)
-            {
-                blendTime = brain.ActiveBlend.Duration;
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log($"[CM DEBUG] Detected Active Blend. Duration: {blendTime}s");
-                #endif
-            }
-            else
-            {
-                blendTime = brain.DefaultBlend.Time;
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log($"[CM DEBUG] No Active Blend. Using Default Duration: {blendTime}s");
-                #endif
-            }
-        }
-
-        // Wait for the blend to finish plus a small buffer
-        yield return new WaitForSeconds(blendTime + 0.1f);
-
-        if (cam != null && cam.Priority == INACTIVE_PRIORITY)
-        {
-            cam.gameObject.SetActive(false);
-            cam.enabled = false;
-        }
-    }
+    // Removed manual disable-after-blend; rely on Cinemachine Brain default blends
 }

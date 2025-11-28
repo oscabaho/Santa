@@ -6,6 +6,7 @@ public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
 {
     public event System.Action<Vector2> MoveEvent;
     public event System.Action InteractEvent;
+    public event System.Action PauseEvent;
 
     private ActionMap _actionMap;
 
@@ -50,6 +51,14 @@ public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
         }
     }
 
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed)
+        {
+            PauseEvent?.Invoke();
+        }
+    }
+
     /// <summary>
     /// Allows non-InputSystem UI (e.g., on-screen buttons) to trigger the same interaction flow.
     /// Safe to call from UI button onClick.
@@ -60,5 +69,13 @@ public class InputReader : ScriptableObject, @ActionMap.IPlayerActions
         GameLog.Log($"InputReader '{name}': RaiseInteract invoked.");
 #endif
         InteractEvent?.Invoke();
+    }
+
+    public void RaisePause()
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"InputReader '{name}': RaisePause invoked.");
+#endif
+        PauseEvent?.Invoke();
     }
 }

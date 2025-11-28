@@ -1,5 +1,5 @@
 /// <summary>
-/// Interfaz para objetos que pueden infligir daño a la durabilidad de un arma al ser golpeados.
+/// Interface for objects that can inflict durability damage on a weapon when hit.
 /// </summary>
 public interface IWeaponDamager
 {
