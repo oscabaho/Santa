@@ -1,11 +1,11 @@
 using UnityEngine;
 
 // =============================
-//  EVENTOS DE PERSONAJE Y COMBATE
+//  CHARACTER AND COMBAT EVENTS
 // =============================
 
 /// <summary>
-/// Evento publicado cuando el jugador gana un combate.
+/// Event published when the player wins a combat.
 /// </summary>
 public class CombatVictoryEvent
 {
@@ -14,8 +14,8 @@ public class CombatVictoryEvent
 }
 
 /// <summary>
-/// Evento publicado cuando el jugador realiza una acción que consume stamina
-/// y que debería reiniciar el delay de recuperación de la misma.
+/// Event published when the player performs an action that consumes stamina
+/// and which should reset its recovery delay.
 /// </summary>
 public class PlayerActionUsedStaminaEvent
 {
@@ -30,7 +30,7 @@ public class PlayerActionUsedStaminaEvent
 }
 
 /// <summary>
-/// Evento publicado cuando el jugador muere.
+/// Event published when the player dies.
 /// </summary>
 public class PlayerDiedEvent
 {
@@ -56,7 +56,7 @@ public class CharacterDeathEvent
 }
 
 /// <summary>
-/// Evento publicado cuando el GameObject del jugador es instanciado en una escena.
+/// Event published when the player's GameObject is instantiated in a scene.
 /// </summary>
 public class PlayerSpawnedEvent
 {
@@ -73,7 +73,7 @@ public class PlayerSpawnedEvent
 // =============================
 
 /// <summary>
-/// Evento publicado cuando se usa un ítem (poción, arma, etc).
+/// Event published when an item is used (potion, weapon, etc.).
 /// </summary>
 public class ItemUsedEvent
 {
@@ -85,11 +85,11 @@ public class ItemUsedEvent
     
 
 // =============================
-//  EVENTOS DE INTERACCIÓN
+//  INTERACTION EVENTS
 // =============================
 
 /// <summary>
-/// Se publica cuando un objeto interactuable entra en el rango del jugador.
+/// Published when an interactable object enters the player's range.
 /// </summary>
 public class InteractableInRangeEvent
 {
@@ -98,7 +98,7 @@ public class InteractableInRangeEvent
 }
 
 /// <summary>
-/// Se publica cuando el objeto interactuable que estaba en rango, ya no lo está.
+/// Published when an interactable object that was in range leaves the range.
 /// </summary>
 public class InteractableOutOfRangeEvent
 {

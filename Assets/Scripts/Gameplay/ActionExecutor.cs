@@ -61,7 +61,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
 
         try
         {
-            action.Ability.Execute(_reusableTargetList, action.Caster, upgradeService);
+            action.Ability.Execute(_reusableTargetList, action.Caster, upgradeService, allCombatants);
         }
         catch (System.Exception ex)
         {

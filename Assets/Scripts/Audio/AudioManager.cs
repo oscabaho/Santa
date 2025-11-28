@@ -4,12 +4,12 @@ using UnityEngine.Audio;
 using UnityEngine.Pool;
 
 /// <summary>
-/// Gestiona la reproducción de todos los sonidos y música del juego.
-/// Utiliza un pool de objetos para los AudioSources para ser más eficiente.
+/// Manages playback of all game sounds and music.
+/// Uses an object pool for AudioSources for efficiency.
 /// </summary>
 public class AudioManager : MonoBehaviour, IAudioService
 {
-    // Claves para PlayerPrefs, públicas para que otros scripts puedan usarlas.
+    // PlayerPrefs keys exposed publicly for use by other scripts.
     public const string MusicVolumeKey = "MusicVolume";
     public const string SfxVolumeKey = "SFXVolume";
 
@@ -33,7 +33,7 @@ public class AudioManager : MonoBehaviour, IAudioService
 
         if (audioSourcePrefab == null)
         {
-            GameLog.LogError("AudioManager: 'Audio Source Prefab' no está asignado en el Inspector. El sistema de audio no funcionará. Por favor, asigna el prefab de PooledAudioSource.", this);
+            GameLog.LogError("AudioManager: 'Audio Source Prefab' is not assigned in the Inspector. The audio system will not function. Please assign the PooledAudioSource prefab.", this);
             enabled = false;
             return;
         }
@@ -43,7 +43,7 @@ public class AudioManager : MonoBehaviour, IAudioService
 
     private void Start()
     {
-        // Al iniciar, cargamos los volúmenes guardados y los aplicamos.
+        // On start, load saved volumes and apply them.
         LoadAndApplyInitialVolumes();
     }
 
@@ -81,9 +81,9 @@ public class AudioManager : MonoBehaviour, IAudioService
         pooledSource.transform.SetParent(target.transform);
         pooledSource.transform.localPosition = Vector3.zero;
 
-        // --- LÓGICA CLAVE ---
-        // Intentamos reproducir el sonido. Si falla, el PooledAudioSource ya se ha devuelto al pool.
-        // No lo añadimos a nuestro diccionario para evitar un estado inconsistente.
+        // --- KEY LOGIC ---
+        // Attempt to play sound. If it fails, PooledAudioSource already returned to pool.
+        // Do not add to dictionary to avoid inconsistent state.
         bool success = pooledSource.Play(audioData, 1.0f, true);
         if (success)
         {
@@ -91,8 +91,8 @@ public class AudioManager : MonoBehaviour, IAudioService
         }
         else
         {
-            // Si falló, nos aseguramos de quitarle el parentesco para que no se quede "pegado"
-            // al objeto target mientras está inactivo en el pool.
+            // If it failed, ensure it's unparented so it doesn't remain attached
+            // to the target object while inactive in the pool.
             pooledSource.transform.SetParent(transform);
         }
     }
@@ -101,7 +101,7 @@ public class AudioManager : MonoBehaviour, IAudioService
     {
         if (_loopingSources.TryGetValue(target, out var pooledSource))
         {
-            pooledSource.Stop(); // Stop se encargará de devolverlo al pool
+            pooledSource.Stop(); // Stop will handle returning it to the pool
             _loopingSources.Remove(target);
         }
     }
@@ -115,43 +115,43 @@ public class AudioManager : MonoBehaviour, IAudioService
     }
 
     /// <summary>
-    /// Establece el volumen de un parámetro expuesto en el AudioMixer.
+    /// Sets the volume of an exposed parameter in the AudioMixer.
     /// </summary>
-    /// <param name="parameterName">El nombre del parámetro expuesto (ej. "MusicVolume").</param>
-    /// <param name="volume">El volumen en una escala lineal (0.0 a 1.0).</param>
+    /// <param name="parameterName">Exposed parameter name (e.g. "MusicVolume").</param>
+    /// <param name="volume">Volume on a linear scale (0.0 to 1.0).</param>
     public void SetVolume(string parameterName, float volume)
     {
         if (mainMixer == null) return;
 
-        // Convertimos el volumen lineal (0-1) a decibelios (logarítmico).
-        // Un valor de 0.0001f es efectivamente silencio (-80dB).
+        // Convert linear volume (0-1) to decibels (logarithmic).
+        // A value of 0.0001f is effectively silence (-80dB).
         float dbVolume = Mathf.Log10(Mathf.Max(volume, 0.0001f)) * 20;
         mainMixer.SetFloat(parameterName, dbVolume);
     }
 
     /// <summary>
-    /// Obtiene el volumen de un parámetro expuesto en el AudioMixer.
+    /// Gets the volume of an exposed parameter in the AudioMixer.
     /// </summary>
-    /// <param name="parameterName">El nombre del parámetro expuesto (ej. "MusicVolume").</param>
-    /// <returns>El volumen en una escala lineal (0.0 a 1.0).</returns>
+    /// <param name="parameterName">Exposed parameter name (e.g. "MusicVolume").</param>
+    /// <returns>Volume on a linear scale (0.0 to 1.0).</returns>
     public float GetVolume(string parameterName)
     {
         if (mainMixer != null && mainMixer.GetFloat(parameterName, out float dbVolume))
         {
-            // Convertimos los decibelios de vuelta a una escala lineal.
+            // Convert decibels back to linear scale.
             return Mathf.Pow(10, dbVolume / 20);
         }
-        // Si no se puede obtener, devolvemos 0 como valor seguro.
+        // If retrieval fails, return 0 as a safe value.
         return 0f;
     }
 
     private void LoadAndApplyInitialVolumes()
     {
-        // Carga el volumen de la música o usa 0.75f si no hay nada guardado.
+        // Load music volume or use 0.75f default.
         float musicVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 0.75f);
         SetVolume(MusicVolumeKey, musicVolume);
 
-        // Carga el volumen de los SFX o usa 1.0f si no hay nada guardado.
+        // Load SFX volume or use 1.0f default.
         float sfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, 1.0f);
         SetVolume(SfxVolumeKey, sfxVolume);
     }

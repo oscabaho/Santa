@@ -32,7 +32,18 @@ public abstract class Ability : ScriptableObject
     /// <param name="targets">The list of targets, determined by the combat manager.</param>
     /// <param name="caster">The GameObject performing the ability.</param>
     /// <param name="upgradeService">Service providing player stats from upgrades.</param>
-    public abstract void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService);
+    /// <param name="allCombatants">All combatants in the battle, for abilities that need additional targeting context.</param>
+    public abstract void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants);
+
+    /// <summary>
+    /// Rolls for a critical hit based on upgrade service critical chance.
+    /// </summary>
+    protected bool RollCriticalHit(IUpgradeService upgradeService)
+    {
+        return upgradeService != null
+            && upgradeService.CriticalHitChance > 0f
+            && Random.value < upgradeService.CriticalHitChance;
+    }
 
 #if UNITY_EDITOR
     /// <summary>

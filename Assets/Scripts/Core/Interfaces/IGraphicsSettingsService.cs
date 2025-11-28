@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Interfaz para exponer operaciones de configuración gráfica de forma desacoplada.
+/// Interface exposing graphics configuration operations in a decoupled way.
 /// </summary>
 public interface IGraphicsSettingsService
 {

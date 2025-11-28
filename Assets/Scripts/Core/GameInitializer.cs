@@ -3,7 +3,8 @@ using VContainer;
 
 public class GameInitializer : MonoBehaviour
 {
-    private const string InitialUIPanelAddress = UIPanelAddresses.VirtualGamepad;
+    private const string InitialUIPanelAddress = Santa.Core.Addressables.AddressableKeys.UIPanels.VirtualGamepad;
+    private const string PauseMenuAddress = Santa.Core.Addressables.AddressableKeys.UIPanels.PauseMenu;
     private IUIManager _uiManager;
     private bool _shown;
 
@@ -15,6 +16,9 @@ public class GameInitializer : MonoBehaviour
 
     void Awake()
     {
+        // Mobile Optimization: Set target frame rate
+        Application.targetFrameRate = 60;
+
         // Try to show as early as possible (before first FixedUpdate) if DI already happened.
         if (_uiManager != null)
         {
@@ -48,6 +52,12 @@ public class GameInitializer : MonoBehaviour
         else if (_uiManager == null)
         {
             GameLog.LogError("GameInitializer: IUIManager service was not injected. Make sure it's registered in a LifetimeScope.");
+        }
+
+        // Optional: Preload Pause Menu ready for input-triggered opening
+        if (_uiManager != null)
+        {
+            _ = _uiManager.PreloadPanel(PauseMenuAddress);
         }
     }
 }

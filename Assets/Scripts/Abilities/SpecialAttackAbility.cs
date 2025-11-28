@@ -8,7 +8,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
 public class SpecialAttackAbility : Ability
 {
-    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService)
+    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
@@ -60,10 +60,5 @@ public class SpecialAttackAbility : Ability
         }
     }
 
-    private bool RollCriticalHit(IUpgradeService upgradeService)
-    {
-        return upgradeService != null
-            && upgradeService.CriticalHitChance > 0f
-            && Random.value < upgradeService.CriticalHitChance;
-    }
+
 }

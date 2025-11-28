@@ -1,7 +1,7 @@
-using UnityEngine; // Añadir esta línea
+using UnityEngine; // Required for GameObject reference
 
 /// <summary>
-/// Interfaz para objetos con los que el jugador puede interactuar.
+/// Interface for objects the player can interact with.
 /// </summary>
 public interface IInteractable
 {

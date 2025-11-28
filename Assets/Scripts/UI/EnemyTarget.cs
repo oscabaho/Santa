@@ -57,7 +57,9 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     // Called by Unity's EventSystem when a pointer click hits this object's collider.
     public void OnPointerClick(PointerEventData eventData)
     {
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log($"¡CLIC DETECTADO en {gameObject.name} por el EventSystem!", this);
+        #endif
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"EnemyTarget OnPointerClick on {gameObject.name}");
         #endif

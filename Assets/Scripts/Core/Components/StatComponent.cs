@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public abstract class StatComponent : IStatController
 {
-    [SerializeField, Tooltip("Valor máximo de la estadística")] 
+    [SerializeField, Tooltip("Maximum value of the stat")] 
     private int maxValue = 100;
     
     [SerializeField, HideInInspector] 

@@ -4,7 +4,7 @@ using VContainer.Unity;
 
 /// <summary>
 /// Entry point to preload frequently used UI panels to avoid first-use hitches.
-/// Currently preloads CombatUI on app start.
+/// Currently preloads CombatUI and PauseMenu on app start.
 /// </summary>
 public class PreloadUIPanelsEntryPoint : IStartable
 {
@@ -18,12 +18,13 @@ public class PreloadUIPanelsEntryPoint : IStartable
 
     public void Start()
     {
-        // Fire-and-forget preload of CombatUI
-        _ = PreloadCombatUIAsync();
+        // Fire-and-forget preload of CombatUI and PauseMenu
+        _ = PreloadPanelsAsync();
     }
 
-    private async Task PreloadCombatUIAsync()
+    private async Task PreloadPanelsAsync()
     {
-        await _uiManager.PreloadPanel(UIPanelAddresses.CombatUI);
+        await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.CombatUI);
+        await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.PauseMenu);
     }
 }

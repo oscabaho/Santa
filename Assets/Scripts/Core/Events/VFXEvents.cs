@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Evento publicado para solicitar la reproducción de un efecto visual desde el pool.
+/// Event published to request playing a visual effect from the pool.
 /// </summary>
 public class PlayVFXRequest
 {

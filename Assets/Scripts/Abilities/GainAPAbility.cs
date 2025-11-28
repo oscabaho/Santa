@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Gain AP Ability", menuName = "Santa/Abilities/Gain AP Ability")]
 public class GainAPAbility : Ability
 {
-    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService)
+    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
         // Get energy gained from UpgradeService
         int amountToGain = upgradeService?.APRecoveryAmount ?? 34;

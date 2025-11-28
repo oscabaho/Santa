@@ -5,7 +5,7 @@ using VContainer;
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
-/// Now refactored to work as a prefab with modular card components.
+/// Refactored to work as a prefab with modular card components.
 /// </summary>
 public class UpgradeUI : MonoBehaviour, IUpgradeUI
 {
@@ -19,7 +19,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
     [Header("Optional Elements")]
     [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private Button closeButton; // Para cerrar sin elegir (opcional)
+    [SerializeField] private Button closeButton; // Optional close without selection
 
     [Header("Animation Settings")]
     [SerializeField] private float fadeInDuration = 0.3f;
@@ -27,6 +27,9 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     private IUpgradeService _upgradeService;
     private ILevelService _levelService;
     private ICombatTransitionService _combatTransitionService;
+
+    // Track active fade coroutine to prevent StopAllCoroutines from canceling other coroutines
+    private Coroutine _fadeCoroutine;
 
     [Inject]
     public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService)
@@ -38,28 +41,28 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
     private void Awake()
     {
-        // Suscribirse a los eventos de las tarjetas
+        // Subscribe to card events
         if (option1Card != null)
             option1Card.OnUpgradeSelected += OnUpgradeChosen;
 
         if (option2Card != null)
             option2Card.OnUpgradeSelected += OnUpgradeChosen;
 
-        // Botón de cerrar opcional
+        // Optional close button
         if (closeButton != null)
             closeButton.onClick.AddListener(OnCloseButtonClicked);
 
-        // Asegurarse de que el canvas group existe
+        // Ensure canvas group exists
         if (canvasGroup == null)
             canvasGroup = upgradePanel?.GetComponent<CanvasGroup>();
 
-        // Iniciar oculto
+        // Start hidden
         HideImmediate();
     }
 
     private void OnDestroy()
     {
-        // Desuscribirse para evitar memory leaks
+        // Unsubscribe to avoid memory leaks
         if (option1Card != null)
             option1Card.OnUpgradeSelected -= OnUpgradeChosen;
 
@@ -71,44 +74,54 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     }
 
     /// <summary>
-    /// Configures the UI with two upgrade options and displays it.
+    /// Configures the UI with two upgrade options and displays them.
     /// </summary>
     public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
     {
         if (upgrade1 == null || upgrade2 == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Cannot show upgrades: one or both upgrades are null.");
-            #endif
+#endif
             return;
         }
 
-        // Configurar las tarjetas
+        // Configure cards
         option1Card?.Setup(upgrade1);
         option2Card?.Setup(upgrade2);
+
+        // Set title via centralized UI strings
+        if (titleText != null)
+        {
+            titleText.text = Santa.Core.Config.UIStrings.UpgradeTitle;
+        }
 
         // Mostrar el panel
         Show();
     }
 
     /// <summary>
-    /// Muestra el panel con un fade-in suave.
+    /// Shows the panel with a smooth fade-in.
     /// </summary>
     private void Show()
     {
         if (upgradePanel != null)
             upgradePanel.SetActive(true);
 
-        // Fade in con CanvasGroup
+        // Fade in with CanvasGroup
         if (canvasGroup != null)
         {
-            StopAllCoroutines();
-            StartCoroutine(FadeIn());
+            // Stop only the active fade coroutine, not all coroutines
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+            }
+            _fadeCoroutine = StartCoroutine(FadeIn());
         }
     }
 
     /// <summary>
-    /// Oculta el panel inmediatamente.
+    /// Hides the panel immediately.
     /// </summary>
     private void HideImmediate()
     {
@@ -121,17 +134,24 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
         }
+
+        // Clear fade coroutine reference
+        _fadeCoroutine = null;
     }
 
     /// <summary>
-    /// Oculta el panel con un fade-out suave.
+    /// Hides the panel with a smooth fade-out.
     /// </summary>
     private void Hide()
     {
         if (canvasGroup != null)
         {
-            StopAllCoroutines();
-            StartCoroutine(FadeOut());
+            // Stop only the active fade coroutine, not all coroutines
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+            }
+            _fadeCoroutine = StartCoroutine(FadeOut());
         }
         else
         {
@@ -142,7 +162,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     private System.Collections.IEnumerator FadeIn()
     {
         float elapsed = 0f;
-        canvasGroup.interactable = false; // Deshabilitar durante la animación
+        canvasGroup.interactable = false; // Disable during animation
 
         while (elapsed < fadeInDuration)
         {
@@ -154,6 +174,7 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
+        _fadeCoroutine = null; // Clear reference when complete
     }
 
     private System.Collections.IEnumerator FadeOut()
@@ -173,22 +194,24 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
         if (upgradePanel != null)
             upgradePanel.SetActive(false);
+
+        _fadeCoroutine = null; // Clear reference when complete
     }
 
     /// <summary>
-    /// Callback cuando se selecciona un upgrade desde cualquier tarjeta.
+    /// Callback when an upgrade is selected from any card.
     /// </summary>
     private void OnUpgradeChosen(AbilityUpgrade chosenUpgrade)
     {
         if (chosenUpgrade == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Chosen upgrade is null.");
-            #endif
+#endif
             return;
         }
 
-        // Deshabilitar ambas tarjetas para evitar doble-click
+        // Disable both cards to avoid double-click
         option1Card?.SetInteractable(false);
         option2Card?.SetInteractable(false);
 
@@ -204,19 +227,37 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         // 4. End the combat state
         _combatTransitionService?.EndCombat(true);
 
-        // 5. Prepare the next level/area
+        // 5. Deactivate TurnBasedCombatManager now that upgrade is selected
+        // This was previously happening too early in TurnBasedCombatManager.EndCombat()
+        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        if (combatManager != null)
+        {
+            combatManager.gameObject.SetActive(false);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUI: Deactivated TurnBasedCombatManager after upgrade selection.");
+#endif
+        }
+
+        // 6. Prepare the next level/area
         _levelService?.AdvanceToNextLevel();
     }
 
     /// <summary>
-    /// Callback para cerrar sin elegir (opcional, puede usarse para testing).
+    /// Callback to close without choosing (optional, useful for testing).
     /// </summary>
     private void OnCloseButtonClicked()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.LogWarning("Upgrade selection closed without choosing.");
-        #endif
+#endif
         Hide();
         _combatTransitionService?.EndCombat(true);
+
+        // Deactivate combat manager when closing without selection
+        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        if (combatManager != null)
+        {
+            combatManager.gameObject.SetActive(false);
+        }
     }
 }

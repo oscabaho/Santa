@@ -48,11 +48,11 @@ public class CombatState
                 _brains[combatant] = brain;
 
             // Identify player and enemies
-            if (combatant.CompareTag("Player"))
+            if (combatant.CompareTag(GameConstants.Tags.Player))
             {
                 _player = combatant;
             }
-            else if (combatant.CompareTag("Enemy"))
+            else if (combatant.CompareTag(GameConstants.Tags.Enemy))
             {
                 _enemies.Add(combatant);
             }
