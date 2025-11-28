@@ -8,11 +8,18 @@ public class AllEnemiesTargeting : TargetingStrategy
 
     public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
     {
+        // Determine the enemy tag based on the caster's tag
+        string enemyTag = caster.CompareTag(GameConstants.Tags.Player) ? GameConstants.Tags.Enemy : GameConstants.Tags.Player;
+
         foreach (var combatant in allCombatants)
         {
-            if (combatant != null && combatant.CompareTag("Enemy"))
+            if (combatant != null && combatant.activeInHierarchy && combatant.CompareTag(enemyTag))
             {
-                results.Add(combatant);
+                // Only add living enemies to the target list
+                if (combatant.TryGetComponent<IHealthController>(out var health) && health.CurrentValue > 0)
+                {
+                    results.Add(combatant);
+                }
             }
         }
     }

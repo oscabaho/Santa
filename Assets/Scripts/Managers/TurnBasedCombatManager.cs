@@ -106,7 +106,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 playerAP.SetMaxValue(maxAP);
                 playerAP.SetValue(maxAP); // Set to max AP (base value)
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log($"TurnBasedCombatManager: Synced Player AP to UpgradeService. MaxAP set to {maxAP}.");
+                GameLog.LogVerbose($"TurnBasedCombatManager: Synced Player AP to UpgradeService. MaxAP set to {maxAP}.");
 #endif
             }
             else
@@ -126,7 +126,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 playerHealth.SetMaxValue(maxHealth);
                 playerHealth.SetValue(maxHealth); // Heal to full at start of combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log($"TurnBasedCombatManager: Synced Player Health to UpgradeService. MaxHealth set to {maxHealth}.");
+                GameLog.LogVerbose($"TurnBasedCombatManager: Synced Player Health to UpgradeService. MaxHealth set to {maxHealth}.");
 #endif
             }
             else
@@ -149,7 +149,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         else
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"StartCombat received {participants.Count} participants:");
+            GameLog.LogVerbose($"StartCombat received {participants.Count} participants:");
 #endif
             for (int i = 0; i < participants.Count; i++)
             {
@@ -163,7 +163,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
                 else
                 {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log($"Participant {i}: name={obj.name}, tag={obj.tag}");
+                    GameLog.LogVerbose($"Participant {i}: name={obj.name}, tag={obj.tag}");
 #endif
                 }
             }
@@ -181,7 +181,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         else
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"CombatState.Player assigned: name={_combatState.Player.name}, tag={_combatState.Player.tag}");
+            GameLog.LogVerbose($"CombatState.Player assigned: name={_combatState.Player.name}, tag={_combatState.Player.tag}");
 #endif
         }
     }
@@ -189,7 +189,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private void StartNewTurn()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("--- SELECTION PHASE ---: Starting new turn.");
+        GameLog.LogVerbose("--- SELECTION PHASE ---: Starting new turn.");
 #endif
         CurrentPhase = CombatPhase.Selection;
         OnPhaseChanged?.Invoke(CurrentPhase);
@@ -230,7 +230,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             SetEnemyTargetsActive(true); // Directly enable targets
             OnPhaseChanged?.Invoke(CurrentPhase);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"Player selected ability '{ability.AbilityName}'. Waiting for target selection.");
+            GameLog.LogVerbose($"Player selected ability '{ability.AbilityName}'. Waiting for target selection.");
 #endif
             return;
         }
@@ -247,7 +247,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("Player cancelled targeting. Returning to selection phase.");
+        GameLog.LogVerbose("Player cancelled targeting. Returning to selection phase.");
 #endif
 
 
@@ -323,7 +323,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         playerAP.AffectValue(-actualCost);
         _combatState.PendingActions.Add(new PendingAction { Ability = ability, Caster = _combatState.Player, PrimaryTarget = primaryTarget });
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Player submitted action: {ability.AbilityName} targeting {(primaryTarget != null ? primaryTarget.name : "self/area")}. Cost: {actualCost} AP.");
+        GameLog.LogVerbose($"Player submitted action: {ability.AbilityName} targeting {(primaryTarget != null ? primaryTarget.name : "self/area")}. Cost: {actualCost} AP.");
 #endif
 
 
@@ -382,7 +382,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
         // If the loop completes, it means no one won or lost, so start a new turn.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("Execution phase finished.");
+        GameLog.LogVerbose("Execution phase finished.");
 #endif
         StartNewTurn();
     }
@@ -390,7 +390,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private void PrepareExecutionPhase()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("--- EXECUTION PHASE ---");
+        GameLog.LogVerbose("--- EXECUTION PHASE ---");
 #endif
         CurrentPhase = CombatPhase.Execution;
         OnPhaseChanged?.Invoke(CurrentPhase);
@@ -468,7 +468,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     private void SetEnemyTargetsActive(bool isActive)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Setting EnemyTarget colliders to: {isActive}");
+        GameLog.LogVerbose($"Setting EnemyTarget colliders to: {isActive}");
 #endif
         foreach (var target in _enemyTargets)
         {

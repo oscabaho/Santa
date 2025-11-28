@@ -14,7 +14,21 @@ public class DamageAbility : Ability
 
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
-        if (targets == null) return;
+        if (targets == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"{caster.name}: Execute called with null targets list!");
+#endif
+            return;
+        }
+
+        if (targets.Count == 0)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"{caster.name}: Execute called with empty targets list (Count=0)!");
+#endif
+            return;
+        }
 
         // Get damage from UpgradeService based on ability type
         int damage = 10; // Fallback default
@@ -36,6 +50,10 @@ public class DamageAbility : Ability
         for (int i = 0; i < targets.Count; i++)
         {
             GameObject target = targets[i];
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            string targetName = target != null ? target.name : "NULL";
+            GameLog.Log($"[DamageAbility] Processing target [{i}]: {targetName}");
+#endif
             if (target == null) continue;
 
             if (target.TryGetComponent<HealthComponentBehaviour>(out var healthComponent))
@@ -59,6 +77,12 @@ public class DamageAbility : Ability
                 }
 #endif
             }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            else
+            {
+                GameLog.LogWarning($"[DamageAbility] {target.name} has NO HealthComponentBehaviour!");
+            }
+#endif
         }
 
         // Area Attack Splash Damage Logic
@@ -66,29 +90,37 @@ public class DamageAbility : Ability
         {
             GameObject primaryTarget = targets[0];
 
-            // Build list of other active enemies
-            var otherEnemies = new List<GameObject>(3);
+            // Determine the tag of the primary target to find splash targets
+            string targetTag = primaryTarget != null ? primaryTarget.tag : null;
+            if (string.IsNullOrEmpty(targetTag))
+            {
+                return; // No valid target tag, skip splash
+            }
+
+            // Build list of other combatants with the SAME tag as primary target
+            var otherTargets = new List<GameObject>(3);
             for (int i = 0; i < allCombatants.Count; i++)
             {
                 var combatant = allCombatants[i];
                 if (combatant != null
                     && combatant.activeInHierarchy
-                    && combatant.CompareTag(GameConstants.Tags.Enemy)
-                    && combatant != primaryTarget)
+                    && combatant.CompareTag(targetTag) // Same tag as primary target
+                    && combatant != primaryTarget
+                    && combatant != caster) // Don't splash the caster
                 {
                     // Check if still alive
                     if (combatant.TryGetComponent<HealthComponentBehaviour>(out var health) && health.CurrentValue > 0)
                     {
-                        otherEnemies.Add(combatant);
+                        otherTargets.Add(combatant);
                     }
                 }
             }
 
-            // If there are other enemies, deal splash damage to one random enemy
-            if (otherEnemies.Count > 0)
+            // If there are other valid targets, deal splash damage to one random target
+            if (otherTargets.Count > 0)
             {
-                int randomIndex = Random.Range(0, otherEnemies.Count);
-                GameObject splashTarget = otherEnemies[randomIndex];
+                int randomIndex = Random.Range(0, otherTargets.Count);
+                GameObject splashTarget = otherTargets[randomIndex];
 
                 if (splashTarget.TryGetComponent<HealthComponentBehaviour>(out var splashHealth))
                 {

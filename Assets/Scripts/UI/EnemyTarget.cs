@@ -31,7 +31,7 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     private void OnEnable()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"EnemyTarget OnEnable on {gameObject.name}");
+        GameLog.LogVerbose($"EnemyTarget OnEnable on {gameObject.name}");
 #endif
         // Always start with the collider disabled. It will be enabled by the combat manager.
         if (_collider != null) _collider.enabled = false;
@@ -43,7 +43,7 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         {
             _collider.enabled = isActive;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"EnemyTarget on {gameObject.name}: Collider explicitly set to {isActive}.");
+            GameLog.LogVerbose($"EnemyTarget on {gameObject.name}: Collider explicitly set to {isActive}.");
 #endif
         }
         else
@@ -59,7 +59,7 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     {
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"EnemyTarget OnPointerClick on {gameObject.name}");
+        GameLog.LogVerbose($"EnemyTarget OnPointerClick on {gameObject.name}");
 #endif
         TrySelect();
     }
@@ -67,7 +67,7 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
     private void TrySelect()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"EnemyTarget TrySelect on {gameObject.name}");
+        GameLog.LogVerbose($"EnemyTarget TrySelect on {gameObject.name}");
 #endif
 
         // Try to find CombatUI if not already set

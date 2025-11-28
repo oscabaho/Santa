@@ -44,9 +44,9 @@ public class ActionButtonController : MonoBehaviour
         _button = GetComponent<Button>();
         if (_button == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("ActionButtonController: Button component missing.", this);
-            #endif
+#endif
         }
         else
         {
@@ -61,9 +61,9 @@ public class ActionButtonController : MonoBehaviour
                 {
                     _button.targetGraphic = image;
                 }
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log("ActionButtonController: Added invisible Image to enable UI raycasts.", this);
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("ActionButtonController: Added invisible Image to enable UI raycasts.", this);
+#endif
             }
         }
     }
@@ -73,9 +73,9 @@ public class ActionButtonController : MonoBehaviour
         if (_button != null)
         {
             _button.onClick.AddListener(OnButtonClicked);
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"ActionButtonController: Listener added. Interactable={_button.interactable}", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"ActionButtonController: Listener added. Interactable={_button.interactable}", this);
+#endif
         }
 
         // Editor convenience / safety: auto-acquire InputReader if DI has not yet injected it.
@@ -86,9 +86,9 @@ public class ActionButtonController : MonoBehaviour
             if (readers != null && readers.Length > 0)
             {
                 inputReader = readers[0];
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log("ActionButtonController: Auto-acquired InputReader in Editor (fallback).", this);
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("ActionButtonController: Auto-acquired InputReader in Editor (fallback).", this);
+#endif
             }
         }
 #endif
@@ -97,17 +97,17 @@ public class ActionButtonController : MonoBehaviour
         var es = EventSystem.current;
         if (es == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("ActionButtonController: No EventSystem found in scene. UI clicks will not work.", this);
-            #endif
+#endif
         }
         else
         {
             var module = es.currentInputModule;
             string moduleName = module != null ? module.GetType().Name : "<none>";
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"ActionButtonController: EventSystem present. currentInputModule={moduleName}", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"ActionButtonController: EventSystem present. currentInputModule={moduleName}", this);
+#endif
             // Detailed configuration now handled by UIEventSystemConfigurator (avoid duplicate logic here).
         }
 
@@ -118,18 +118,18 @@ public class ActionButtonController : MonoBehaviour
             if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
             {
                 canvas.worldCamera = Camera.main;
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log("ActionButtonController: Assigned Camera.main to Canvas.worldCamera (ScreenSpaceCamera).", this);
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("ActionButtonController: Assigned Camera.main to Canvas.worldCamera (ScreenSpaceCamera).", this);
+#endif
             }
 
             var raycaster = canvas.GetComponent<GraphicRaycaster>();
             if (raycaster == null)
             {
                 canvas.gameObject.AddComponent<GraphicRaycaster>();
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log("ActionButtonController: Added GraphicRaycaster to parent Canvas.", this);
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("ActionButtonController: Added GraphicRaycaster to parent Canvas.", this);
+#endif
             }
         }
 
@@ -139,9 +139,9 @@ public class ActionButtonController : MonoBehaviour
         {
             if (!cg.interactable || !cg.blocksRaycasts)
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"ActionButtonController: Parent CanvasGroup '{cg.gameObject.name}' has interactable={cg.interactable}, blocksRaycasts={cg.blocksRaycasts}. This may block clicks.", this);
-                #endif
+#endif
             }
         }
 
@@ -173,15 +173,15 @@ public class ActionButtonController : MonoBehaviour
     {
         if (inputReader == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("ActionButtonController: InputReader is not assigned. Cannot trigger interaction.", this);
-            #endif
+#endif
             return;
         }
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"ActionButtonController: Click -> RaiseInteract on '{inputReader.name}'.", this);
-        #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose($"ActionButtonController: Click -> RaiseInteract on '{inputReader.name}'.", this);
+#endif
         inputReader.RaiseInteract();
     }
 }

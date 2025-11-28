@@ -34,24 +34,24 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (inputReader == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
-            #endif
+#endif
         }
     }
 
     private void OnEnable()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"PlayerInteraction: OnEnable. InputReader={inputReader?.name ?? "NULL"}", this);
-        #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose($"PlayerInteraction: OnEnable. InputReader={inputReader?.name ?? "NULL"}", this);
+#endif
 
         if (inputReader != null)
         {
             inputReader.InteractEvent += OnInteract;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"PlayerInteraction: Subscribed to InteractEvent on InputReader '{inputReader.name}'.", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"PlayerInteraction: Subscribed to InteractEvent on InputReader '{inputReader.name}'.", this);
+#endif
         }
 
         // Subscribe to combat end event to clear interaction state
@@ -100,22 +100,22 @@ public class PlayerInteraction : MonoBehaviour
             _gameplayUIService.ShowActionButton(false);
         }
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("PlayerInteraction: Combat ended, cleared interaction state and hid action button.", this);
-        #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose("PlayerInteraction: Combat ended, cleared interaction state and hid action button.", this);
+#endif
     }
 
     private void OnInteract()
     {
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"PlayerInteraction: OnInteract called. CurrentTrigger={_currentCombatTrigger?.name ?? "NULL"}", this);
-        #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose($"PlayerInteraction: OnInteract called. CurrentTrigger={_currentCombatTrigger?.name ?? "NULL"}", this);
+#endif
 
         if (_currentCombatTrigger != null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"PlayerInteraction: Starting combat interaction on trigger '{_currentCombatTrigger.name}'.", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"PlayerInteraction: Starting combat interaction on trigger '{_currentCombatTrigger.name}'.", this);
+#endif
             _currentCombatTrigger.StartCombatInteraction();
         }
         else
@@ -125,9 +125,9 @@ public class PlayerInteraction : MonoBehaviour
             if (t - _lastNoTriggerLogTime > NoTriggerLogCooldown)
             {
                 _lastNoTriggerLogTime = t;
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("PlayerInteraction: OnInteract called but no CombatTrigger is set. Player might not be inside a trigger zone.", this);
-                #endif
+#endif
             }
         }
     }
@@ -138,9 +138,9 @@ public class PlayerInteraction : MonoBehaviour
         {
             _resolver.Inject(combatTrigger);
             _currentCombatTrigger = combatTrigger;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"PlayerInteraction: Entered trigger zone '{combatTrigger.name}'. Setting as current trigger.", this);
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"PlayerInteraction: Entered trigger zone '{combatTrigger.name}'. Setting as current trigger.", this);
+#endif
 
             _desiredActionVisible = true;
             if (_gameplayUIService != null && _gameplayUIService.IsReady)

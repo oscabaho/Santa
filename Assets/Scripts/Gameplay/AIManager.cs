@@ -37,11 +37,17 @@ public class AIManager : MonoBehaviour, IAIManager
         _tempEnemies.Clear();
         _tempAllies.Clear();
 
-        // Classify combatants: Allies are player + anyone tagged "Player"
+        // Ensure the player is always in the allies list
+        if (player != null)
+        {
+            _tempAllies.Add(player);
+        }
+
+        // Classify combatants: Allies include anyone tagged "Player" (except player to avoid duplicates)
         // Enemies are anyone tagged "Enemy"
         foreach (var c in allCombatants)
         {
-            if (c == null) continue;
+            if (c == null || c == player) continue; // Skip null and player (already added)
 
             if (c.CompareTag(GameConstants.Tags.Enemy))
             {
@@ -49,7 +55,7 @@ public class AIManager : MonoBehaviour, IAIManager
             }
             else if (c.CompareTag(GameConstants.Tags.Player))
             {
-                // Player and allies both use "Player" tag
+                // Allies with "Player" tag (e.g., summoned units, NPCs)
                 _tempAllies.Add(c);
             }
         }
@@ -60,6 +66,9 @@ public class AIManager : MonoBehaviour, IAIManager
 
             if (brainCache.TryGetValue(combatant, out var brain) && apCache.TryGetValue(combatant, out var aiAP))
             {
+                // CRITICAL: Pass enemies and allies in CORRECT order
+                // EnemyBrain needs _tempAllies (Players) as enemies to attack
+                // AllyBrain needs _tempEnemies (Enemies) as enemies to attack
                 PendingAction aiAction = brain.ChooseAction(playerAction, _tempEnemies, _tempAllies);
 
                 if (aiAction.Ability != null && aiAP.CurrentValue >= aiAction.Ability.ApCost)
