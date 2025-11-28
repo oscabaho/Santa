@@ -146,11 +146,7 @@ public class GameLifetimeScope : LifetimeScope
             builder.RegisterComponent(graphicsSettingsManager).As<IGraphicsSettingsService>().AsSelf();
         }
 
-        var graphicsSettingsController = FindFirstObjectByType<GraphicsSettingsController>(FindObjectsInactive.Include);
-        if (graphicsSettingsController != null)
-        {
-            builder.RegisterComponent(graphicsSettingsController).AsSelf();
-        }
+        TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
 
         GameLog.Log("GameLifetimeScope CONFIGURED!");
     }
