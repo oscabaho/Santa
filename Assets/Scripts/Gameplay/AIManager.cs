@@ -36,11 +36,22 @@ public class AIManager : MonoBehaviour, IAIManager
     {
         _tempEnemies.Clear();
         _tempAllies.Clear();
+
+        // Classify combatants: Allies are player + anyone tagged "Player"
+        // Enemies are anyone tagged "Enemy"
         foreach (var c in allCombatants)
         {
             if (c == null) continue;
-            if (c.CompareTag("Enemy")) _tempEnemies.Add(c);
-            else _tempAllies.Add(c);
+
+            if (c.CompareTag(GameConstants.Tags.Enemy))
+            {
+                _tempEnemies.Add(c);
+            }
+            else if (c.CompareTag(GameConstants.Tags.Player))
+            {
+                // Player and allies both use "Player" tag
+                _tempAllies.Add(c);
+            }
         }
 
         foreach (var combatant in allCombatants)
@@ -55,7 +66,9 @@ public class AIManager : MonoBehaviour, IAIManager
                 {
                     aiAP.AffectValue(-aiAction.Ability.ApCost);
                     pendingActions.Add(aiAction);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.Log($"{combatant.name} submitted action: {aiAction.Ability.AbilityName}");
+#endif
                 }
             }
         }

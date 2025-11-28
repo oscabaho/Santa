@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.Pool;
 
 /// <summary>
-/// Componente para un sistema de partículas gestionado por un ObjectPool.
-/// Se encarga de devolverse al pool cuando termina su efecto.
+/// Component for a particle system managed by an ObjectPool.
+/// Returns itself to the pool when its effect ends.
 /// </summary>
 [RequireComponent(typeof(ParticleSystem))]
 public class PooledParticleSystem : MonoBehaviour
@@ -12,7 +12,7 @@ public class PooledParticleSystem : MonoBehaviour
     private ParticleSystem _particleSystem;
 
     /// <summary>
-    /// El pool de objetos al que pertenece esta instancia.
+    /// The object pool this instance belongs to.
     /// </summary>
     public IObjectPool<PooledParticleSystem> Pool { get; set; }
 
@@ -23,16 +23,16 @@ public class PooledParticleSystem : MonoBehaviour
 
     private void OnEnable()
     {
-        // Al activarse desde el pool, iniciamos la corrutina que lo devolverá.
+        // When activated from the pool, start the coroutine that will return it.
         StartCoroutine(ReturnToPoolWhenFinished());
     }
 
     private IEnumerator ReturnToPoolWhenFinished()
     {
-        // Esperamos hasta que el sistema de partículas (y todos sus hijos) haya terminado.
+        // Wait until the particle system (and all children) has finished.
         yield return new WaitWhile(() => _particleSystem.IsAlive(true));
 
-        // Una vez terminado, nos devolvemos al pool.
+        // Once finished, return to the pool.
         Pool?.Release(this);
     }
 }

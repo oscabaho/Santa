@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Evento publicado cuando inicia el día en el ciclo día/noche.
+/// Event published when day starts in the day/night cycle.
 /// </summary>
 public class DayStartedEvent { }
 
 /// <summary>
-/// Evento publicado cuando inicia la noche en el ciclo día/noche.
+/// Event published when night starts in the day/night cycle.
 /// </summary>
 public class NightStartedEvent { }

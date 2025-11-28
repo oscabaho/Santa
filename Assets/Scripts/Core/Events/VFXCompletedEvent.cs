@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Evento publicado cuando un efecto visual gestionado por VFXManager ha terminado.
+/// Event published when a visual effect managed by VFXManager has finished.
 /// </summary>
 public class VFXCompletedEvent
 {

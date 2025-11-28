@@ -14,12 +14,16 @@ public class UIPanel : MonoBehaviour
     /// </summary>
     protected virtual void Awake()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"UIPanel.Awake() called for {gameObject.name}", gameObject);
+#endif
         CanvasGroup = GetComponent<CanvasGroup>();
         if (CanvasGroup == null)
         {
             // This should not happen due to [RequireComponent]
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UIPanel on {gameObject.name} requires a CanvasGroup component.", this);
+#endif
         }
     }
 
@@ -29,9 +33,10 @@ public class UIPanel : MonoBehaviour
     /// </summary>
     public virtual void Show()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"UIPanel.Show() called for {gameObject.name}", gameObject);
-        gameObject.SetActive(true);
-        
+#endif
+
         // Ensure canvas group is fetched, as Awake might not have been called if the object was inactive.
         if (CanvasGroup == null)
         {
@@ -40,14 +45,20 @@ public class UIPanel : MonoBehaviour
 
         if (CanvasGroup == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UIPanel.Show() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
+#endif
             return;
         }
-        
+
         CanvasGroup.alpha = 1f;
         CanvasGroup.interactable = true;
         CanvasGroup.blocksRaycasts = true;
+
+        gameObject.SetActive(true);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"UIPanel.Show() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+#endif
     }
 
     /// <summary>
@@ -55,9 +66,11 @@ public class UIPanel : MonoBehaviour
     /// Can be overridden for custom hide animations (e.g., fading out).
     /// </summary>
     public virtual void Hide()
-     {
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"UIPanel.Hide() called for {gameObject.name}", gameObject);
-        
+#endif
+
         if (CanvasGroup == null)
         {
             CanvasGroup = GetComponent<CanvasGroup>();
@@ -65,7 +78,9 @@ public class UIPanel : MonoBehaviour
 
         if (CanvasGroup == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UIPanel.Hide() on {gameObject.name}: CanvasGroup is null and could not be found.", this);
+#endif
             return;
         }
 
@@ -73,6 +88,8 @@ public class UIPanel : MonoBehaviour
         CanvasGroup.interactable = false;
         CanvasGroup.blocksRaycasts = false;
         gameObject.SetActive(false);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+#endif
     }
 }

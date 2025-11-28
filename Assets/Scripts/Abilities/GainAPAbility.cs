@@ -1,21 +1,27 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Gain AP Ability", menuName = "Santa/Abilities/Gain AP Ability")]
 public class GainAPAbility : Ability
 {
-    [Header("Effect")]
-    [SerializeField] private int amountToGain = 50;
-
-    public override void Execute(List<GameObject> targets, GameObject caster)
+    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
-        foreach (var target in targets)
+        // Get energy gained from UpgradeService
+        int amountToGain = upgradeService?.APRecoveryAmount ?? 34;
+
+        // Use for loop instead of foreach for mobile performance
+        for (int i = 0; i < targets.Count; i++)
         {
-            var apComponent = target.GetComponent<ActionPointComponentBehaviour>();
-            if (apComponent != null)
+            GameObject target = targets[i];
+            if (target == null) continue;
+
+            if (target.TryGetComponent<ActionPointComponentBehaviour>(out var apComponent))
             {
                 apComponent.AffectValue(amountToGain);
-                GameLog.Log($"{target.name} used an ability to gain {amountToGain} AP.");
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"{target.name} gained {amountToGain} AP.");
+#endif
             }
         }
     }

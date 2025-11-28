@@ -1,4 +1,4 @@
- using UnityEngine;
+using UnityEngine;
 
 
 
@@ -6,7 +6,8 @@
 public enum UpgradeType
 {
     IncreaseDamage,
-    IncreaseEnergyGain, // For all attacks
+    IncreaseAPRecovery, // Amount of AP recovered by GainAP ability
+    IncreaseMaxHealth,
     ReduceSpecialMissChance
 }
 

@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// Manages the global state of the game (Exploration, Combat) using events to announce changes.
@@ -10,7 +10,7 @@ public class GameStateManager : MonoBehaviour, IGameStateService
     public GameState CurrentState { get; private set; }
 
     public event Action OnCombatStarted;
-    public event Action OnCombatEnded;
+    public event Action<bool> OnCombatEnded;
 
     // --- Unity Methods ---
 
@@ -30,20 +30,23 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         if (CurrentState == GameState.Combat) return;
 
         CurrentState = GameState.Combat;
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Game State changed to: Combat");
+        #endif
         OnCombatStarted?.Invoke();
     }
 
     /// <summary>
     /// Switches the game back to Exploration mode and invokes the OnCombatEnded event.
     /// </summary>
-    public void EndCombat()
+    public void EndCombat(bool playerWon)
     {
         if (CurrentState == GameState.Exploration) return;
 
         CurrentState = GameState.Exploration;
-        GameLog.Log("Game State changed to: Exploration");
-        OnCombatEnded?.Invoke();
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"Game State changed to: Exploration. Player Won: {playerWon}");
+        #endif
+        OnCombatEnded?.Invoke(playerWon);
     }
-
 }

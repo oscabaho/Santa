@@ -3,10 +3,10 @@ using UnityEngine;
 using UnityEngine.Pool;
 
 /// <summary>
-/// Componente para un AudioSource gestionado por un ObjectPool.
-/// Se encarga de devolverse al pool cuando termina de reproducir el audio.
-/// Su única responsabilidad es reproducir un sonido configurado y gestionar su
-/// ciclo de vida para volver al pool.
+/// Component for an AudioSource managed by an ObjectPool.
+/// Returns itself to the pool when audio playback finishes.
+/// Its sole responsibility is to play a configured sound and manage
+/// its lifecycle for returning to the pool.
 /// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class PooledAudioSource : MonoBehaviour
@@ -15,12 +15,12 @@ public class PooledAudioSource : MonoBehaviour
     private Coroutine _returnToPoolCoroutine;
 
     /// <summary>
-    /// El componente AudioSource nativo. Útil para configuraciones avanzadas (ej. 3D).
+    /// The native AudioSource component. Useful for advanced configurations (e.g., 3D).
     /// </summary>
     public AudioSource Source => _audioSource;
 
     /// <summary>
-    /// El pool de objetos al que pertenece esta instancia.
+    /// The object pool this instance belongs to.
     /// </summary>
     public IObjectPool<PooledAudioSource> Pool { get; set; }
 
@@ -31,14 +31,14 @@ public class PooledAudioSource : MonoBehaviour
     }
 
     /// <summary>
-    /// Inicia la reproducción del clip de audio con una configuración específica.
+    /// Starts playback of the audio clip with specific configuration.
     /// </summary>
-    /// <returns>True si la reproducción comenzó, false si falló (ej. clip nulo).</returns>
+    /// <returns>True if playback started, false if it failed (e.g. null clip).</returns>
     public bool Play(AudioData audioData, float spatialBlend = 1.0f, bool forceLoop = false)
     {
-        if (audioData == null || audioData.GetClip() == null) // Usar GetClip para validar que haya al menos un clip
+        if (audioData == null || audioData.GetClip() == null) // Use GetClip to validate at least one clip exists
         {
-            GameLog.LogWarning("Se intentó reproducir un AudioClip nulo. Devolviendo al pool de inmediato.");
+            GameLog.LogWarning("Attempted to play a null AudioClip. Returning to pool immediately.");
             ReturnToPool();
             return false;
         }
@@ -63,7 +63,7 @@ public class PooledAudioSource : MonoBehaviour
     }
 
     /// <summary>
-    /// Detiene la reproducción del sonido y lo devuelve inmediatamente al pool.
+    /// Stops playback and immediately returns to the pool.
     /// </summary>
     public void Stop()
     {

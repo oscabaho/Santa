@@ -16,7 +16,8 @@ public interface IGameStateService
     /// <summary>
     /// Switches the game back to Exploration mode.
     /// </summary>
-    void EndCombat();
+    /// <param name="playerWon">True if the player won the combat, false otherwise.</param>
+    void EndCombat(bool playerWon);
 
     /// <summary>
     /// Event fired when combat begins.
@@ -24,7 +25,7 @@ public interface IGameStateService
     event Action OnCombatStarted;
 
     /// <summary>
-    /// Event fired when combat ends.
+    /// Event fired when combat ends. Parameter indicates if player won.
     /// </summary>
-    event Action OnCombatEnded;
+    event Action<bool> OnCombatEnded;
 }

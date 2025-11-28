@@ -5,9 +5,9 @@ using TMPro;
 using System;
 
 /// <summary>
-/// Representa una tarjeta individual de upgrade en la UI.
-/// Puede ser reutilizada para mostrar diferentes upgrades.
-/// Incluye efectos visuales de hover y selección.
+/// Represents an individual upgrade card in the UI.
+/// Can be reused to display different upgrades.
+/// Includes visual hover and selection effects.
 /// </summary>
 public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -50,7 +50,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>
-    /// Configura la tarjeta con los datos del upgrade.
+    /// Configures the card with the upgrade's data.
     /// </summary>
     public void Setup(AbilityUpgrade upgrade)
     {
@@ -62,13 +62,13 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (upgradeDescriptionText != null)
             upgradeDescriptionText.text = upgrade.UpgradeDescription;
 
-        // Si tienes un sistema de iconos, descoméntalo:
+        // If you have an icon system, uncomment below:
         // if (upgradeIcon != null && upgrade.Icon != null)
         //     upgradeIcon.sprite = upgrade.Icon;
     }
 
     /// <summary>
-    /// Limpia la tarjeta cuando no se use.
+    /// Clears the card when not used.
     /// </summary>
     public void Clear()
     {
@@ -87,7 +87,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>
-    /// Habilita o deshabilita la interacción de la tarjeta.
+    /// Enables or disables card interaction.
     /// </summary>
     public void SetInteractable(bool interactable)
     {
@@ -95,26 +95,26 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             selectButton.interactable = interactable;
     }
 
-    // Implementación de IPointerEnterHandler
+    // IPointerEnterHandler implementation
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (_cardBackground != null)
             _cardBackground.color = hoverColor;
 
-        // Animación de escala al hacer hover
+        // Scale animation on hover
         if (_scaleCoroutine != null)
             StopCoroutine(_scaleCoroutine);
         
         _scaleCoroutine = StartCoroutine(AnimateScale(_originalScale * hoverScale));
     }
 
-    // Implementación de IPointerExitHandler
+    // IPointerExitHandler implementation
     public void OnPointerExit(PointerEventData eventData)
     {
         if (_cardBackground != null)
             _cardBackground.color = normalColor;
 
-        // Volver a la escala original
+        // Return to original scale
         if (_scaleCoroutine != null)
             StopCoroutine(_scaleCoroutine);
         
@@ -122,7 +122,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>
-    /// Anima suavemente el cambio de escala.
+    /// Smoothly animates scale change.
     /// </summary>
     private System.Collections.IEnumerator AnimateScale(Vector3 targetScale)
     {
@@ -134,7 +134,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             elapsed += Time.unscaledDeltaTime;
             float t = elapsed / animationDuration;
             
-            // Ease out cubic para una animación suave
+            // Ease-out cubic for a smooth animation
             t = 1f - Mathf.Pow(1f - t, 3f);
             
             transform.localScale = Vector3.Lerp(startScale, targetScale, t);

@@ -2,38 +2,38 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 /// <summary>
-/// Un ScriptableObject que contiene la configuración para un evento de sonido.
-/// Esto permite a los diseñadores de sonido crear y ajustar sonidos como assets
-/// en el proyecto, desacoplando los datos de audio del código.
+/// ScriptableObject containing configuration for a sound event.
+/// Lets sound designers create and tweak sounds as assets,
+/// decoupling audio data from code.
 /// </summary>
 [CreateAssetMenu(menuName = "ProyectSecret/Audio/Audio Data", fileName = "NewAudioData")]
 public class AudioData : ScriptableObject
 {
     [Header("Sound Definition")]
-    [Tooltip("El/los clip(s) de audio a reproducir. Si hay más de uno, se elegirá uno al azar.")]
+    [Tooltip("Audio clip(s) to play. If more than one, one will be chosen at random.")]
     public AudioClip[] clips;
 
     [Header("Configuration")]
-    [Tooltip("El grupo de mezcla de audio al que se enviará el sonido.")]
+    [Tooltip("Audio mixer group the sound will route to.")]
     public AudioMixerGroup outputMixerGroup;
 
-    [Tooltip("Si el sonido debe reproducirse en bucle.")]
+    [Tooltip("Whether the sound should loop.")]
     public bool loop = false;
 
-    [Tooltip("Volumen base del sonido.")]
+    [Tooltip("Base sound volume.")]
     [Range(0f, 1f)]
     public float volume = 1f;
 
-    [Tooltip("Pitch (tono) base del sonido.")]
+    [Tooltip("Base sound pitch.")]
     [Range(0.1f, 3f)]
     public float pitch = 1f;
 
     [Header("Randomization")]
-    [Tooltip("Variación aleatoria del volumen (0 = sin variación).")]
+    [Tooltip("Random volume variation (0 = none).")]
     [Range(0f, 1f)]
     public float volumeVariation = 0f;
 
-    [Tooltip("Variación aleatoria del pitch (0 = sin variación).")]
+    [Tooltip("Random pitch variation (0 = none).")]
     [Range(0f, 1f)]
     public float pitchVariation = 0f;
 

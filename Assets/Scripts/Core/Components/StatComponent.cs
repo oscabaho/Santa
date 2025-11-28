@@ -4,11 +4,11 @@ using UnityEngine;
 [Serializable]
 public abstract class StatComponent : IStatController
 {
-    [SerializeField, Tooltip("Valor máximo de la estadística")] 
+    [SerializeField, Tooltip("Maximum value of the stat")] 
     private int maxValue = 100;
     
     [SerializeField, HideInInspector] 
-    private int currentValue;
+    protected int currentValue;
 
     public int MaxValue => maxValue;
     public int CurrentValue => currentValue;
@@ -38,10 +38,22 @@ public abstract class StatComponent : IStatController
         OnValueChanged?.Invoke(currentValue, maxValue);
     }
 
+    public virtual void SetMaxValue(int newMax)
+    {
+        maxValue = newMax;
+        currentValue = Mathf.Clamp(currentValue, 0, maxValue);
+        OnValueChanged?.Invoke(currentValue, maxValue);
+    }
+
     public virtual void ModifyMaxValue(int amount)
     {
         maxValue += amount;
         currentValue = Mathf.Clamp(currentValue, 0, maxValue);
+        OnValueChanged?.Invoke(currentValue, maxValue);
+    }
+
+    protected void TriggerValueChanged()
+    {
         OnValueChanged?.Invoke(currentValue, maxValue);
     }
 }

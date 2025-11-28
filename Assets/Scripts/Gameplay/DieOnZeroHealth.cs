@@ -1,5 +1,6 @@
 using UnityEngine;
 using VContainer;
+using Santa.Core.Save;
 
 /// <summary>
 /// Desactiva el GameObject cuando la vida llega a 0 y notifica al EventBus.
@@ -9,6 +10,7 @@ public class DieOnZeroHealth : MonoBehaviour
 {
     private HealthComponentBehaviour _health;
     private IEventBus _eventBus;
+    // Tracker is event-driven; no direct reference needed.
 
     [Inject]
     public void Construct(IEventBus eventBus)
@@ -19,6 +21,7 @@ public class DieOnZeroHealth : MonoBehaviour
     private void Awake()
     {
         _health = GetComponent<HealthComponentBehaviour>();
+        // Tracker subscribes to CharacterDeathEvent; no lookup required.
     }
 
     private void OnEnable()
@@ -39,6 +42,8 @@ public class DieOnZeroHealth : MonoBehaviour
         {
             // Publicar evento global usando el IEventBus inyectado
             _eventBus?.Publish(new CharacterDeathEvent(gameObject));
+
+            // DefeatedEnemiesTracker will handle persistence via CharacterDeathEvent subscription
 
             // Desactivar el objeto para que TurnBasedCombatManager lo considere como "muerto"
             gameObject.SetActive(false);

@@ -17,16 +17,21 @@ public class LevelManager : MonoBehaviour, ILevelService
     private int currentLevelIndex = -1;
     private readonly List<GameObject> _activeGentrifiedVisuals = new List<GameObject>();
     private readonly List<GameObject> _activeLiberatedVisuals = new List<GameObject>();
+    private Santa.Core.Save.EnvironmentDecorState _decorState;
 
     private void Start()
     {
+        // Locate EnvironmentDecorState to persist liberation changes
+        _decorState = FindFirstObjectByType<Santa.Core.Save.EnvironmentDecorState>(FindObjectsInactive.Include);
         if (levels != null && levels.Count > 0)
         {
             SetLevel(0);
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("LevelManager: No levels assigned in the inspector.");
+            #endif
         }
     }
 
@@ -50,7 +55,9 @@ public class LevelManager : MonoBehaviour, ILevelService
         LevelData currentLevel = GetCurrentLevelData();
         if (currentLevel != null)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Liberating level: {currentLevel.levelName}");
+            #endif
 
             foreach (var visual in _activeGentrifiedVisuals)
             {
@@ -59,6 +66,12 @@ public class LevelManager : MonoBehaviour, ILevelService
             foreach (var visual in _activeLiberatedVisuals)
             {
                 if (visual != null) visual.SetActive(true);
+            }
+
+            // Record liberation change for save/load replay
+            if (!string.IsNullOrEmpty(currentLevel.levelName))
+            {
+                _decorState?.ApplyChange($"liberated:{currentLevel.levelName}");
             }
         }
     }
@@ -75,7 +88,9 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         else
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("LevelManager: All levels have been liberated! Game Over.");
+            #endif
             // TODO: Handle game completion logic
         }
     }
@@ -84,7 +99,9 @@ public class LevelManager : MonoBehaviour, ILevelService
     {
         if (levelIndex < 0 || levelIndex >= levels.Count)
         {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"LevelManager: Invalid level index {levelIndex}.");
+            #endif
             return;
         }
 
@@ -97,7 +114,9 @@ public class LevelManager : MonoBehaviour, ILevelService
         currentLevelIndex = levelIndex;
         LevelData newLevel = levels[currentLevelIndex];
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Setting up level: {newLevel.levelName}");
+        #endif
 
         // Instantiate the initial 'gentrified' visuals for the new level.
         InstantiateLevelVisuals(newLevel);

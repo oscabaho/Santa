@@ -1,5 +1,5 @@
 /// <summary>
-/// Interfaz para objetos que pueden recibir daño.
+/// Interface for objects that can receive damage.
 /// </summary>
 public interface IDamageable
 {

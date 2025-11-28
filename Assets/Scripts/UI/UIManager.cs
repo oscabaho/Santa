@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
 
 public class UIManager : MonoBehaviour, IUIManager
@@ -18,7 +18,7 @@ public class UIManager : MonoBehaviour, IUIManager
     }
 
     /// <summary>
-    /// Inyecta dependencias recursivamente en todos los MonoBehaviour del GameObject y sus hijos
+    /// Injects dependencies recursively into all MonoBehaviours on the GameObject and its children
     /// </summary>
     private void InjectRecursively(GameObject instance)
     {
@@ -43,7 +43,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty.");
+#endif
             return;
         }
 
@@ -57,41 +59,58 @@ public class UIManager : MonoBehaviour, IUIManager
             }
             else
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"UIManager: Cached panel with address '{panelAddress}' is missing its UIPanel component. The panel will not be shown.");
+#endif
             }
             return;
         }
 
         // If not cached, load and instantiate it.
-        var handle = Addressables.InstantiateAsync(panelAddress, transform);
-        await handle.Task;
-
-        if (handle.Status == AsyncOperationStatus.Succeeded)
+        try
         {
-            var newPanelInstance = handle.Result;
-            _addressToInstanceMap[panelAddress] = newPanelInstance;
-            
-            // Inyectar dependencias en el panel cargado dinámicamente
-            if (_resolver != null)
+            var handle = Addressables.InstantiateAsync(panelAddress, transform);
+            await handle.Task;
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
             {
-                InjectRecursively(newPanelInstance);
-            }
-            
-            var panelComponent = newPanelInstance.GetComponent<UIPanel>();
-            if (panelComponent != null)
-            {
-                panelComponent.Show();
-                GameLog.Log($"UIManager: Panel with address '{panelAddress}' loaded and shown.");
+                var newPanelInstance = handle.Result;
+                _addressToInstanceMap[panelAddress] = newPanelInstance;
+
+                // Inject dependencies into the dynamically loaded panel
+                if (_resolver != null)
+                {
+                    InjectRecursively(newPanelInstance);
+                }
+
+                var panelComponent = newPanelInstance.GetComponent<UIPanel>();
+                if (panelComponent != null)
+                {
+                    panelComponent.Show();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log($"UIManager: Panel with address '{panelAddress}' loaded and shown.");
+#endif
+                }
+                else
+                {
+                    // If the component is missing, log an error. The prefab is likely misconfigured.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' does not have a UIPanel component on its root object. The panel will not be shown.");
+#endif
+                }
             }
             else
             {
-                // If the component is missing, log an error. The prefab is likely misconfigured.
-                GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' does not have a UIPanel component on its root object. The panel will not be shown.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"UIManager: Failed to load panel with address '{panelAddress}'. Status: {handle.Status}");
+#endif
             }
         }
-        else
+        catch (System.Exception ex)
         {
-            GameLog.LogError($"UIManager: Failed to load panel with address '{panelAddress}'.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogError($"UIManager: Exception loading panel '{panelAddress}': {ex.Message}");
+#endif
         }
     }
 
@@ -99,18 +118,24 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for hiding.");
+#endif
             return;
         }
 
         if (_addressToInstanceMap.TryGetValue(panelAddress, out var panelInstance))
         {
             panelInstance.GetComponent<UIPanel>()?.Hide();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"UIManager: Panel with address '{panelAddress}' hidden.");
+#endif
         }
         else
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"UIManager: Panel with address '{panelAddress}' not found or not instantiated.");
+#endif
         }
     }
 
@@ -118,7 +143,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for switching.");
+#endif
             return;
         }
 
@@ -141,7 +168,9 @@ public class UIManager : MonoBehaviour, IUIManager
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UIManager: Panel address is null or empty for preloading.");
+#endif
             return;
         }
 
@@ -151,35 +180,50 @@ public class UIManager : MonoBehaviour, IUIManager
             return;
         }
 
-        var handle = Addressables.InstantiateAsync(panelAddress, transform);
-        await handle.Task;
-
-        if (handle.Status == AsyncOperationStatus.Succeeded)
+        try
         {
-            var instance = handle.Result;
-            _addressToInstanceMap[panelAddress] = instance;
+            var handle = Addressables.InstantiateAsync(panelAddress, transform);
+            await handle.Task;
 
-            // Inyectar dependencias en el panel precargado
-            if (_resolver != null)
+            if (handle.Status == AsyncOperationStatus.Succeeded)
             {
-                InjectRecursively(instance);
-            }
+                var instance = handle.Result;
+                _addressToInstanceMap[panelAddress] = instance;
 
-            var panel = instance.GetComponent<UIPanel>();
-            if (panel != null)
-            {
-                // Ensure panel remains hidden after preload
-                panel.Hide();
-                GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");
+                // Inject dependencies into the preloaded panel
+                if (_resolver != null)
+                {
+                    InjectRecursively(instance);
+                }
+
+                var panel = instance.GetComponent<UIPanel>();
+                if (panel != null)
+                {
+                    // Ensure the panel remains hidden after preload
+                    panel.Hide();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");
+#endif
+                }
+                else
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' is missing UIPanel component on root.");
+#endif
+                }
             }
             else
             {
-                GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' is missing UIPanel component on root.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"UIManager: Failed to preload panel with address '{panelAddress}'. Status: {handle.Status}");
+#endif
             }
         }
-        else
+        catch (System.Exception ex)
         {
-            GameLog.LogError($"UIManager: Failed to preload panel with address '{panelAddress}'.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogError($"UIManager: Exception preloading panel '{panelAddress}': {ex.Message}");
+#endif
         }
     }
 }

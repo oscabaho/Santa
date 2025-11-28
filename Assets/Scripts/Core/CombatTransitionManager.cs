@@ -14,15 +14,19 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     [Tooltip("Sequence of tasks to execute when ending combat.")]
     [SerializeField] private TransitionSequence endCombatSequence;
 
+    [Header("Respawn Settings")]
+    [Tooltip("The transform where the player should respawn upon defeat.")]
+    [SerializeField] private Transform respawnPoint;
+
     // --- Injected References ---
-    private ScreenFade _screenFade;
     private IUIManager _uiManager;
     private IGameStateService _gameStateService;
+    private ICombatCameraManager _combatCameraManager;
 
     // --- Discovered References ---
     private GameObject _explorationCamera;
     private GameObject _explorationPlayer;
-    
+
     // --- Runtime State ---
     private GameObject _currentCombatSceneParent;
     private TransitionContext _currentContext;
@@ -30,18 +34,19 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private Coroutine _endSequenceRoutine;
 
     [Inject]
-    public void Construct(ScreenFade screenFade, IUIManager uiManager, IGameStateService gameStateService)
+    public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null)
     {
-        _screenFade = screenFade;
         _uiManager = uiManager;
         _gameStateService = gameStateService;
+        _combatCameraManager = combatCameraManager; // May be null; will log on use.
     }
 
     private void Awake()
     {
         // Discover persistent exploration objects
-        _explorationPlayer = FindFirstObjectByType<ExplorationPlayerIdentifier>()?.gameObject;
-        _explorationCamera = Camera.main?.gameObject;
+        var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
+        _explorationPlayer = playerIdentifier != null ? playerIdentifier.gameObject : null;
+        _explorationCamera = Camera.main != null ? Camera.main.gameObject : null;
 
         if (_explorationPlayer == null)
         {
@@ -60,11 +65,30 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentCombatSceneParent = combatSceneParent;
 
         // Discover combat-specific objects within the instantiated prefab
-        var combatPlayer = _currentCombatSceneParent.GetComponentInChildren<CombatPlayerIdentifier>()?.gameObject;
+        var combatPlayerIdentifier = _currentCombatSceneParent.GetComponentInChildren<CombatPlayerIdentifier>();
+        var combatPlayer = combatPlayerIdentifier != null ? combatPlayerIdentifier.gameObject : null;
         if (combatPlayer == null)
         {
             GameLog.LogError($"CombatTransitionManager: Could not find the combat player via the CombatPlayerIdentifier component within {_currentCombatSceneParent.name}.", this);
             return;
+        }
+
+        // --- DYNAMIC CAMERA ASSIGNMENT ---
+        _currentCombatSceneParent.TryGetComponent<CombatArenaSettings>(out var arenaSettings);
+        if (arenaSettings != null)
+        {
+            if (_combatCameraManager != null)
+            {
+                _combatCameraManager.SetCombatCameras(arenaSettings.MainCombatCamera, arenaSettings.TargetSelectionCamera);
+            }
+            else
+            {
+                GameLog.LogWarning("CombatTransitionManager: ICombatCameraManager not injected; cameras will rely on fallback tag search inside CombatCameraManager.");
+            }
+        }
+        else
+        {
+            GameLog.LogWarning($"CombatTransitionManager: No CombatArenaSettings found on {_currentCombatSceneParent.name}. CombatCameraManager will attempt fallback tag search.");
         }
 
         // Build and store the context for both start and end transitions
@@ -73,10 +97,9 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _currentContext.AddTarget(TargetId.ExplorationPlayer, _explorationPlayer);
         _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
         _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
-        _currentContext.AddToContext("ScreenFade", _screenFade);
         _currentContext.AddToContext("UIManager", _uiManager);
         _currentContext.AddToContext("GameStateService", _gameStateService);
-        
+
         if (startCombatSequence == null)
         {
             return;
@@ -90,12 +113,12 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _startSequenceRoutine = StartCoroutine(ExecuteStartSequence());
     }
 
-    public void EndCombat()
+    public void EndCombat(bool playerWon)
     {
         if (_currentCombatSceneParent == null || _currentContext == null)
         {
             GameLog.LogWarning("EndCombat was called but there is no active combat or context.", this);
-            _gameStateService?.EndCombat();
+            _gameStateService?.EndCombat(playerWon);
             CleanupContext();
             return;
         }
@@ -107,35 +130,63 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
         if (endCombatSequence != null)
         {
-            _endSequenceRoutine = StartCoroutine(ExecuteEndSequence());
+            _endSequenceRoutine = StartCoroutine(ExecuteEndSequence(playerWon));
         }
         else
         {
-            _gameStateService?.EndCombat();
+            // If no transition sequence, reposition immediately
+            if (!playerWon)
+            {
+                RepositionPlayerOnDefeat();
+            }
+            _gameStateService?.EndCombat(playerWon);
             CleanupContext();
         }
     }
 
     private IEnumerator ExecuteStartSequence()
     {
-        // Show loading hint while running the transition
-        _screenFade?.ShowLoading();
         yield return startCombatSequence.Execute(_currentContext);
-        // Ensure loading hint is hidden after sequence completes
-        _screenFade?.HideLoading();
         _startSequenceRoutine = null;
     }
 
-    private IEnumerator ExecuteEndSequence()
+    private IEnumerator ExecuteEndSequence(bool playerWon)
     {
-        // Show loading hint while running the transition
-        _screenFade?.ShowLoading();
+        // Change game state FIRST, before visual transitions
+        // This ensures that events (OnCombatEnded) fire before UI changes
+        _gameStateService?.EndCombat(playerWon);
+
+        // Now execute visual transitions (UI switch, camera transitions, etc.)
         yield return endCombatSequence.Execute(_currentContext);
-        // Ensure loading hint is hidden after sequence completes
-        _screenFade?.HideLoading();
-        _gameStateService?.EndCombat();
+
+        // Deactivate combat cameras explicitly AFTER the visual transition is complete.
+        // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
+        if (_combatCameraManager != null)
+        {
+            _combatCameraManager.DeactivateCameras();
+        }
+
+        // Reposition player AFTER the camera transition is complete
+        if (!playerWon)
+        {
+            RepositionPlayerOnDefeat();
+        }
+
         CleanupContext();
         _endSequenceRoutine = null;
+    }
+
+    private void RepositionPlayerOnDefeat()
+    {
+        if (respawnPoint != null && _explorationPlayer != null)
+        {
+            GameLog.Log($"Player defeated. Respawning at {respawnPoint.position}.");
+            _explorationPlayer.transform.position = respawnPoint.position;
+        }
+        else
+        {
+            GameLog.LogWarning("Player defeated but no Respawn Point assigned (or player null).");
+        }
     }
 
     private void CleanupContext()

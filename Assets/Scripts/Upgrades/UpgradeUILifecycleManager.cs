@@ -4,7 +4,7 @@ using VContainer.Unity;
 
 /// <summary>
 /// Manager que controla el ciclo de vida optimizado de la UpgradeUI.
-/// Precarga la UI al inicio del combate y la libera al volver al menú.
+/// Preloads the Upgrade UI at combat start and releases it when returning to the menu.
 /// </summary>
 public class UpgradeUILifecycleManager : IStartable, ITickable
 {
@@ -26,19 +26,21 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
     void IStartable.Start()
     {
         _previousState = _gameStateService.CurrentState;
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Initialized and monitoring game state.");
+        #endif
     }
 
     void ITickable.Tick()
     {
         GameState currentState = _gameStateService.CurrentState;
 
-        // Si entramos en combate, precargar la UI
+        // On entering combat, preload the UI
         if (currentState == GameState.Combat && _previousState != GameState.Combat)
         {
             OnEnterCombat();
         }
-            // Si salimos del combate a exploración, liberar la UI (opcional)
+            // On leaving combat to exploration, release the UI (optional)
             else if (currentState == GameState.Exploration && _previousState == GameState.Combat)
         {
                 OnExitCombat();
@@ -52,14 +54,18 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         if (_hasPreloadedForCombat)
             return;
 
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Entering combat. Preloading UpgradeUI...");
+        #endif
         await _upgradeUILoader.PreloadAsync();
         _hasPreloadedForCombat = true;
     }
 
         private void OnExitCombat()
     {
+            #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("UpgradeUILifecycleManager: Exiting combat. Releasing UpgradeUI resources (optional)...");
+            #endif
         _upgradeUILoader.Release();
         _hasPreloadedForCombat = false;
     }

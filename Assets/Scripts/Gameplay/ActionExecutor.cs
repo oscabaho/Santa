@@ -12,7 +12,8 @@ public interface IActionExecutor
     /// <param name="action">The action to execute.</param>
     /// <param name="allCombatants">A read-only list of all combatants.</param>
     /// <param name="healthCache">A cache of health components for performance.</param>
-    void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache);
+    /// <param name="upgradeService">Service providing player stats from upgrades.</param>
+    void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache, IUpgradeService upgradeService);
 }
 
 /// <summary>
@@ -22,29 +23,29 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
 {
     private readonly List<GameObject> _reusableTargetList = new List<GameObject>(8);
 
-    public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache)
+    public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache, IUpgradeService upgradeService)
     {
         if (action.Caster == null)
         {
-                GameLog.LogWarning("Skipping action: caster is null.");
+            GameLog.LogWarning("Skipping action: caster is null.");
             return;
         }
 
         if (action.Ability == null)
         {
-                GameLog.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
+            GameLog.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
             return;
         }
 
         if (!healthCache.TryGetValue(action.Caster, out var casterHealth))
         {
-                GameLog.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
+            GameLog.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
             return;
         }
 
         if (casterHealth.CurrentValue <= 0)
         {
-                GameLog.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
+            GameLog.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
             return;
         }
 
@@ -60,7 +61,7 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
 
         try
         {
-            action.Ability.Execute(_reusableTargetList, action.Caster);
+            action.Ability.Execute(_reusableTargetList, action.Caster, upgradeService, allCombatants);
         }
         catch (System.Exception ex)
         {

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Componente MonoBehaviour para exponer y gestionar HealthComponent en un GameObject.
+/// MonoBehaviour component exposing and managing a HealthComponent on a GameObject.
 /// </summary>
 [DisallowMultipleComponent]
 public class HealthComponentBehaviour : MonoBehaviour, IHealthController
@@ -16,9 +16,10 @@ public class HealthComponentBehaviour : MonoBehaviour, IHealthController
     public int MaxValue => health.MaxValue;
     public void AffectValue(int value) => health.AffectValue(value);
     public void SetValue(int value) => health.SetValue(value);
+    public void SetMaxValue(int value) => health.SetMaxValue(value);
 
     /// <summary>
-    /// Establece la vida al máximo.
+    /// Sets health to maximum.
     /// </summary>
     public void SetToMax()
     {
