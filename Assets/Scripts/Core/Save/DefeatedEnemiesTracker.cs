@@ -80,6 +80,10 @@ namespace Santa.Core.Save
         {
             var marker = go.GetComponent<IUniqueIdProvider>();
             if (marker != null && !string.IsNullOrEmpty(marker.UniqueId)) return marker.UniqueId;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogWarning($"DefeatedEnemiesTracker: Using GameObject name '{go.name}' as ID for enemy. This may cause collisions. Consider adding an IUniqueIdProvider.", go);
+#endif
             return go.name; // fallback
         }
 
