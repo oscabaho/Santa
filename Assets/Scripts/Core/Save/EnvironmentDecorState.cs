@@ -36,7 +36,7 @@ namespace Santa.Core.Save
         private void PerformChange(string id)
         {
             // Example: find decor objects with matching ID and enable them
-            var decorObjects = Resources.FindObjectsOfTypeAll<DecorMarker>();
+            var decorObjects = FindObjectsByType<DecorMarker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var d in decorObjects)
             {
                 if (d != null && d.ChangeId == id && d.gameObject.scene.IsValid())

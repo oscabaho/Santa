@@ -159,6 +159,13 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         // Now execute visual transitions (UI switch, camera transitions, etc.)
         yield return endCombatSequence.Execute(_currentContext);
 
+        // Deactivate combat cameras explicitly AFTER the visual transition is complete.
+        // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
+        if (_combatCameraManager != null)
+        {
+            _combatCameraManager.DeactivateCameras();
+        }
+
         // Reposition player AFTER the camera transition is complete
         if (!playerWon)
         {

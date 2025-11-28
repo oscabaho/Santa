@@ -55,9 +55,13 @@ public class GameInitializer : MonoBehaviour
         }
 
         // Optional: Preload Pause Menu ready for input-triggered opening
-        if (_uiManager != null)
+        try
         {
             _ = _uiManager.PreloadPanel(PauseMenuAddress);
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogWarning($"GameInitializer: Failed to preload PauseMenu. Check Addressables configuration. Error: {ex.Message}");
         }
     }
 }

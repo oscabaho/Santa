@@ -48,23 +48,25 @@ namespace Santa.Core.Save
         public void ReadFrom(in SaveData data)
         {
             _defeated.Clear();
-            if (data.defeatedEnemyIds == null) return;
+            if (data.defeatedEnemyIds == null || data.defeatedEnemyIds.Length == 0) return;
 
-            // Disable defeated enemies on load
-            var allEnemies = Resources.FindObjectsOfTypeAll<GameObject>();
-            foreach (var go in allEnemies)
+            var defeatedIds = new HashSet<string>(data.defeatedEnemyIds);
+            // Use FindObjectsByType for better performance (no sorting needed)
+            var allIdentifiables = FindObjectsByType<Santa.Core.Save.UniqueIdProvider>(FindObjectsSortMode.None);
+            var allObjects = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var mb in allObjects)
             {
-                if (!go.activeInHierarchy) continue; // target active ones in scene
-                if (!IsEnemy(go)) continue;
-                var id = GetId(go);
-                if (string.IsNullOrEmpty(id)) continue;
-                foreach (var saved in data.defeatedEnemyIds)
+                if (mb is IUniqueIdProvider provider)
                 {
-                    if (id == saved)
+                    if (!mb.gameObject.scene.IsValid()) continue; // Skip prefabs
+
+                    var id = provider.UniqueId;
+                    if (string.IsNullOrEmpty(id)) continue;
+
+                    if (defeatedIds.Contains(id))
                     {
                         _defeated.Add(id);
-                        ApplyDefeatedVisual(go);
-                        break;
+                        ApplyDefeatedVisual(mb.gameObject);
                     }
                 }
             }
@@ -90,11 +92,6 @@ namespace Santa.Core.Save
         }
     }
 
-    // Optional marker interfaces to enable stronger IDs and enemy detection
-    public interface IUniqueIdProvider
-    {
-        string UniqueId { get; }
-    }
-
+    // Optional marker interface to enable stronger enemy detection
     public interface IEnemyMarker { }
 }

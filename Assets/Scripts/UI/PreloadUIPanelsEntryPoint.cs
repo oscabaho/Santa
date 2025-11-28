@@ -24,7 +24,14 @@ public class PreloadUIPanelsEntryPoint : IStartable
 
     private async Task PreloadPanelsAsync()
     {
-        await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.CombatUI);
-        await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.PauseMenu);
+        try
+        {
+            await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.CombatUI);
+            await _uiManager.PreloadPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.PauseMenu);
+        }
+        catch (System.Exception ex)
+        {
+            UnityEngine.Debug.LogWarning($"PreloadUIPanelsEntryPoint: Failed to preload panels. Check Addressables configuration. Error: {ex.Message}");
+        }
     }
 }

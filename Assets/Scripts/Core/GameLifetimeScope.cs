@@ -43,7 +43,7 @@ public class GameLifetimeScope : LifetimeScope
     {
         // First, run base Awake logic (LifetimeScope)
         base.Awake();
-        
+
         // Then mark this GameObject as persistent across scene loads
         DontDestroyOnLoad(this.gameObject);
     }
@@ -69,7 +69,7 @@ public class GameLifetimeScope : LifetimeScope
 
         RegisterService<ICombatTransitionService, CombatTransitionManager>(builder, combatTransitionManagerInstance);
         RegisterServiceWithMultipleInterfaces(builder, upgradeManagerInstance);
-        
+
         // Registramos GameEventBus como Singleton
         builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
@@ -108,29 +108,49 @@ public class GameLifetimeScope : LifetimeScope
             .WithParameter(typeof(ICombatTransitionService), resolver => resolver.Resolve<ICombatTransitionService>())
             .AsSelf();
 
-            // Register lifecycle manager (OPTIONAL) for automatic preload & release.
-            // Comment out if you prefer manual preload/release control.
-            builder.RegisterEntryPoint<UpgradeUILifecycleManager>();
-            // Preload frequently used panels like CombatUI at startup
-            builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
+        // Register lifecycle manager (OPTIONAL) for automatic preload & release.
+        // Comment out if you prefer manual preload/release control.
+        builder.RegisterEntryPoint<UpgradeUILifecycleManager>();
+        // Preload frequently used panels like CombatUI at startup
+        builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
 
         // --- Save System ---
-        // Register SaveService from hierarchy or create a new GameObject-bound instance.
-        builder.RegisterComponentInHierarchy<Santa.Core.Save.SaveService>().As<Santa.Core.Save.ISaveService>().AsSelf();
+        // Register SaveService from hierarchy only if it exists (optional for test scenes)
+        var saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>(FindObjectsInactive.Include);
+        if (saveService != null)
+        {
+            builder.RegisterComponent(saveService).As<Santa.Core.Save.ISaveService>().AsSelf();
+        }
+        else
+        {
+            GameLog.LogWarning("GameLifetimeScope: SaveService not found in scene. Save functionality disabled.");
+        }
 
-        // --- Hierarchy Components ---
-        builder.RegisterComponentInHierarchy<GameInitializer>();
-        builder.RegisterComponentInHierarchy<PlayerInteraction>().AsSelf();
-        builder.RegisterComponentInHierarchy<Santa.UI.PauseMenuController>().AsSelf();
-        builder.RegisterComponentInHierarchy<Santa.UI.VirtualPauseMenuBinder>().AsSelf();
-        builder.RegisterComponentInHierarchy<Santa.UI.VirtualPauseButton>().AsSelf();
-        
+        // --- Hierarchy Components (Optional Registrations) ---
+        // These components are optional and will be registered only if found in the scene
+        TryRegisterOptionalComponent<GameInitializer>(builder);
+        TryRegisterOptionalComponent<PlayerInteraction>(builder);
+        TryRegisterOptionalComponent<Santa.UI.PauseMenuController>(builder);
+        TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
+        TryRegisterOptionalComponent<Santa.UI.VirtualPauseButton>(builder);
+
         // NOTE: CombatUI and UpgradeUI are instantiated dynamically via Addressables (see UIManager)
         // They should not be registered here nor in the base scene.
-        
-        builder.RegisterComponentInHierarchy<CombatScenePool>().AsSelf();
-        builder.RegisterComponentInHierarchy<GraphicsSettingsManager>().As<IGraphicsSettingsService>().AsSelf();
-        builder.RegisterComponentInHierarchy<GraphicsSettingsController>().AsSelf();
+
+        TryRegisterOptionalComponent<CombatScenePool>(builder);
+
+        // GraphicsSettings components - optional
+        var graphicsSettingsManager = FindFirstObjectByType<GraphicsSettingsManager>(FindObjectsInactive.Include);
+        if (graphicsSettingsManager != null)
+        {
+            builder.RegisterComponent(graphicsSettingsManager).As<IGraphicsSettingsService>().AsSelf();
+        }
+
+        var graphicsSettingsController = FindFirstObjectByType<GraphicsSettingsController>(FindObjectsInactive.Include);
+        if (graphicsSettingsController != null)
+        {
+            builder.RegisterComponent(graphicsSettingsController).AsSelf();
+        }
 
         GameLog.Log("GameLifetimeScope CONFIGURED!");
     }
@@ -141,6 +161,7 @@ public class GameLifetimeScope : LifetimeScope
         public void SwitchToMainCamera() { }
         public void SwitchToTargetSelectionCamera() { }
         public void SetCombatCameras(Unity.Cinemachine.CinemachineCamera main, Unity.Cinemachine.CinemachineCamera target) { }
+        public void DeactivateCameras() { }
     }
 
     /// <summary>
@@ -175,6 +196,24 @@ public class GameLifetimeScope : LifetimeScope
         {
             builder.RegisterComponentInHierarchy<UpgradeManager>().As<IUpgradeService>().As<IUpgradeTarget>().AsSelf();
             GameLog.Log("GameLifetimeScope: UpgradeManager not assigned. Registered from hierarchy.");
+        }
+    }
+
+    /// <summary>
+    /// Try to register an optional component from the hierarchy.
+    /// If not found, logs a warning but does not fail.
+    /// </summary>
+    private void TryRegisterOptionalComponent<T>(IContainerBuilder builder) where T : Component
+    {
+        var component = FindFirstObjectByType<T>(FindObjectsInactive.Include);
+        if (component != null)
+        {
+            builder.RegisterComponent(component).AsSelf();
+        }
+        else
+        {
+            // Optional components don't need a warning, just a debug log if needed
+            // GameLog.Log($"GameLifetimeScope: {typeof(T).Name} not found in scene (optional).");
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Santa.Core.Config
         public const string LastUpgrade = "LastUpgrade";
 
         // Common UI text (optional centralization)
-        public const string SelectTargetText = "Select a target";
+        // Common UI text (optional centralization)
+        // public const string SelectTargetText = "Select a target"; // Moved to UIStrings.cs
     }
 }
