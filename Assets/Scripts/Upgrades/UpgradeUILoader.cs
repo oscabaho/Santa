@@ -1,10 +1,10 @@
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using System.Threading.Tasks;
 using VContainer;
 using VContainer.Unity;
-using System.Threading;
 
 /// <summary>
 /// Loader that manages loading and access to the UpgradeUI via Addressables.
@@ -68,16 +68,16 @@ public class UpgradeUILoader : IUpgradeUI
         // First-time load
         await LoadUpgradeUI();
         if (ct.IsCancellationRequested) return;
-        
+
         if (_upgradeUIInstance != null)
         {
             _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
         }
         else
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
-            #endif
+#endif
         }
     }
 
@@ -90,31 +90,31 @@ public class UpgradeUILoader : IUpgradeUI
         // Do not overwrite current show cancellation; separate preload lifecycle
         if (_isLoaded)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose("UpgradeUILoader: UI already loaded, no need to preload.");
+#endif
             return;
         }
 
         if (_isLoading)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: Already loading, waiting...");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose("UpgradeUILoader: Already loading, waiting...");
+#endif
             await WaitForLoad();
             return;
         }
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
-        #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose("UpgradeUILoader: Preloading UpgradeUI in background...");
+#endif
         await LoadUpgradeUI();
 
         if (_isLoaded)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: Preload completed successfully.");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose("UpgradeUILoader: Preload completed successfully.");
+#endif
         }
     }
 
@@ -130,9 +130,9 @@ public class UpgradeUILoader : IUpgradeUI
 
         try
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
+#endif
 
             // Load and instantiate via Addressables
             _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
@@ -151,39 +151,39 @@ public class UpgradeUILoader : IUpgradeUI
                     }
                     else
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         GameLog.LogWarning("UpgradeUILoader: IObjectResolver not available, dependencies will not be injected into UpgradeUI instance.");
-                        #endif
+#endif
                     }
 
                     Object.DontDestroyOnLoad(instantiatedObject);
 
                     _isLoaded = true;
-                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
-                    #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogVerbose("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
+#endif
                 }
                 else
                 {
-                    #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.LogError($"UpgradeUILoader: Prefab '{UPGRADE_UI_ADDRESS}' does not have UpgradeUI component.");
-                    #endif
+#endif
                     Addressables.ReleaseInstance(instantiatedObject);
                 }
             }
             else
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"UpgradeUILoader: Failed to load '{UPGRADE_UI_ADDRESS}' from Addressables. " +
                                 $"Status: {_loadHandle.Status}. Make sure the prefab is marked as Addressable.");
-                #endif
+#endif
             }
         }
         catch (System.Exception ex)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"UpgradeUILoader: Exception while loading UpgradeUI: {ex.Message}");
-            #endif
+#endif
         }
         finally
         {
@@ -215,9 +215,9 @@ public class UpgradeUILoader : IUpgradeUI
             Addressables.ReleaseInstance(_loadHandle.Result);
             _upgradeUIInstance = null;
             _isLoaded = false;
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: UpgradeUI resources released.");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogVerbose("UpgradeUILoader: UpgradeUI resources released.");
+#endif
         }
     }
 }

@@ -18,6 +18,15 @@ public static class GameLog
     public static void LogError(object message, UnityEngine.Object context) => Debug.LogError(message, context);
     public static void LogFormat(string format, params object[] args) => Debug.LogFormat(format, args);
     public static void LogException(System.Exception ex) => Debug.LogException(ex);
+
+#if GAME_LOGS_VERBOSE
+    public static void LogVerbose(object message) => Debug.Log(message);
+    public static void LogVerbose(object message, UnityEngine.Object context) => Debug.Log(message, context);
+#else
+    public static void LogVerbose(object message) { }
+    public static void LogVerbose(object message, UnityEngine.Object context) { }
+#endif
+
 #else
     // No-op in release builds unless GAME_LOGS_ENABLED is specified.
     public static void Log(object message) { }
@@ -28,5 +37,7 @@ public static class GameLog
     public static void LogError(object message, UnityEngine.Object context) { }
     public static void LogFormat(string format, params object[] args) { }
     public static void LogException(System.Exception ex) { }
+    public static void LogVerbose(object message) { }
+    public static void LogVerbose(object message, UnityEngine.Object context) { }
 #endif
 }

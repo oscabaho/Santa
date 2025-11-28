@@ -34,9 +34,9 @@ namespace Santa.Core.Save
 
         private void OnCharacterDeath(CharacterDeathEvent evt)
         {
-            if (evt?.Character != null)
+            if (evt?.Entity != null)
             {
-                MarkDefeated(evt.Character);
+                MarkDefeated(evt.Entity);
             }
         }
 
