@@ -51,20 +51,21 @@ namespace Santa.Core.Save
             if (data.defeatedEnemyIds == null || data.defeatedEnemyIds.Length == 0) return;
 
             var defeatedIds = new HashSet<string>(data.defeatedEnemyIds);
-            // Use FindObjectsByType for better performance
-            var allObjects = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var mb in allObjects)
+            // Use FindObjectsByType<Transform> to iterate unique GameObjects (one Transform per GameObject)
+            var allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var transform in allTransforms)
             {
-                if (!mb.gameObject.scene.IsValid()) continue; // Skip prefabs
-                if (!IsEnemy(mb.gameObject)) continue; // Ensure we only process enemies
+                var go = transform.gameObject;
+                if (!go.scene.IsValid()) continue; // Skip prefabs
+                if (!IsEnemy(go)) continue; // Ensure we only process enemies
 
-                var id = GetId(mb.gameObject); // Use the shared GetId helper for consistent ID retrieval
+                var id = GetId(go); // Use the shared GetId helper for consistent ID retrieval
                 if (string.IsNullOrEmpty(id)) continue;
 
                 if (defeatedIds.Contains(id))
                 {
                     _defeated.Add(id);
-                    ApplyDefeatedVisual(mb.gameObject);
+                    ApplyDefeatedVisual(go);
                 }
             }
         }
