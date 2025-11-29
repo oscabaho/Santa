@@ -31,7 +31,9 @@ public class PreloadUIPanelsEntryPoint : IStartable
         }
         catch (System.Exception ex)
         {
-            UnityEngine.Debug.LogWarning($"PreloadUIPanelsEntryPoint: Failed to preload panels. Check Addressables configuration. Error: {ex.Message}");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"PreloadUIPanelsEntryPoint: Failed to preload panels. Check Addressables configuration. Error: {ex.Message}");
+#endif
         }
     }
 }

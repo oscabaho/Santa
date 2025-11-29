@@ -8,10 +8,12 @@ using UnityEngine;
 public class EnemyBrain : MonoBehaviour, IBrain
 {
     private AbilityHolder _abilityHolder;
+    private ActionPointComponentBehaviour _apComponent;
 
     private void Awake()
     {
         _abilityHolder = GetComponent<AbilityHolder>();
+        _apComponent = GetComponent<ActionPointComponentBehaviour>();
     }
 
     /// <summary>
@@ -44,14 +46,13 @@ public class EnemyBrain : MonoBehaviour, IBrain
         }
 
         // Simple AI: Find the most expensive ability it can afford and use it.
-        var ap = GetComponent<ActionPointComponentBehaviour>();
         Ability chosenAbility = null;
         int bestCost = -1;
         var abilities = _abilityHolder.Abilities;
         for (int i = 0; i < abilities.Count; i++)
         {
             var ability = abilities[i];
-            if (ability != null && ap.ActionPoints.HasEnough(ability.ApCost))
+            if (ability != null && _apComponent.ActionPoints.HasEnough(ability.ApCost))
             {
                 if (ability.ApCost > bestCost)
                 {

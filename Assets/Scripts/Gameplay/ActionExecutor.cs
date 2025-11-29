@@ -21,29 +21,40 @@ public interface IActionExecutor
 /// </summary>
 public class ActionExecutor : MonoBehaviour, IActionExecutor
 {
+    // Reusable list to avoid allocations during Execute
+    private readonly List<GameObject> _targetList = new List<GameObject>(8);
+
     public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache, IUpgradeService upgradeService)
     {
         if (action.Caster == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("Skipping action: caster is null.");
+#endif
             return;
         }
 
         if (action.Ability == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Skipping action from {action.Caster.name}: Ability is null.");
+#endif
             return;
         }
 
         if (!healthCache.TryGetValue(action.Caster, out var casterHealth))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"{action.Caster.name} has no cached IHealthController; skipping action {action.Ability.AbilityName}.");
+#endif
             return;
         }
 
         if (casterHealth.CurrentValue <= 0)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"{action.Caster.name} is defeated and cannot perform {action.Ability.AbilityName}.");
+#endif
             return;
         }
 
@@ -59,33 +70,41 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
         };
 
         // Use local list to avoid any potential shared state issues with async execution
-        var targetList = new List<GameObject>(8);
+        _targetList.Clear();
         if (validatedAction.Ability.Targeting != null)
         {
-            validatedAction.Ability.Targeting.ResolveTargets(validatedAction.Caster, validatedAction.PrimaryTarget, allCombatants, targetList, validatedAction.Ability);
+            validatedAction.Ability.Targeting.ResolveTargets(validatedAction.Caster, validatedAction.PrimaryTarget, allCombatants, _targetList, validatedAction.Ability);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            string targetNames = targetList.Count > 0
-                ? string.Join(", ", System.Linq.Enumerable.Select(targetList, t => t != null ? t.name : "NULL"))
-                : "NONE";
-            GameLog.Log($"[ActionExecutor] {validatedAction.Caster.name} resolved {targetList.Count} target(s): {targetNames}");
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = 0; i < _targetList.Count; i++)
+            {
+                if (i > 0) sb.Append(", ");
+                sb.Append(_targetList[i] != null ? _targetList[i].name : "NULL");
+            }
+            string targetNames = _targetList.Count > 0 ? sb.ToString() : "NONE";
+            GameLog.Log($"[ActionExecutor] {validatedAction.Caster.name} resolved {_targetList.Count} target(s): {targetNames}");
 #endif
         }
         else
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Ability {validatedAction.Ability.AbilityName} has no Targeting strategy assigned!");
+#endif
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"[ActionExecutor] About to execute {validatedAction.Ability.AbilityName} with {targetList.Count} target(s)");
+        GameLog.Log($"[ActionExecutor] About to execute {validatedAction.Ability.AbilityName} with {_targetList.Count} target(s)");
 #endif
 
         try
         {
-            validatedAction.Ability.Execute(targetList, validatedAction.Caster, upgradeService, allCombatants);
+            validatedAction.Ability.Execute(_targetList, validatedAction.Caster, upgradeService, allCombatants);
         }
         catch (System.Exception ex)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"Exception while executing ability {validatedAction.Ability.AbilityName} from {validatedAction.Caster.name}: {ex}");
+#endif
         }
     }
 
@@ -122,7 +141,9 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
             // Show feedback to player
             if (action.Caster.CompareTag(GameConstants.Tags.Player))
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"Target {originalTarget.name} defeated! Auto-targeting {newTarget.name} (highest HP).");
+#endif
             }
         }
         else if (newTarget == null)

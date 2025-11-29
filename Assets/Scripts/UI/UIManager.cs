@@ -150,10 +150,14 @@ public class UIManager : MonoBehaviour, IUIManager
         }
 
         // Hide all panels except the one we are switching to
-        var keysToHide = _addressToInstanceMap.Keys.Where(key => key != panelAddress).ToList();
-        foreach (var key in keysToHide)
+        // Avoid LINQ allocation: _addressToInstanceMap.Keys.Where(...).ToList()
+        var keys = _addressToInstanceMap.Keys;
+        foreach (var key in keys)
         {
-            HidePanel(key);
+            if (key != panelAddress)
+            {
+                HidePanel(key);
+            }
         }
 
         // Show the target panel

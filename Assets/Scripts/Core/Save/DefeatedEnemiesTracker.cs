@@ -8,12 +8,26 @@ namespace Santa.Core.Save
     {
         private readonly HashSet<string> _defeated = new HashSet<string>();
         private IEventBus _eventBus;
+        private ISaveContributorRegistry _registry;
 
         [VContainer.Inject]
-        public void Construct(IEventBus eventBus)
+        public void Construct(IEventBus eventBus, ISaveContributorRegistry registry = null)
         {
             _eventBus = eventBus;
+            _registry = registry;
             _eventBus.Subscribe<CharacterDeathEvent>(OnCharacterDeath);
+        }
+
+        private void OnEnable()
+        {
+            // Register with the save system
+            _registry?.Register(this);
+        }
+
+        private void OnDisable()
+        {
+            // Unregister when disabled
+            _registry?.Unregister(this);
         }
 
         private void OnDestroy()
@@ -82,7 +96,7 @@ namespace Santa.Core.Save
             if (marker != null && !string.IsNullOrEmpty(marker.UniqueId)) return marker.UniqueId;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogWarning($"DefeatedEnemiesTracker: Using GameObject name '{go.name}' as ID for enemy. This may cause collisions. Consider adding an IUniqueIdProvider.", go);
+            GameLog.LogWarning($"DefeatedEnemiesTracker: Using GameObject name '{go.name}' as ID for enemy. This may cause collisions. Consider adding an IUniqueIdProvider.", go);
 #endif
             return go.name; // fallback
         }

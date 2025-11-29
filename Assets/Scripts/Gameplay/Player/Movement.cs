@@ -27,7 +27,9 @@ public class Movement : MonoBehaviour
 
         if (inputReader == null)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"InputReader is not assigned in the inspector on {gameObject.name}!", this);
+#endif
         }
     }
 

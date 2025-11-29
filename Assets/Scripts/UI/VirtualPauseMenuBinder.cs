@@ -85,11 +85,15 @@ namespace Santa.UI
         {
             if (_saveService != null && _saveService.TryLoad(out var data))
             {
-                Debug.Log($"VirtualPauseMenu: Loaded save from scene '{data.sceneName}' at {data.savedAtUtc:u}.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"VirtualPauseMenu: Loaded save from scene '{data.sceneName}' at {data.savedAtUtc:u}.");
+#endif
             }
             else
             {
-                Debug.LogWarning("VirtualPauseMenu: No save data found.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("VirtualPauseMenu: No save data found.");
+#endif
             }
         }
 

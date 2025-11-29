@@ -12,6 +12,9 @@ public class DamageAbility : Ability
     [Tooltip("Type of attack to determine which upgrade stat to use for damage.")]
     [SerializeField] private AbilityType abilityType = AbilityType.DirectAttack;
 
+    // Static cache to avoid allocations during splash target calculation
+    private static readonly List<GameObject> _splashTargetsCache = new List<GameObject>(10);
+
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
         if (targets == null)
@@ -91,14 +94,16 @@ public class DamageAbility : Ability
             GameObject primaryTarget = targets[0];
 
             // Determine the tag of the primary target to find splash targets
-            string targetTag = primaryTarget != null ? primaryTarget.tag : null;
+            string targetTag = (primaryTarget != null) ? primaryTarget.tag : null;
             if (string.IsNullOrEmpty(targetTag))
             {
                 return; // No valid target tag, skip splash
             }
 
             // Build list of other combatants with the SAME tag as primary target
-            var otherTargets = new List<GameObject>(3);
+            // Use a static reusable list to avoid allocations, but clear it first
+            _splashTargetsCache.Clear();
+
             for (int i = 0; i < allCombatants.Count; i++)
             {
                 var combatant = allCombatants[i];
@@ -111,16 +116,16 @@ public class DamageAbility : Ability
                     // Check if still alive
                     if (combatant.TryGetComponent<HealthComponentBehaviour>(out var health) && health.CurrentValue > 0)
                     {
-                        otherTargets.Add(combatant);
+                        _splashTargetsCache.Add(combatant);
                     }
                 }
             }
 
             // If there are other valid targets, deal splash damage to one random target
-            if (otherTargets.Count > 0)
+            if (_splashTargetsCache.Count > 0)
             {
-                int randomIndex = Random.Range(0, otherTargets.Count);
-                GameObject splashTarget = otherTargets[randomIndex];
+                int randomIndex = Random.Range(0, _splashTargetsCache.Count);
+                GameObject splashTarget = _splashTargetsCache[randomIndex];
 
                 if (splashTarget.TryGetComponent<HealthComponentBehaviour>(out var splashHealth))
                 {

@@ -45,8 +45,14 @@ public class CombatUI : UIPanel
     private IActionPointController _playerAP;
     private ICombatService _combatService;
 
-    // Callbacks for enemy health updates
-    private Dictionary<IHealthController, System.Action<int, int>> _enemyHealthCallbacks = new Dictionary<IHealthController, System.Action<int, int>>();
+    // Callbacks for enemy health updates with cached position data
+    private struct EnemyHealthData
+    {
+        public IHealthController Health;
+        public System.Action<int, int> Callback;
+        public CombatPosition Position; // Cached to avoid GetComponent
+    }
+    private readonly Dictionary<GameObject, EnemyHealthData> _enemyHealthData = new Dictionary<GameObject, EnemyHealthData>();
 
     private Ability _pendingAbility;
     private List<Button> _actionButtons;
@@ -149,10 +155,9 @@ public class CombatUI : UIPanel
     private void OnDestroy()
     {
         // Release Addressables assets
-        if (directAttackAbility != null) Addressables.Release(directAttackAbility);
-        if (areaAttackAbility != null) Addressables.Release(areaAttackAbility);
-        if (specialAttackAbility != null) Addressables.Release(specialAttackAbility);
-        if (meditateAbility != null) Addressables.Release(meditateAbility);
+
+        _playerHealth = null;
+        _playerAP = null;
     }
 
     private void HandlePhaseChanged(CombatPhase newPhase)
@@ -193,6 +198,13 @@ public class CombatUI : UIPanel
             {
                 CancelTargetingMode();
             }
+        }
+        else if (newPhase == CombatPhase.Victory || newPhase == CombatPhase.Defeat)
+        {
+            // Combat ended; clean up subscriptions to break potential reference cycles
+            // and ensure we don't hold onto destroyed enemies.
+            UnsubscribeFromPlayerEvents();
+            UnsubscribeFromEnemyEvents();
         }
         else
         {
@@ -247,7 +259,7 @@ public class CombatUI : UIPanel
 
     private void SubscribeToEnemyEvents()
     {
-        if (_combatService == null || _enemyHealthCallbacks.Count > 0) return; // Already subscribed or no service
+        if (_combatService == null || _enemyHealthData.Count > 0) return; // Already subscribed or no service
 
         var enemies = _combatService.Enemies;
         if (enemies == null || enemies.Count == 0) return;
@@ -261,24 +273,58 @@ public class CombatUI : UIPanel
             {
                 var health = registry.HealthController;
                 System.Action<int, int> callback = null;
+                CombatPosition position = CombatPosition.Center; // Default
 
-                if (enemy.name.Contains("Right", System.StringComparison.OrdinalIgnoreCase))
+                // Cache position from component (called once per enemy)
+                var posId = enemy.GetComponent<CombatPositionIdentifier>();
+                if (posId != null)
                 {
-                    callback = (curr, max) => UpdateSlider(rightEnemyHealthSlider, curr, max);
+                    position = posId.Position;
+                    switch (position)
+                    {
+                        case CombatPosition.Right:
+                            callback = (curr, max) => UpdateSlider(rightEnemyHealthSlider, curr, max);
+                            break;
+                        case CombatPosition.Left:
+                            callback = (curr, max) => UpdateSlider(leftEnemyHealthSlider, curr, max);
+                            break;
+                        case CombatPosition.Center:
+                            callback = (curr, max) => UpdateSlider(centralEnemyHealthSlider, curr, max);
+                            break;
+                    }
                 }
-                else if (enemy.name.Contains("Left", System.StringComparison.OrdinalIgnoreCase))
+                else
                 {
-                    callback = (curr, max) => UpdateSlider(leftEnemyHealthSlider, curr, max);
-                }
-                else if (enemy.name.Contains("Central", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    callback = (curr, max) => UpdateSlider(centralEnemyHealthSlider, curr, max);
+                    // Fallback to name-based identification (Legacy)
+                    if (enemy.name.Contains("Right", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        position = CombatPosition.Right;
+                        callback = (curr, max) => UpdateSlider(rightEnemyHealthSlider, curr, max);
+                    }
+                    else if (enemy.name.Contains("Left", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        position = CombatPosition.Left;
+                        callback = (curr, max) => UpdateSlider(leftEnemyHealthSlider, curr, max);
+                    }
+                    else if (enemy.name.Contains("Central", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        position = CombatPosition.Center;
+                        callback = (curr, max) => UpdateSlider(centralEnemyHealthSlider, curr, max);
+                    }
                 }
 
                 if (callback != null)
                 {
                     health.OnValueChanged += callback;
-                    _enemyHealthCallbacks[health] = callback;
+
+                    // Cache all data together
+                    _enemyHealthData[enemy] = new EnemyHealthData
+                    {
+                        Health = health,
+                        Callback = callback,
+                        Position = position
+                    };
+
                     // Initial update
                     callback(health.CurrentValue, health.MaxValue);
                 }
@@ -288,14 +334,14 @@ public class CombatUI : UIPanel
 
     private void UnsubscribeFromEnemyEvents()
     {
-        foreach (var kvp in _enemyHealthCallbacks)
+        foreach (var kvp in _enemyHealthData)
         {
-            if (kvp.Key != null)
+            if (kvp.Value.Health != null)
             {
-                kvp.Key.OnValueChanged -= kvp.Value;
+                kvp.Value.Health.OnValueChanged -= kvp.Value.Callback;
             }
         }
-        _enemyHealthCallbacks.Clear();
+        _enemyHealthData.Clear();
     }
 
     private void UpdateSlider(Slider slider, int current, int max)

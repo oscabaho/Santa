@@ -150,90 +150,6 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         SaveStats();
     }
 
-    // --- IUpgradeTarget Implementation ---
-
-    public void IncreaseDirectAttackDamage(int amount)
-    {
-        DirectAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Direct Attack Damage increased to {DirectAttackDamage}");
-#endif
-    }
-
-    public void IncreaseAreaAttackDamage(int amount)
-    {
-        AreaAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Area Attack Damage increased to {AreaAttackDamage}");
-#endif
-    }
-
-    public void IncreaseSpecialAttackDamage(int amount)
-    {
-        SpecialAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Special Attack Damage increased to {SpecialAttackDamage}");
-#endif
-    }
-
-    public void IncreaseAPRecoveryAmount(int amount)
-    {
-        APRecoveryAmount += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"AP Recovery Amount increased to {APRecoveryAmount}");
-#endif
-    }
-
-    public void ReduceSpecialAttackMissChance(float amount)
-    {
-        SpecialAttackMissChance = Mathf.Max(0f, SpecialAttackMissChance - amount);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Special Attack Miss Chance reduced to {SpecialAttackMissChance}");
-#endif
-    }
-
-    public void IncreaseMaxActionPoints(int amount)
-    {
-        MaxActionPoints += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Max Action Points increased to {MaxActionPoints}");
-#endif
-    }
-
-    public void IncreaseMaxHealth(int amount)
-    {
-        MaxHealth += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Max Health increased to {MaxHealth}");
-#endif
-    }
-
-    public void IncreaseGlobalAPCostReduction(int amount)
-    {
-        GlobalAPCostReduction += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Global AP Cost Reduction increased to {GlobalAPCostReduction}");
-#endif
-    }
-
-    public void IncreaseGlobalActionSpeed(int amount)
-    {
-        GlobalActionSpeedBonus += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Global Action Speed Bonus increased to {GlobalActionSpeedBonus}");
-#endif
-    }
-
-    public void IncreaseCriticalHitChance(float amount)
-    {
-        CriticalHitChance = Mathf.Min(1.0f, CriticalHitChance + amount);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Critical Hit Chance increased to {CriticalHitChance * 100}%");
-#endif
-    }
-
-    // --- Persistence (Mobile-friendly secure storage) ---
-
     private void SaveStats()
     {
         Santa.Core.Security.SecureStorage.SetString(Santa.Core.Config.GameKeys.LastUpgrade, _lastSelectedUpgrade);
@@ -251,70 +167,152 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     }
 
     // Helper method for testing/debugging
-        public void ResetLastSelectedUpgrade()
-        {
+    public void ResetLastSelectedUpgrade()
+    {
         _lastSelectedUpgrade = null;
         Santa.Core.Security.SecureStorage.Delete(Santa.Core.Config.GameKeys.LastUpgrade);
-    #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Reset last selected upgrade.");
-    #endif
-        }
+#endif
+    }
 
-        // --- Save/Load Contributions ---
-        public void WriteTo(ref Santa.Core.Save.SaveData data)
+    // --- IUpgradeTarget Implementation ---
+
+    public void IncreaseDirectAttackDamage(int amount)
+    {
+        DirectAttackDamage += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"DirectAttackDamage increased by {amount}. New Value: {DirectAttackDamage}");
+#endif
+    }
+
+    public void IncreaseAreaAttackDamage(int amount)
+    {
+        AreaAttackDamage += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"AreaAttackDamage increased by {amount}. New Value: {AreaAttackDamage}");
+#endif
+    }
+
+    public void IncreaseSpecialAttackDamage(int amount)
+    {
+        SpecialAttackDamage += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"SpecialAttackDamage increased by {amount}. New Value: {SpecialAttackDamage}");
+#endif
+    }
+
+    public void ReduceSpecialAttackMissChance(float amount)
+    {
+        SpecialAttackMissChance = Mathf.Max(0f, SpecialAttackMissChance - amount);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"SpecialAttackMissChance reduced by {amount}. New Value: {SpecialAttackMissChance}");
+#endif
+    }
+
+    public void IncreaseAPRecoveryAmount(int amount)
+    {
+        APRecoveryAmount += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"APRecoveryAmount increased by {amount}. New Value: {APRecoveryAmount}");
+#endif
+    }
+
+    public void IncreaseMaxActionPoints(int amount)
+    {
+        MaxActionPoints += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"MaxActionPoints increased by {amount}. New Value: {MaxActionPoints}");
+#endif
+    }
+
+    public void IncreaseMaxHealth(int amount)
+    {
+        MaxHealth += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"MaxHealth increased by {amount}. New Value: {MaxHealth}");
+#endif
+    }
+
+    public void IncreaseGlobalAPCostReduction(int amount)
+    {
+        GlobalAPCostReduction += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"GlobalAPCostReduction increased by {amount}. New Value: {GlobalAPCostReduction}");
+#endif
+    }
+
+    public void IncreaseGlobalActionSpeed(int amount)
+    {
+        GlobalActionSpeedBonus += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"GlobalActionSpeedBonus increased by {amount}. New Value: {GlobalActionSpeedBonus}");
+#endif
+    }
+
+    public void IncreaseCriticalHitChance(float amount)
+    {
+        CriticalHitChance += amount;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // GameLog.LogVerbose($"CriticalHitChance increased by {amount}. New Value: {CriticalHitChance}");
+#endif
+    }
+
+    // --- Save/Load Contributions ---
+    public void WriteTo(ref Santa.Core.Save.SaveData data)
+    {
+        data.lastUpgrade = _lastSelectedUpgrade;
+        data.acquiredUpgrades = _acquiredUpgrades.ToArray();
+    }
+
+    public void ReadFrom(in Santa.Core.Save.SaveData data)
+    {
+        // Restore stats from base, then re-apply upgrades
+        RestoreBaseStats();
+        _acquiredUpgrades.Clear();
+
+        if (data.acquiredUpgrades != null && allPossibleUpgrades != null)
         {
-            data.lastUpgrade = _lastSelectedUpgrade;
-            data.acquiredUpgrades = _acquiredUpgrades.ToArray();
-        }
-
-        public void ReadFrom(in Santa.Core.Save.SaveData data)
-        {
-            // Restore stats from base, then re-apply upgrades
-            RestoreBaseStats();
-            _acquiredUpgrades.Clear();
-
-            if (data.acquiredUpgrades != null && allPossibleUpgrades != null)
+            foreach (var name in data.acquiredUpgrades)
             {
-                foreach (var name in data.acquiredUpgrades)
+                var upgrade = allPossibleUpgrades.FirstOrDefault(u => u.UpgradeName == name);
+                if (upgrade != null)
                 {
-                    var upgrade = allPossibleUpgrades.FirstOrDefault(u => u.UpgradeName == name);
-                    if (upgrade != null)
-                    {
-                        upgrade.Strategy.Apply(this);
-                        _acquiredUpgrades.Add(name);
-                    }
+                    upgrade.Strategy.Apply(this);
+                    _acquiredUpgrades.Add(name);
                 }
             }
-            _lastSelectedUpgrade = data.lastUpgrade;
         }
+        _lastSelectedUpgrade = data.lastUpgrade;
+    }
 
-        private void RestoreBaseStats()
+    private void RestoreBaseStats()
+    {
+        if (baseStatsConfig != null)
         {
-            if (baseStatsConfig != null)
-            {
-                DirectAttackDamage = baseStatsConfig.DirectAttackDamage;
-                AreaAttackDamage = baseStatsConfig.AreaAttackDamage;
-                SpecialAttackDamage = baseStatsConfig.SpecialAttackDamage;
-                SpecialAttackMissChance = baseStatsConfig.SpecialAttackMissChance;
-                APRecoveryAmount = baseStatsConfig.APRecoveryAmount;
-                MaxActionPoints = baseStatsConfig.MaxActionPoints;
-                MaxHealth = baseStatsConfig.MaxHealth;
-                GlobalAPCostReduction = baseStatsConfig.GlobalAPCostReduction;
-                GlobalActionSpeedBonus = baseStatsConfig.GlobalActionSpeedBonus;
-                CriticalHitChance = baseStatsConfig.BaseCriticalHitChance;
-            }
-            else
-            {
-                DirectAttackDamage = 25;
-                AreaAttackDamage = 10;
-                SpecialAttackDamage = 75;
-                SpecialAttackMissChance = 0.2f;
-                APRecoveryAmount = 34;
-                MaxActionPoints = 100;
-                MaxHealth = 100;
-                GlobalAPCostReduction = 0;
-                GlobalActionSpeedBonus = 0;
-                CriticalHitChance = 0.1f;
-            }
+            DirectAttackDamage = baseStatsConfig.DirectAttackDamage;
+            AreaAttackDamage = baseStatsConfig.AreaAttackDamage;
+            SpecialAttackDamage = baseStatsConfig.SpecialAttackDamage;
+            SpecialAttackMissChance = baseStatsConfig.SpecialAttackMissChance;
+            APRecoveryAmount = baseStatsConfig.APRecoveryAmount;
+            MaxActionPoints = baseStatsConfig.MaxActionPoints;
+            MaxHealth = baseStatsConfig.MaxHealth;
+            GlobalAPCostReduction = baseStatsConfig.GlobalAPCostReduction;
+            GlobalActionSpeedBonus = baseStatsConfig.GlobalActionSpeedBonus;
+            CriticalHitChance = baseStatsConfig.BaseCriticalHitChance;
         }
+        else
+        {
+            DirectAttackDamage = 25;
+            AreaAttackDamage = 10;
+            SpecialAttackDamage = 75;
+            SpecialAttackMissChance = 0.2f;
+            APRecoveryAmount = 34;
+            MaxActionPoints = 100;
+            MaxHealth = 100;
+            GlobalAPCostReduction = 0;
+            GlobalActionSpeedBonus = 0;
+            CriticalHitChance = 0.1f;
+        }
+    }
 }

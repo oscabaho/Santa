@@ -55,11 +55,15 @@ namespace Santa.UI
             if (_saveService != null && _saveService.TryLoad(out var data))
             {
                 // Minimal feedback; real load would restore state via services
-                Debug.Log($"PauseMenuUI: Loaded save from scene '{data.sceneName}' at {data.savedAtUtc:u}.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"PauseMenuUI: Loaded save from scene '{data.sceneName}' at {data.savedAtUtc:u}.");
+#endif
             }
             else
             {
-                Debug.LogWarning("PauseMenuUI: No save data found.");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("PauseMenuUI: No save data found.");
+#endif
             }
         }
 

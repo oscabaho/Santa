@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
 
 /// <summary>
 /// Manages the game's level progression, including visual transformation of areas by instantiating prefabs.
@@ -15,8 +16,8 @@ public class LevelManager : MonoBehaviour, ILevelService
     [SerializeField] private Transform levelVisualsParent;
 
     private int currentLevelIndex = -1;
-    private readonly List<GameObject> _activeGentrifiedVisuals = new List<GameObject>();
-    private readonly List<GameObject> _activeLiberatedVisuals = new List<GameObject>();
+    private readonly List<GameObject> _activeGentrifiedVisuals = new();
+    private readonly List<GameObject> _activeLiberatedVisuals = new();
     private Santa.Core.Save.EnvironmentDecorState _decorState;
 
     private void Start()
@@ -29,9 +30,9 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         else
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning("LevelManager: No levels assigned in the inspector.");
-            #endif
+#endif
         }
     }
 
@@ -55,9 +56,9 @@ public class LevelManager : MonoBehaviour, ILevelService
         LevelData currentLevel = GetCurrentLevelData();
         if (currentLevel != null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Liberating level: {currentLevel.levelName}");
-            #endif
+#endif
 
             foreach (var visual in _activeGentrifiedVisuals)
             {
@@ -69,9 +70,9 @@ public class LevelManager : MonoBehaviour, ILevelService
             }
 
             // Record liberation change for save/load replay
-            if (!string.IsNullOrEmpty(currentLevel.levelName))
+            if (!string.IsNullOrEmpty(currentLevel.levelName) && _decorState != null)
             {
-                _decorState?.ApplyChange($"liberated:{currentLevel.levelName}");
+                _decorState.ApplyChange($"liberated:{currentLevel.levelName}");
             }
         }
     }
@@ -88,20 +89,20 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         else
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("LevelManager: All levels have been liberated! Game Over.");
-            #endif
+#endif
             // TODO: Handle game completion logic
         }
     }
 
-    private void SetLevel(int levelIndex)
+    private async void SetLevel(int levelIndex)
     {
         if (levelIndex < 0 || levelIndex >= levels.Count)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError($"LevelManager: Invalid level index {levelIndex}.");
-            #endif
+#endif
             return;
         }
 
@@ -114,18 +115,20 @@ public class LevelManager : MonoBehaviour, ILevelService
         currentLevelIndex = levelIndex;
         LevelData newLevel = levels[currentLevelIndex];
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Setting up level: {newLevel.levelName}");
-        #endif
+#endif
 
-        // Instantiate the initial 'gentrified' visuals for the new level.
-        InstantiateLevelVisuals(newLevel);
+        // Instantiate the initial 'gentrified' visuals for the new level asynchronously.
+        await InstantiateLevelVisualsAsync(newLevel);
     }
 
-    private void InstantiateLevelVisuals(LevelData levelData)
+    private async Task InstantiateLevelVisualsAsync(LevelData levelData)
     {
         // Use the specified parent if available, otherwise use this manager's transform.
         Transform parent = levelVisualsParent != null ? levelVisualsParent : transform;
+        int itemsProcessed = 0;
+        int batchSize = 5; // Instantiate 5 items per frame to maintain 60 FPS
 
         foreach (var prefab in levelData.gentrifiedVisuals)
         {
@@ -133,6 +136,12 @@ public class LevelManager : MonoBehaviour, ILevelService
             {
                 var instance = Instantiate(prefab, parent);
                 _activeGentrifiedVisuals.Add(instance);
+                itemsProcessed++;
+
+                if (itemsProcessed % batchSize == 0)
+                {
+                    await Task.Yield();
+                }
             }
         }
         foreach (var prefab in levelData.liberatedVisuals)
@@ -142,6 +151,12 @@ public class LevelManager : MonoBehaviour, ILevelService
                 var instance = Instantiate(prefab, parent);
                 instance.SetActive(false);
                 _activeLiberatedVisuals.Add(instance);
+                itemsProcessed++;
+
+                if (itemsProcessed % batchSize == 0)
+                {
+                    await Task.Yield();
+                }
             }
         }
     }
