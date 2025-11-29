@@ -1,29 +1,104 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 namespace Santa.Core.Security
 {
+    /// <summary>
+    /// Wrapper for save data with integrity validation
+    /// </summary>
+    [Serializable]
+    public class SecureSaveContainer<T>
+    {
+        public T Data;
+        public string Checksum;
+        public int Version;
+        public long TimestampUtc;
+    }
+
     // Small helper to persist tiny objects securely as JSON using SecureStorage.
     public static class SecureStorageJson
     {
+        private const int CURRENT_SAVE_VERSION = 1;
+
+        // Secret key for HMAC (in production, load from secure source)
+        // For now using a simple key - consider using Unity's Application.cloudProjectId or similar
+        private static readonly byte[] SECRET_KEY = Encoding.UTF8.GetBytes("Santa_Save_Secret_2025");
+
         public static void Set<T>(string key, T obj)
         {
-            var json = JsonUtility.ToJson(obj ?? Activator.CreateInstance<T>());
-            SecureStorage.SetString(key, json);
+            try
+            {
+                var container = new SecureSaveContainer<T>
+                {
+                    Data = obj ?? Activator.CreateInstance<T>(),
+                    Version = CURRENT_SAVE_VERSION,
+                    TimestampUtc = DateTime.UtcNow.Ticks
+                };
+
+                // Compute checksum over data + timestamp
+                container.Checksum = ComputeChecksum(container.Data, container.TimestampUtc);
+
+                var json = JsonUtility.ToJson(container);
+                SecureStorage.SetString(key, json);
+            }
+            catch (Exception e)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"SecureStorageJson: Failed to save '{key}': {e.Message}");
+#endif
+            }
         }
 
         public static bool TryGet<T>(string key, out T obj)
         {
             obj = default;
             if (!SecureStorage.TryGetString(key, out var json)) return false;
+
             try
             {
-                obj = JsonUtility.FromJson<T>(json);
-                return obj != null;
+                // Try new format with checksum first
+                var container = JsonUtility.FromJson<SecureSaveContainer<T>>(json);
+
+                if (container != null && !string.IsNullOrEmpty(container.Checksum))
+                {
+                    // Validate checksum
+                    string computedChecksum = ComputeChecksum(container.Data, container.TimestampUtc);
+                    if (container.Checksum != computedChecksum)
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        GameLog.LogError($"SecureStorageJson: Integrity check failed for '{key}'. Data may be corrupted or tampered with!");
+#endif
+                        return false;
+                    }
+
+                    // Validate version
+                    if (container.Version > CURRENT_SAVE_VERSION)
+                    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        GameLog.LogWarning($"SecureStorageJson: Save data for '{key}' is from a newer version ({container.Version} vs {CURRENT_SAVE_VERSION}). Loading may fail.");
+#endif
+                    }
+
+                    obj = container.Data;
+                    return obj != null;
+                }
+                else
+                {
+                    // Fallback: try to parse as legacy direct format (no container)
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogWarning($"SecureStorageJson: Loading legacy save format for '{key}' without checksum validation. Consider re-saving.");
+#endif
+                    obj = JsonUtility.FromJson<T>(json);
+                    return obj != null;
+                }
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"SecureStorageJson: Failed to parse JSON for '{key}': {e.Message}");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SecureStorageJson: Failed to parse JSON for '{key}': {e.Message}");
+#endif
                 return false;
             }
         }
@@ -31,6 +106,33 @@ namespace Santa.Core.Security
         public static void Delete(string key)
         {
             SecureStorage.Delete(key);
+        }
+
+        private static string ComputeChecksum<T>(T data, long timestamp)
+        {
+            try
+            {
+                // Serialize data to JSON
+                string dataJson = JsonUtility.ToJson(data);
+
+                // Combine data + timestamp
+                string combined = $"{dataJson}|{timestamp}";
+                byte[] dataBytes = Encoding.UTF8.GetBytes(combined);
+
+                // Compute HMAC-SHA256
+                using (var hmac = new HMACSHA256(SECRET_KEY))
+                {
+                    byte[] hash = hmac.ComputeHash(dataBytes);
+                    return Convert.ToBase64String(hash);
+                }
+            }
+            catch (Exception e)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogError($"SecureStorageJson: Failed to compute checksum: {e.Message}");
+#endif
+                return string.Empty;
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
 {
     private readonly UpgradeUILoader _upgradeUILoader;
     private readonly IGameStateService _gameStateService;
-    
+
     private GameState _previousState;
     private bool _hasPreloadedForCombat = false;
 
@@ -26,9 +26,9 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
     void IStartable.Start()
     {
         _previousState = _gameStateService.CurrentState;
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Initialized and monitoring game state.");
-        #endif
+#endif
     }
 
     void ITickable.Tick()
@@ -40,10 +40,10 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         {
             OnEnterCombat();
         }
-            // On leaving combat to exploration, release the UI (optional)
-            else if (currentState == GameState.Exploration && _previousState == GameState.Combat)
+        // On leaving combat to exploration, release the UI (optional)
+        else if (currentState == GameState.Exploration && _previousState == GameState.Combat)
         {
-                OnExitCombat();
+            OnExitCombat();
         }
 
         _previousState = currentState;
@@ -54,18 +54,18 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         if (_hasPreloadedForCombat)
             return;
 
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("UpgradeUILifecycleManager: Entering combat. Preloading UpgradeUI...");
-        #endif
+#endif
         await _upgradeUILoader.PreloadAsync();
         _hasPreloadedForCombat = true;
     }
 
-        private void OnExitCombat()
+    private void OnExitCombat()
     {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILifecycleManager: Exiting combat. Releasing UpgradeUI resources (optional)...");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log("UpgradeUILifecycleManager: Exiting combat. Releasing UpgradeUI resources (optional)...");
+#endif
         _upgradeUILoader.Release();
         _hasPreloadedForCombat = false;
     }

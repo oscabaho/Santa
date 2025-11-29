@@ -23,16 +23,13 @@ public class PooledParticleSystem : MonoBehaviour
 
     private void OnEnable()
     {
-        // When activated from the pool, start the coroutine that will return it.
-        StartCoroutine(ReturnToPoolWhenFinished());
+        var main = _particleSystem.main;
+        main.stopAction = ParticleSystemStopAction.Callback;
     }
 
-    private IEnumerator ReturnToPoolWhenFinished()
+    private void OnParticleSystemStopped()
     {
-        // Wait until the particle system (and all children) has finished.
-        yield return new WaitWhile(() => _particleSystem.IsAlive(true));
-
-        // Once finished, return to the pool.
+        // Return to pool when the particle system stops
         Pool?.Release(this);
     }
 }

@@ -56,7 +56,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     {
         if (!_inCombat) return;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"CombatCameraManager: Phase changed to {phase}");
+        GameLog.LogVerbose($"CombatCameraManager: Phase changed to {phase}");
 #endif
         if (phase == CombatPhase.Targeting)
         {
@@ -72,7 +72,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
     {
         _inCombat = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("CombatCameraManager: HandleCombatStarted called");
+        GameLog.LogVerbose("CombatCameraManager: HandleCombatStarted called");
 #endif
 
         // Lazily resolve or find the combat service when combat starts to avoid DI cycles
@@ -95,7 +95,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             {
                 _combatService.OnPhaseChanged += HandlePhaseChanged;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.Log("CombatCameraManager: Successfully subscribed to OnPhaseChanged event");
+                GameLog.LogVerbose("CombatCameraManager: Successfully subscribed to OnPhaseChanged event");
 #endif
             }
             else
@@ -110,7 +110,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             FindAndAssignCameras();
         }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"CombatCameraManager: Camera refs - Main: {(_mainCombatCamera != null ? _mainCombatCamera.gameObject.name : "NULL")}, Target: {(_targetSelectionCamera != null ? _targetSelectionCamera.gameObject.name : "NULL")}");
+        GameLog.LogVerbose($"CombatCameraManager: Camera refs - Main: {(_mainCombatCamera != null ? _mainCombatCamera.gameObject.name : "NULL")}, Target: {(_targetSelectionCamera != null ? _targetSelectionCamera.gameObject.name : "NULL")}");
 #endif
         SwitchToMainCamera();
     }
@@ -275,7 +275,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         string activeName = activeCam != null ? activeCam.gameObject.name : "NULL";
         string inactiveName = inactiveCam != null ? inactiveCam.gameObject.name : "NULL";
-        GameLog.Log($"CombatCameraManager: SwitchCamera called - Active: {activeName} (GameObject), Inactive: {inactiveName} (GameObject)");
+        GameLog.LogVerbose($"CombatCameraManager: SwitchCamera called - Active: {activeName} (GameObject), Inactive: {inactiveName} (GameObject)");
 #endif
 
         if (activeCam != null)
@@ -285,7 +285,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             activeCam.enabled = true;
             activeCam.Priority = ACTIVE_PRIORITY;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"CombatCameraManager: Set GameObject '{activeCam.gameObject.name}' priority to {ACTIVE_PRIORITY}, actualPriority: {activeCam.Priority}, active: {activeCam.gameObject.activeSelf}, enabled: {activeCam.enabled}");
+            GameLog.LogVerbose($"CombatCameraManager: Set GameObject '{activeCam.gameObject.name}' priority to {ACTIVE_PRIORITY}, actualPriority: {activeCam.Priority}, active: {activeCam.gameObject.activeSelf}, enabled: {activeCam.enabled}");
 #endif
         }
         else
@@ -299,7 +299,7 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             inactiveCam.enabled = true;
             inactiveCam.Priority = INACTIVE_PRIORITY;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"CombatCameraManager: Set GameObject '{inactiveCam.gameObject.name}' priority to {INACTIVE_PRIORITY}, actualPriority: {inactiveCam.Priority}, active: {inactiveCam.gameObject.activeSelf}, enabled: {inactiveCam.enabled}");
+            GameLog.LogVerbose($"CombatCameraManager: Set GameObject '{inactiveCam.gameObject.name}' priority to {INACTIVE_PRIORITY}, actualPriority: {inactiveCam.Priority}, active: {inactiveCam.gameObject.activeSelf}, enabled: {inactiveCam.enabled}");
 #endif
         }
     }

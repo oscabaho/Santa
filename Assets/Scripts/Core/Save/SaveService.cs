@@ -11,11 +11,13 @@ namespace Santa.Core.Save
         private const string SaveKey = "GameSave";
 
         private ICombatService _combatService;
+        private ISaveContributorRegistry _registry;
 
         [Inject]
-        public void Construct(ICombatService combatService)
+        public void Construct(ICombatService combatService, ISaveContributorRegistry registry = null)
         {
             _combatService = combatService;
+            _registry = registry;
         }
 
         public bool CanSaveNow()
@@ -37,7 +39,7 @@ namespace Santa.Core.Save
         {
             if (!CanSaveNow())
             {
-                Debug.LogWarning("SaveService: Save is disabled during combat.");
+                GameLog.LogWarning("SaveService: Save is disabled during combat.");
                 return;
             }
             var data = new SaveData
@@ -56,7 +58,7 @@ namespace Santa.Core.Save
             // Allow scene components to contribute data
             WriteContributors(ref data);
             SecureStorageJson.Set(SaveKey, data);
-            Debug.Log("SaveService: Game saved.");
+            GameLog.Log("SaveService: Game saved.");
         }
 
         public bool TryLoad(out SaveData data)
@@ -79,7 +81,7 @@ namespace Santa.Core.Save
         public void Delete()
         {
             SecureStorageJson.Delete(SaveKey);
-            Debug.Log("SaveService: Save deleted.");
+            GameLog.Log("SaveService: Save deleted.");
         }
 
         private GameObject FindPlayerObject()
@@ -95,13 +97,37 @@ namespace Santa.Core.Save
             return GameObject.Find("Player");
         }
 
-        private void WriteContributors(ref SaveData data)
+        private System.Collections.Generic.IReadOnlyList<ISaveContributor> GetContributors()
         {
-            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            var list = new System.Collections.Generic.List<SerializableKV>();
-            foreach (var mb in contributors)
+            // Use registry if available (preferred)
+            if (_registry != null)
+            {
+                return _registry.GetValidContributors();
+            }
+
+            // Fallback to scene scanning (legacy, expensive)
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning("SaveService: ISaveContributorRegistry not injected. Falling back to expensive FindObjectsByType. Consider adding SaveContributorRegistry to scene.");
+#endif
+            var contributors = new System.Collections.Generic.List<ISaveContributor>();
+            var allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var mb in allMonoBehaviours)
             {
                 if (mb is ISaveContributor sc)
+                {
+                    contributors.Add(sc);
+                }
+            }
+            return contributors;
+        }
+
+        private void WriteContributors(ref SaveData data)
+        {
+            var contributors = GetContributors();
+            foreach (var sc in contributors)
+            {
+                // Registry handles validity checks, but double-check for safety
+                if (sc is MonoBehaviour mb && mb != null)
                 {
                     sc.WriteTo(ref data);
                 }
@@ -111,10 +137,11 @@ namespace Santa.Core.Save
 
         private void ReadContributors(in SaveData data)
         {
-            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var mb in contributors)
+            var contributors = GetContributors();
+            foreach (var sc in contributors)
             {
-                if (mb is ISaveContributor sc)
+                // Registry handles validity checks, but double-check for safety
+                if (sc is MonoBehaviour mb && mb != null)
                 {
                     sc.ReadFrom(in data);
                 }

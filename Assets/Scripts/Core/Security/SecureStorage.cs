@@ -39,7 +39,9 @@ namespace Santa.Core.Security
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"SecureStorage: Failed to read '{key}': {e.Message}");
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SecureStorage: Failed to read '{key}': {e.Message}");
+#endif
                 return false;
             }
         }

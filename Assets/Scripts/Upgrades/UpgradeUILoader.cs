@@ -90,31 +90,19 @@ public class UpgradeUILoader : IUpgradeUI
         // Do not overwrite current show cancellation; separate preload lifecycle
         if (_isLoaded)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose("UpgradeUILoader: UI already loaded, no need to preload.");
-#endif
             return;
         }
 
         if (_isLoading)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose("UpgradeUILoader: Already loading, waiting...");
-#endif
             await WaitForLoad();
             return;
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.LogVerbose("UpgradeUILoader: Preloading UpgradeUI in background...");
-#endif
         await LoadUpgradeUI();
 
         if (_isLoaded)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose("UpgradeUILoader: Preload completed successfully.");
-#endif
         }
     }
 
@@ -130,10 +118,6 @@ public class UpgradeUILoader : IUpgradeUI
 
         try
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
-#endif
-
             // Load and instantiate via Addressables
             _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
             await _loadHandle.Task;
@@ -159,9 +143,6 @@ public class UpgradeUILoader : IUpgradeUI
                     Object.DontDestroyOnLoad(instantiatedObject);
 
                     _isLoaded = true;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogVerbose("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
-#endif
                 }
                 else
                 {
@@ -215,9 +196,6 @@ public class UpgradeUILoader : IUpgradeUI
             Addressables.ReleaseInstance(_loadHandle.Result);
             _upgradeUIInstance = null;
             _isLoaded = false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose("UpgradeUILoader: UpgradeUI resources released.");
-#endif
         }
     }
 }

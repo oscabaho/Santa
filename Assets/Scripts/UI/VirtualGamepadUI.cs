@@ -173,18 +173,4 @@ public class VirtualGamepadUI : MonoBehaviour
 #endif
         inputReader.RaiseInteract();
     }
-
-    private void Update()
-    {
-        // Temporary debug: detect when the button changes visibility
-        if (_externalController == null && actionButton != null && _lastButtonState != actionButton.activeInHierarchy)
-        {
-            _lastButtonState = actionButton.activeInHierarchy;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose($"VirtualGamepadUI: Action button visibility changed to {_lastButtonState}", this);
-#endif
-        }
-    }
-
-    private bool _lastButtonState;
 }
