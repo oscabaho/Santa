@@ -125,12 +125,12 @@ namespace Santa.Core.Security
 
         private static byte[] DeriveKey(int length)
         {
-            // Derive per-device key material from deviceUniqueIdentifier plus an app-scoped salt.
+            // Derive per-device key material from deviceUniqueIdentifier plus an obfuscated app-scoped salt.
             var deviceId = SystemInfo.deviceUniqueIdentifier ?? "unknown-device";
-            var salt = Encoding.UTF8.GetBytes("santa-sec-key"); // A constant salt is fine here.
+            var salt = SecurityConstants.GetStorageSalt();
 
-            // Use PBKDF2 for stronger key derivation. 10000 iterations is a reasonable starting point.
-            using (var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(deviceId, salt, 10000, System.Security.Cryptography.HashAlgorithmName.SHA256))
+            // Use PBKDF2 for stronger key derivation. 100,000 iterations meets modern security standards.
+            using (var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(deviceId, salt, 100000, System.Security.Cryptography.HashAlgorithmName.SHA256))
             {
                 return pbkdf2.GetBytes(length);
             }

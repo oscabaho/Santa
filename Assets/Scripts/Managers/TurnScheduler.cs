@@ -14,13 +14,8 @@ public class TurnScheduler
 
     public CombatPhase CurrentPhase { get; private set; }
 
-    private readonly MonoBehaviour _coroutineRunner;
-    private readonly float _delayBetweenActions;
-
-    public TurnScheduler(MonoBehaviour coroutineRunner, float delayBetweenActions)
+    public TurnScheduler()
     {
-        _coroutineRunner = coroutineRunner;
-        _delayBetweenActions = delayBetweenActions;
     }
 
     public void StartTurn()

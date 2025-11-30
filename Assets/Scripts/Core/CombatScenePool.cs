@@ -18,7 +18,7 @@ public class CombatScenePool : MonoBehaviour
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
     private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
-    private readonly Vector3 _combatSceneOffset = new Vector3(0f, -2000f, 0f);
+    private readonly Vector3 _combatSceneOffset = new Vector3(0f, GameConstants.CombatScene.OffsetY, 0f);
 
     [Inject]
     public void Construct(IObjectResolver resolver)
@@ -112,7 +112,7 @@ public class CombatScenePool : MonoBehaviour
         var components = instance.GetComponentsInChildren<MonoBehaviour>(true);
         int successCount = 0;
         int failCount = 0;
-        
+
         foreach (var component in components)
         {
             try
@@ -128,7 +128,7 @@ public class CombatScenePool : MonoBehaviour
                 failCount++;
             }
         }
-        
+
         GameLog.Log($"CombatScenePool: Injected dependencies into {successCount}/{components.Length} components in arena '{instance.name}'. {failCount} failed (may be optional dependencies).");
     }
 

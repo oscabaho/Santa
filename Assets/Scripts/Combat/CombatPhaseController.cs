@@ -31,12 +31,9 @@ public class CombatPhaseController : ICombatPhaseController
     private readonly TurnScheduler _turnScheduler;
     private readonly ICombatStateManager _stateManager;
 
-    public CombatPhaseController(
-        MonoBehaviour coroutineRunner,
-        float delayBetweenActions,
-        ICombatStateManager stateManager)
+    public CombatPhaseController(ICombatStateManager stateManager)
     {
-        _turnScheduler = new TurnScheduler(coroutineRunner, delayBetweenActions);
+        _turnScheduler = new TurnScheduler();
         _stateManager = stateManager;
     }
 

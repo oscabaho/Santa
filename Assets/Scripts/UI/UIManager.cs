@@ -44,7 +44,7 @@ public class UIManager : MonoBehaviour, IUIManager
         if (string.IsNullOrEmpty(panelAddress))
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UIManager: Panel address is null or empty.");
+            GameLog.LogError(Santa.Core.Config.LogMessages.UI.PanelAddressNull);
 #endif
             return;
         }
@@ -60,7 +60,7 @@ public class UIManager : MonoBehaviour, IUIManager
             else
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError($"UIManager: Cached panel with address '{panelAddress}' is missing its UIPanel component. The panel will not be shown.");
+                GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.CachedPanelMissingComponent, panelAddress));
 #endif
             }
             return;
@@ -88,28 +88,28 @@ public class UIManager : MonoBehaviour, IUIManager
                 {
                     panelComponent.Show();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log($"UIManager: Panel with address '{panelAddress}' loaded and shown.");
+                    GameLog.Log(string.Format(Santa.Core.Config.LogMessages.UI.PanelLoadedAndShown, panelAddress));
 #endif
                 }
                 else
                 {
                     // If the component is missing, log an error. The prefab is likely misconfigured.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' does not have a UIPanel component on its root object. The panel will not be shown.");
+                    GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.PrefabMissingComponent, panelAddress));
 #endif
                 }
             }
             else
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError($"UIManager: Failed to load panel with address '{panelAddress}'. Status: {handle.Status}");
+                GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.LoadFailed, panelAddress, handle.Status));
 #endif
             }
         }
         catch (System.Exception ex)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError($"UIManager: Exception loading panel '{panelAddress}': {ex.Message}");
+            GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.LoadException, panelAddress, ex.Message));
 #endif
         }
     }
@@ -119,7 +119,7 @@ public class UIManager : MonoBehaviour, IUIManager
         if (string.IsNullOrEmpty(panelAddress))
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UIManager: Panel address is null or empty for hiding.");
+            GameLog.LogError(Santa.Core.Config.LogMessages.UI.PanelAddressNullHide);
 #endif
             return;
         }
@@ -128,13 +128,13 @@ public class UIManager : MonoBehaviour, IUIManager
         {
             panelInstance.GetComponent<UIPanel>()?.Hide();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"UIManager: Panel with address '{panelAddress}' hidden.");
+            GameLog.Log(string.Format(Santa.Core.Config.LogMessages.UI.PanelHidden, panelAddress));
 #endif
         }
         else
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning($"UIManager: Panel with address '{panelAddress}' not found or not instantiated.");
+            GameLog.LogWarning(string.Format(Santa.Core.Config.LogMessages.UI.PanelNotFound, panelAddress));
 #endif
         }
     }
@@ -144,7 +144,7 @@ public class UIManager : MonoBehaviour, IUIManager
         if (string.IsNullOrEmpty(panelAddress))
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UIManager: Panel address is null or empty for switching.");
+            GameLog.LogError(Santa.Core.Config.LogMessages.UI.PanelAddressNullSwitch);
 #endif
             return;
         }
@@ -173,7 +173,7 @@ public class UIManager : MonoBehaviour, IUIManager
         if (string.IsNullOrEmpty(panelAddress))
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UIManager: Panel address is null or empty for preloading.");
+            GameLog.LogError(Santa.Core.Config.LogMessages.UI.PanelAddressNullPreload);
 #endif
             return;
         }
@@ -206,27 +206,27 @@ public class UIManager : MonoBehaviour, IUIManager
                     // Ensure the panel remains hidden after preload
                     panel.Hide();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log($"UIManager: Panel '{panelAddress}' preloaded and hidden.");
+                    GameLog.Log(string.Format(Santa.Core.Config.LogMessages.UI.PanelPreloaded, panelAddress));
 #endif
                 }
                 else
                 {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogError($"UIManager: Prefab with address '{panelAddress}' is missing UIPanel component on root.");
+                    GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.PreloadMissingComponent, panelAddress));
 #endif
                 }
             }
             else
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError($"UIManager: Failed to preload panel with address '{panelAddress}'. Status: {handle.Status}");
+                GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.PreloadFailed, panelAddress, handle.Status));
 #endif
             }
         }
         catch (System.Exception ex)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError($"UIManager: Exception preloading panel '{panelAddress}': {ex.Message}");
+            GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.PreloadException, panelAddress, ex.Message));
 #endif
         }
     }
