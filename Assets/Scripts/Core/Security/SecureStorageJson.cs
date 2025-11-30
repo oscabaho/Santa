@@ -22,9 +22,16 @@ namespace Santa.Core.Security
     {
         private const int CURRENT_SAVE_VERSION = 1;
 
-        // Secret key for HMAC (in production, load from secure source)
-        // For now using a simple key - consider using Unity's Application.cloudProjectId or similar
-        private static readonly byte[] SECRET_KEY = Encoding.UTF8.GetBytes("Santa_Save_Secret_2025");
+        // Secret key for HMAC derived from device ID
+        private static byte[] GetHmacKey()
+        {
+            var deviceId = SystemInfo.deviceUniqueIdentifier ?? "unknown-device";
+            var salt = SecurityConstants.GetSaveSalt();
+            using (var pbkdf2 = new System.Security.Cryptography.Rfc2898DeriveBytes(deviceId, salt, 100000, System.Security.Cryptography.HashAlgorithmName.SHA256))
+            {
+                return pbkdf2.GetBytes(32);
+            }
+        }
 
         public static void Set<T>(string key, T obj)
         {
@@ -120,7 +127,7 @@ namespace Santa.Core.Security
                 byte[] dataBytes = Encoding.UTF8.GetBytes(combined);
 
                 // Compute HMAC-SHA256
-                using (var hmac = new HMACSHA256(SECRET_KEY))
+                using (var hmac = new HMACSHA256(GetHmacKey()))
                 {
                     byte[] hash = hmac.ComputeHash(dataBytes);
                     return Convert.ToBase64String(hash);

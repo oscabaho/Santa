@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using UnityEngine;
 using VContainer;
-using System.Threading;
 
 /// <summary>
 /// This component starts a turn-based combat encounter when the player interacts with it.
@@ -13,27 +11,14 @@ public class CombatTrigger : MonoBehaviour
 {
     private CombatEncounter _encounter;
     private bool _combatHasBeenTriggered = false;
-    private GameObject _activeCombatInstance;
-    private string _activeCombatPoolKey;
-    private IGameStateService _gameStateService;
-    private ICombatTransitionService _combatTransitionService;
-    private CombatScenePool _combatScenePool;
-    private ICombatService _combatService;
+    private ICombatEncounterManager _encounterManager;
     private Collider _interactionCollider;
-    private bool _isListeningForCombatEnd;
     private CancellationTokenSource _loadCancellation;
 
     [Inject]
-    public void Construct(
-        IGameStateService gameStateService,
-        ICombatTransitionService combatTransitionService,
-        CombatScenePool combatScenePool,
-        ICombatService combatService)
+    public void Construct(ICombatEncounterManager encounterManager)
     {
-        _gameStateService = gameStateService;
-        _combatTransitionService = combatTransitionService;
-        _combatScenePool = combatScenePool;
-        _combatService = combatService;
+        _encounterManager = encounterManager;
     }
 
     private void Awake()
@@ -41,9 +26,9 @@ public class CombatTrigger : MonoBehaviour
         _encounter = GetComponent<CombatEncounter>();
         if (_encounter == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger requires a CombatEncounter component.");
-            #endif
+#endif
             enabled = false;
             return;
         }
@@ -51,9 +36,9 @@ public class CombatTrigger : MonoBehaviour
         _interactionCollider = GetComponent<Collider>();
         if (_interactionCollider == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("CombatTrigger requires a Collider component to function.");
-            #endif
+#endif
             enabled = false;
             return;
         }
@@ -74,162 +59,51 @@ public class CombatTrigger : MonoBehaviour
             _interactionCollider.enabled = false;
         }
 
-        if (_combatTransitionService == null)
+        if (_encounterManager == null)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("CombatTrigger: ICombatTransitionService not found when starting combat.");
-            #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogError("CombatTrigger: ICombatEncounterManager not found when starting combat.");
+#endif
             ResetTriggerState();
             return;
         }
 
-        if (_combatService == null)
-        {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("CombatTrigger: ICombatService not found. Cannot start combat.");
-            #endif
-            ResetTriggerState();
-            return;
-        }
-
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Player has interacted with a combat trigger.");
-        #endif
-
-        var poolKey = _encounter.GetPoolKey();
-        if (_combatScenePool == null)
-        {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("CombatTrigger: CombatScenePool instance not found.");
-            #endif
-            ResetTriggerState();
-            return;
-        }
+#endif
 
         try
         {
-            _activeCombatInstance = await _combatScenePool.GetInstanceAsync(poolKey, _encounter);
+            bool playerWon = await _encounterManager.StartEncounterAsync(_encounter);
+
             if (ct.IsCancellationRequested || this == null || gameObject == null)
             {
-                // Trigger destroyed or cancelled; abort safely
                 return;
             }
-            if (_activeCombatInstance == null)
+
+            if (playerWon)
             {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError("Failed to get instance from pool.");
-                #endif
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"Player won combat initiated by '{gameObject.name}'. Destroying enemy.");
+#endif
+                Destroy(gameObject);
+            }
+            else
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"Player lost combat initiated by '{gameObject.name}'. Resetting trigger.");
+#endif
                 ResetTriggerState();
-                return;
             }
-
-            _activeCombatInstance.SetActive(true); // Activate the instance
-            _activeCombatPoolKey = poolKey;
-
-            var combatArena = _activeCombatInstance.GetComponentInChildren<CombatArena>(true);
-            if (combatArena == null)
-            {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError($"CombatTrigger: Could not find CombatArena inside '{_activeCombatInstance.name}'.");
-                #endif
-                HandleCombatStartFailure();
-                return;
-            }
-
-            List<GameObject> participants = combatArena.Combatants
-                .Where(go => go != null)
-                .Distinct()
-                .ToList();
-
-            if (participants.Count == 0)
-            {
-                #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError("CombatTrigger: CombatArena returned zero participants.");
-                #endif
-                HandleCombatStartFailure();
-                return;
-            }
-
-            _gameStateService.OnCombatEnded += OnCombatEnded;
-            _isListeningForCombatEnd = true;
-            _combatTransitionService.StartCombat(_activeCombatInstance);
-            _combatService.StartCombat(participants);
-            _gameStateService.StartCombat();
         }
         catch (System.Exception ex)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("Failed to start combat interaction.");
             GameLog.LogException(ex);
-            #endif
-            HandleCombatStartFailure();
-        }
-    }
-
-    private void OnCombatEnded(bool playerWon)
-    {
-        // Release the instance back to the pool
-        ReleaseActiveInstance();
-        CleanupActiveCombatInstance();
-
-        // Unsubscribe
-        if (_gameStateService != null && _isListeningForCombatEnd)
-        {
-            _gameStateService.OnCombatEnded -= OnCombatEnded;
-            _isListeningForCombatEnd = false;
-        }
-
-        if (playerWon)
-        {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"Player won combat initiated by '{gameObject.name}'. Destroying enemy.");
-            #endif
-
-            // Disable collider before destroying to trigger OnTriggerExit on PlayerInteraction
-            // This ensures the interaction button is hidden
-            if (_interactionCollider != null)
-            {
-                _interactionCollider.enabled = false;
-            }
-
-            Destroy(gameObject);
-        }
-        else
-        {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"Player lost combat initiated by '{gameObject.name}'. Resetting trigger.");
-            #endif
+#endif
             ResetTriggerState();
         }
-    }
-
-    private void HandleCombatStartFailure()
-    {
-        if (_gameStateService != null && _isListeningForCombatEnd)
-        {
-            _gameStateService.OnCombatEnded -= OnCombatEnded;
-            _isListeningForCombatEnd = false;
-        }
-
-        ReleaseActiveInstance();
-        CleanupActiveCombatInstance();
-        ResetTriggerState();
-    }
-
-    private void ReleaseActiveInstance()
-    {
-        if (_combatScenePool == null) return;
-        if (_activeCombatInstance != null && !string.IsNullOrEmpty(_activeCombatPoolKey))
-        {
-            bool releaseAddressables = _encounter != null && _encounter.ReleaseAddressablesInstances;
-            _combatScenePool.ReleaseInstance(_activeCombatPoolKey, _activeCombatInstance, releaseAddressables);
-        }
-    }
-
-    private void CleanupActiveCombatInstance()
-    {
-        _activeCombatInstance = null;
-        _activeCombatPoolKey = null;
     }
 
     private void ResetTriggerState()

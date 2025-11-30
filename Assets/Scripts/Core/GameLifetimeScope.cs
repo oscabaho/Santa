@@ -21,6 +21,9 @@ public class GameLifetimeScope : LifetimeScope
     private CombatTransitionManager combatTransitionManagerInstance;
 
     [SerializeField]
+    private CombatEncounterManager combatEncounterManagerInstance;
+
+    [SerializeField]
     private UpgradeManager upgradeManagerInstance;
 
     [SerializeField]
@@ -68,6 +71,7 @@ public class GameLifetimeScope : LifetimeScope
         // RegisterService<IAudioService, AudioManager>(builder, audioManagerInstance);
 
         RegisterService<ICombatTransitionService, CombatTransitionManager>(builder, combatTransitionManagerInstance);
+        RegisterService<ICombatEncounterManager, CombatEncounterManager>(builder, combatEncounterManagerInstance);
         RegisterServiceWithMultipleInterfaces(builder, upgradeManagerInstance);
 
         // Registramos GameEventBus como Singleton

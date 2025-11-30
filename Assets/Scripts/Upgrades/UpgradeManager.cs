@@ -56,19 +56,19 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         else
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UpgradeManager: PlayerStatsConfig is not assigned! Using hardcoded defaults.");
+            GameLog.LogError(Santa.Core.Config.LogMessages.Upgrades.ConfigNotAssigned);
 #endif
-            // Fallback to hardcoded values
-            DirectAttackDamage = 25;
-            AreaAttackDamage = 10;
-            SpecialAttackDamage = 75;
-            SpecialAttackMissChance = 0.2f;
-            APRecoveryAmount = 34;
-            MaxActionPoints = 100;
-            MaxHealth = 100;
-            GlobalAPCostReduction = 0;
-            GlobalActionSpeedBonus = 0;
-            CriticalHitChance = 0.1f;
+            // Fallback to constants from GameConstants.PlayerStats
+            DirectAttackDamage = GameConstants.PlayerStats.DefaultDirectAttackDamage;
+            AreaAttackDamage = GameConstants.PlayerStats.DefaultAreaAttackDamage;
+            SpecialAttackDamage = GameConstants.PlayerStats.DefaultSpecialAttackDamage;
+            SpecialAttackMissChance = GameConstants.PlayerStats.DefaultSpecialAttackMissChance;
+            APRecoveryAmount = GameConstants.PlayerStats.DefaultAPRecoveryAmount;
+            MaxActionPoints = GameConstants.PlayerStats.DefaultMaxActionPoints;
+            MaxHealth = GameConstants.PlayerStats.DefaultMaxHealth;
+            GlobalAPCostReduction = GameConstants.PlayerStats.DefaultGlobalAPCostReduction;
+            GlobalActionSpeedBonus = GameConstants.PlayerStats.DefaultGlobalActionSpeedBonus;
+            CriticalHitChance = GameConstants.PlayerStats.DefaultBaseCriticalHitChance;
         }
     }
 
@@ -89,7 +89,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (allPossibleUpgrades == null || allPossibleUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning("Not enough upgrades defined in UpgradeManager to offer a choice.");
+            GameLog.LogWarning(Santa.Core.Config.LogMessages.Upgrades.NotEnoughUpgrades);
 #endif
             return;
         }
@@ -105,7 +105,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (availableUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning($"Not enough unique upgrades to offer a choice. Only {availableUpgrades.Count} available.");
+            GameLog.LogWarning(string.Format(Santa.Core.Config.LogMessages.Upgrades.NotEnoughUniqueUpgrades, availableUpgrades.Count));
 #endif
             // If there's at least one, we could offer it, but for now, we just end combat gracefully.
             _combatTransitionService?.EndCombat(true);
@@ -124,7 +124,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         AbilityUpgrade option2 = availableUpgrades[index2];
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Offering upgrades: {option1.UpgradeName} vs {option2.UpgradeName}");
+        GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.OfferingUpgrades, option1.UpgradeName, option2.UpgradeName));
 #endif
         _upgradeUI.ShowUpgrades(option1, option2);
     }
@@ -134,7 +134,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (upgrade == null) return;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"Applying upgrade: {upgrade.UpgradeName}");
+        GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.ApplyingUpgrade, upgrade.UpgradeName));
 #endif
 
         // Apply the strategy to THIS manager (which holds the stats)
@@ -161,7 +161,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         {
             _lastSelectedUpgrade = stored;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"Last selected upgrade loaded: {_lastSelectedUpgrade}");
+            GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.LastUpgradeLoaded, _lastSelectedUpgrade));
 #endif
         }
     }
@@ -172,7 +172,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         _lastSelectedUpgrade = null;
         Santa.Core.Security.SecureStorage.Delete(Santa.Core.Config.GameKeys.LastUpgrade);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("Reset last selected upgrade.");
+        GameLog.Log(Santa.Core.Config.LogMessages.Upgrades.ResetLastUpgrade);
 #endif
     }
 
@@ -303,16 +303,17 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         }
         else
         {
-            DirectAttackDamage = 25;
-            AreaAttackDamage = 10;
-            SpecialAttackDamage = 75;
-            SpecialAttackMissChance = 0.2f;
-            APRecoveryAmount = 34;
-            MaxActionPoints = 100;
-            MaxHealth = 100;
-            GlobalAPCostReduction = 0;
-            GlobalActionSpeedBonus = 0;
-            CriticalHitChance = 0.1f;
+            // Fallback to constants from GameConstants.PlayerStats
+            DirectAttackDamage = GameConstants.PlayerStats.DefaultDirectAttackDamage;
+            AreaAttackDamage = GameConstants.PlayerStats.DefaultAreaAttackDamage;
+            SpecialAttackDamage = GameConstants.PlayerStats.DefaultSpecialAttackDamage;
+            SpecialAttackMissChance = GameConstants.PlayerStats.DefaultSpecialAttackMissChance;
+            APRecoveryAmount = GameConstants.PlayerStats.DefaultAPRecoveryAmount;
+            MaxActionPoints = GameConstants.PlayerStats.DefaultMaxActionPoints;
+            MaxHealth = GameConstants.PlayerStats.DefaultMaxHealth;
+            GlobalAPCostReduction = GameConstants.PlayerStats.DefaultGlobalAPCostReduction;
+            GlobalActionSpeedBonus = GameConstants.PlayerStats.DefaultGlobalActionSpeedBonus;
+            CriticalHitChance = GameConstants.PlayerStats.DefaultBaseCriticalHitChance;
         }
     }
 }

@@ -87,7 +87,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         // Create specialized components
         _stateManager = new CombatStateManager();
         _actionHandler = new PlayerActionHandler();
-        _phaseController = new CombatPhaseController(this, _delayBetweenActions, _stateManager);
+        _phaseController = new CombatPhaseController(_stateManager);
         _winConditionChecker = new DefaultWinConditionChecker();
 
         // Wire component events
@@ -102,7 +102,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (_actionExecutor == null)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError($"Could not find IActionExecutor in children of {gameObject.name}.", this);
+            GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.TurnBasedCombat.ExecutorNotFound, gameObject.name), this);
 #endif
             enabled = false;
         }
@@ -110,7 +110,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (_aiManager == null)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError($"Could not find IAIManager in children of {gameObject.name}.", this);
+            GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.TurnBasedCombat.AIManagerNotFound, gameObject.name), this);
 #endif
             enabled = false;
         }
@@ -123,7 +123,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
     public void StartCombat(List<GameObject> participants)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("═══ COMBAT STARTED ═══");
+        GameLog.Log(Santa.Core.Config.LogMessages.TurnBasedCombat.CombatStarted);
 #endif
 
         _stateManager.Initialize(participants, _upgradeService);
@@ -211,7 +211,7 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.LogVerbose("Execution phase finished.");
+        GameLog.LogVerbose(Santa.Core.Config.LogMessages.TurnBasedCombat.ExecutionPhaseFinished);
 #endif
         _phaseController.StartTurn();
     }
@@ -272,14 +272,14 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         if (playerWon)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("═══ COMBAT ENDED: VICTORY ═══");
+            GameLog.Log(Santa.Core.Config.LogMessages.TurnBasedCombat.CombatVictory);
 #endif
             _upgradeService?.PresentUpgradeOptions();
         }
         else
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("═══ COMBAT ENDED: DEFEAT ═══");
+            GameLog.Log(Santa.Core.Config.LogMessages.TurnBasedCombat.CombatDefeat);
 #endif
             _combatTransitionService?.EndCombat(false);
             gameObject.SetActive(false);

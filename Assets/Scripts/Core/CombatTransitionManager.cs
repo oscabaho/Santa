@@ -50,12 +50,12 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
         if (_explorationPlayer == null)
         {
-            GameLog.LogError("CombatTransitionManager: Could not find the exploration player via the ExplorationPlayerIdentifier component.", this);
+            GameLog.LogError(Santa.Core.Config.LogMessages.CombatTransition.ExplorationPlayerNotFound, this);
             enabled = false;
         }
         if (_explorationCamera == null)
         {
-            GameLog.LogError("CombatTransitionManager: Could not find the main camera.", this);
+            GameLog.LogError(Santa.Core.Config.LogMessages.CombatTransition.MainCameraNotFound, this);
             enabled = false;
         }
     }
@@ -69,7 +69,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         var combatPlayer = combatPlayerIdentifier != null ? combatPlayerIdentifier.gameObject : null;
         if (combatPlayer == null)
         {
-            GameLog.LogError($"CombatTransitionManager: Could not find the combat player via the CombatPlayerIdentifier component within {_currentCombatSceneParent.name}.", this);
+            GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.CombatTransition.CombatPlayerNotFound, _currentCombatSceneParent.name), this);
             return;
         }
 
@@ -83,12 +83,12 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             }
             else
             {
-                GameLog.LogWarning("CombatTransitionManager: ICombatCameraManager not injected; cameras will rely on fallback tag search inside CombatCameraManager.");
+                GameLog.LogWarning(Santa.Core.Config.LogMessages.CombatTransition.CameraManagerNotInjected);
             }
         }
         else
         {
-            GameLog.LogWarning($"CombatTransitionManager: No CombatArenaSettings found on {_currentCombatSceneParent.name}. CombatCameraManager will attempt fallback tag search.");
+            GameLog.LogWarning(string.Format(Santa.Core.Config.LogMessages.CombatTransition.NoArenaSettings, _currentCombatSceneParent.name));
         }
 
         // Build and store the context for both start and end transitions
@@ -117,7 +117,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     {
         if (_currentCombatSceneParent == null || _currentContext == null)
         {
-            GameLog.LogWarning("EndCombat was called but there is no active combat or context.", this);
+            GameLog.LogWarning(Santa.Core.Config.LogMessages.CombatTransition.EndCombatNoContext, this);
             _gameStateService?.EndCombat(playerWon);
             CleanupContext();
             return;
@@ -180,12 +180,12 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     {
         if (respawnPoint != null && _explorationPlayer != null)
         {
-            GameLog.Log($"Player defeated. Respawning at {respawnPoint.position}.");
+            GameLog.Log(string.Format(Santa.Core.Config.LogMessages.CombatTransition.PlayerDefeatedRespawning, respawnPoint.position));
             _explorationPlayer.transform.position = respawnPoint.position;
         }
         else
         {
-            GameLog.LogWarning("Player defeated but no Respawn Point assigned (or player null).");
+            GameLog.LogWarning(Santa.Core.Config.LogMessages.CombatTransition.PlayerDefeatedNoRespawn);
         }
     }
 

@@ -25,11 +25,11 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
     {
 #if UNITY_STANDALONE
         // --- PC SPECIFIC LOGIC ---
-        Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
-        Application.targetFrameRate = 60;
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("Platform: PC. Applied default graphics settings (1920x1080, 60 FPS, Windowed).");
-        #endif
+        Screen.SetResolution(GameConstants.Graphics.DefaultPCWidth, GameConstants.Graphics.DefaultPCHeight, FullScreenMode.Windowed);
+        Application.targetFrameRate = GameConstants.Graphics.DefaultTargetFrameRate;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"Platform: PC. Applied default graphics settings ({GameConstants.Graphics.DefaultPCWidth}x{GameConstants.Graphics.DefaultPCHeight}, {GameConstants.Graphics.DefaultTargetFrameRate} FPS, Windowed).");
+#endif
 
 #elif UNITY_ANDROID || UNITY_IOS
         // --- MOBILE SPECIFIC LOGIC ---
@@ -60,16 +60,16 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
             refreshRate = selectedResolution.refreshRateRatio.value;
             if (refreshRate <= 0d)
             {
-                refreshRate = 60d;
+                refreshRate = GameConstants.Graphics.DefaultMobileRefreshRate;
             }
         }
 
         Application.targetFrameRate = (int)System.Math.Round(refreshRate);
         Screen.SetResolution(selectedResolution.width, selectedResolution.height, true);
         ConfigureMobileOrientation();
-        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Platform: Mobile. Applied graphics settings ({selectedResolution.width}x{selectedResolution.height} @ {Application.targetFrameRate} FPS).");
-        #endif
+#endif
 #endif
     }
 
@@ -113,9 +113,9 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
     {
         if (resolutionIndex < 0 || resolutionIndex >= AvailableResolutions.Length)
         {
-            #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"GraphicsSettingsManager: Invalid resolution index {resolutionIndex}.");
-            #endif
+#endif
             return;
         }
         Resolution resolution = AvailableResolutions[resolutionIndex];
