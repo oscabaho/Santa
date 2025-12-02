@@ -131,7 +131,7 @@ namespace Santa.Core.Save
         private void WriteContributors(ref SaveData data)
         {
             var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            var list = new System.Collections.Generic.List<SerializableKV>();
+
             foreach (var mb in contributors)
             {
                 if (mb is ISaveContributor sc)
