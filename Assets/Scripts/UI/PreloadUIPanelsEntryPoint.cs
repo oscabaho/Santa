@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using VContainer;
 using VContainer.Unity;
 
@@ -19,10 +19,10 @@ public class PreloadUIPanelsEntryPoint : IStartable
     public void Start()
     {
         // Fire-and-forget preload of CombatUI and PauseMenu
-        _ = PreloadPanelsAsync();
+        PreloadPanelsAsync().Forget();
     }
 
-    private async Task PreloadPanelsAsync()
+    private async UniTaskVoid PreloadPanelsAsync()
     {
         try
         {

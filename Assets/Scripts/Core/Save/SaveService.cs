@@ -9,20 +9,23 @@ namespace Santa.Core.Save
     public class SaveService : MonoBehaviour, ISaveService
     {
         private const string SaveKey = "GameSave";
+        private const string ManifestKey = "GameSave_Manifest";
         private const string BackupKeyPrefix = "GameSave_Backup_";
-        private const int MaxBackups = 3;
-        private const float MinSaveInterval = 5f; // seconds
-
-        private float _lastSaveTime = -999f;
+        private const int MaxBackups = 5;
 
         private ICombatService _combatService;
         private ISaveContributorRegistry _registry;
+        private ISecureStorageService _secureStorage;
+        private Santa.Core.Player.IPlayerReference _playerRef;
+        private float _lastSaveTime;
 
         [Inject]
-        public void Construct(ICombatService combatService, ISaveContributorRegistry registry = null)
+        public void Construct(ICombatService combatService, ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, Santa.Core.Player.IPlayerReference playerRef = null)
         {
             _combatService = combatService;
+            _secureStorage = secureStorage;
             _registry = registry;
+            _playerRef = playerRef;
         }
 
         public bool CanSaveNow()
@@ -44,19 +47,9 @@ namespace Santa.Core.Save
         {
             if (!CanSaveNow())
             {
-                GameLog.LogWarning("SaveService: Save is disabled during combat.");
+                Debug.LogWarning("SaveService: Save is disabled during combat.");
                 return;
             }
-
-            // Rate limiting: prevent save spam
-            if (Time.time - _lastSaveTime < MinSaveInterval)
-            {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogWarning($"SaveService: Save rate limited. Please wait {MinSaveInterval - (Time.time - _lastSaveTime):F1} seconds.");
-#endif
-                return;
-            }
-
             var data = new SaveData
             {
                 sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
@@ -64,7 +57,7 @@ namespace Santa.Core.Save
             };
 
             // Capture player position
-            var playerGo = FindPlayerObject();
+            var playerGo = GetPlayerObject();
             if (playerGo != null)
             {
                 data.playerPosition = playerGo.transform.position;
@@ -84,7 +77,7 @@ namespace Santa.Core.Save
             CreateBackup();
 
             // Save main file
-            SecureStorageJson.Set(SaveKey, data);
+            _secureStorage.Save(SaveKey, data);
             _lastSaveTime = Time.time;
 
             GameLog.Log("SaveService: Game saved.");
@@ -93,7 +86,7 @@ namespace Santa.Core.Save
         public bool TryLoad(out SaveData data)
         {
             // Try main save first
-            var ok = SecureStorageJson.TryGet(SaveKey, out data);
+            var ok = _secureStorage.TryLoad(SaveKey, out data);
 
             // If main save fails, try backups
             if (!ok)
@@ -121,7 +114,7 @@ namespace Santa.Core.Save
             }
 
             // Restore player position
-            var playerGo = FindPlayerObject();
+            var playerGo = GetPlayerObject();
             if (playerGo != null)
             {
                 playerGo.transform.position = data.playerPosition;
@@ -134,55 +127,64 @@ namespace Santa.Core.Save
 
         public void Delete()
         {
-            SecureStorageJson.Delete(SaveKey);
+            _secureStorage.Delete(SaveKey);
             DeleteAllBackups();
             GameLog.Log("SaveService: Save and all backups deleted.");
         }
 
-        private GameObject FindPlayerObject()
+        public bool TryGetLastSaveTimeUtc(out DateTime utc)
+        {
+            // Read current main save without mutating any state
+            if (_secureStorage.TryLoad(SaveKey, out SaveData data))
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"SaveService.TryGetLastSaveTimeUtc: Loaded data with timestamp {data.savedAtUtc:u} (Year={data.savedAtUtc.Year})");
+#endif
+                // Guard against default DateTime (no real save yet)
+                if (data.savedAtUtc != default && data.savedAtUtc.Year >= 2000)
+                {
+                    utc = data.savedAtUtc;
+                    return true;
+                }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SaveService.TryGetLastSaveTimeUtc: Timestamp validation failed (default={data.savedAtUtc == default}, year={data.savedAtUtc.Year})");
+#endif
+            }
+            else
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("SaveService.TryGetLastSaveTimeUtc: TryLoad returned false - no save data found");
+#endif
+            }
+            utc = default;
+            return false;
+        }
+
+        private GameObject GetPlayerObject()
         {
             // Prefer combat service player if available
             if (_combatService != null && _combatService.Player != null)
             {
                 return _combatService.Player;
             }
-            // Fallback by tag/name
-            var byTag = GameObject.FindWithTag("Player");
-            if (byTag != null) return byTag;
-            return GameObject.Find("Player");
-        }
-
-        private System.Collections.Generic.IReadOnlyList<ISaveContributor> GetContributors()
-        {
-            // Use registry if available (preferred)
-            if (_registry != null)
+            // Use injected player reference if available
+            if (_playerRef != null && _playerRef.Player != null)
             {
-                return _registry.GetValidContributors();
+                return _playerRef.Player;
             }
-
-            // Fallback to scene scanning (legacy, expensive)
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning("SaveService: ISaveContributorRegistry not injected. Falling back to expensive FindObjectsByType. Consider adding SaveContributorRegistry to scene.");
+            GameLog.LogError("SaveService: Player reference not available. Ensure IPlayerReference is registered and present in the base scene.");
 #endif
-            var contributors = new System.Collections.Generic.List<ISaveContributor>();
-            var allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var mb in allMonoBehaviours)
-            {
-                if (mb is ISaveContributor sc)
-                {
-                    contributors.Add(sc);
-                }
-            }
-            return contributors;
+            return null;
         }
 
         private void WriteContributors(ref SaveData data)
         {
-            var contributors = GetContributors();
-            foreach (var sc in contributors)
+            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            foreach (var mb in contributors)
             {
-                // Registry handles validity checks, but double-check for safety
-                if (sc is MonoBehaviour mb && mb != null)
+                if (mb is ISaveContributor sc)
                 {
                     sc.WriteTo(ref data);
                 }
@@ -192,11 +194,10 @@ namespace Santa.Core.Save
 
         private void ReadContributors(in SaveData data)
         {
-            var contributors = GetContributors();
-            foreach (var sc in contributors)
+            var contributors = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var mb in contributors)
             {
-                // Registry handles validity checks, but double-check for safety
-                if (sc is MonoBehaviour mb && mb != null)
+                if (mb is ISaveContributor sc)
                 {
                     sc.ReadFrom(in data);
                 }
@@ -205,10 +206,24 @@ namespace Santa.Core.Save
 
         #region Backup System
 
+        private SaveManifest LoadManifest()
+        {
+            if (_secureStorage.TryLoad(ManifestKey, out SaveManifest manifest))
+            {
+                return manifest;
+            }
+            return new SaveManifest();
+        }
+
+        private void SaveManifest(SaveManifest manifest)
+        {
+            _secureStorage.Save(ManifestKey, manifest);
+        }
+
         private void CreateBackup()
         {
             // Copy current main save to backup with timestamp
-            if (!SecureStorageJson.TryGet(SaveKey, out SaveData currentData))
+            if (!_secureStorage.TryLoad(SaveKey, out SaveData currentData))
             {
                 // No existing save to backup
                 return;
@@ -216,10 +231,19 @@ namespace Santa.Core.Save
 
             var timestamp = DateTime.UtcNow.Ticks;
             var backupKey = $"{BackupKeyPrefix}{timestamp}";
-            SecureStorageJson.Set(backupKey, currentData);
+
+            // Save the backup file
+            _secureStorage.Save(backupKey, currentData);
+
+            // Update manifest
+            var manifest = LoadManifest();
+            manifest.Backups.Add(new BackupEntry { Key = backupKey, Timestamp = timestamp });
 
             // Clean old backups (keep only last MaxBackups)
-            CleanOldBackups();
+            CleanOldBackups(manifest);
+
+            // Save updated manifest
+            SaveManifest(manifest);
         }
 
         private bool TryLoadFromBackup(out SaveData data)
@@ -231,7 +255,7 @@ namespace Santa.Core.Save
 
             foreach (var backupKey in backupKeys)
             {
-                if (SecureStorageJson.TryGet(backupKey, out data))
+                if (_secureStorage.TryLoad(backupKey, out data))
                 {
                     return true;
                 }
@@ -242,50 +266,55 @@ namespace Santa.Core.Save
 
         private System.Collections.Generic.List<string> GetBackupKeysSorted()
         {
-            var backupKeys = new System.Collections.Generic.List<string>();
+            var manifest = LoadManifest();
+            var keys = new System.Collections.Generic.List<string>();
 
-            // Check for up to MaxBackups * 2 to account for old backups
-            for (int i = 0; i < MaxBackups * 2; i++)
+            // Sort by timestamp descending
+            manifest.Backups.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
+
+            foreach (var entry in manifest.Backups)
             {
-                // We can't enumerate all keys in SecureStorage, so we try known patterns
-                // This is a limitation - in production, consider using a manifest file
+                keys.Add(entry.Key);
             }
 
-            // For now, try a simple approach: check last 10 possible backup slots
-            // This is a simplified implementation
-            var now = DateTime.UtcNow.Ticks;
-            var oneHourTicks = TimeSpan.FromHours(1).Ticks;
-
-            for (int i = 0; i < 10; i++)
-            {
-                var estimatedTicks = now - (i * oneHourTicks);
-                var testKey = $"{BackupKeyPrefix}{estimatedTicks}";
-
-                // Test if this backup exists by trying to read it
-                if (SecureStorageJson.TryGet<SaveData>(testKey, out _))
-                {
-                    backupKeys.Add(testKey);
-                    if (backupKeys.Count >= MaxBackups) break;
-                }
-            }
-
-            return backupKeys;
+            return keys;
         }
 
-        private void CleanOldBackups()
+        private void CleanOldBackups(SaveManifest manifest)
         {
-            // Note: This is a simplified implementation
-            // In a production system, you'd want a manifest file to track all backups
-            // For now, we rely on the fact that old backups will naturally be replaced
+            // Sort by timestamp descending (newest first)
+            manifest.Backups.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
+
+            if (manifest.Backups.Count <= MaxBackups)
+            {
+                return;
+            }
+
+            // Identify backups to remove (all after MaxBackups)
+            int removeCount = manifest.Backups.Count - MaxBackups;
+            var toRemove = manifest.Backups.GetRange(MaxBackups, removeCount);
+
+            // Remove files
+            foreach (var entry in toRemove)
+            {
+                _secureStorage.Delete(entry.Key);
+            }
+
+            // Remove from manifest
+            manifest.Backups.RemoveRange(MaxBackups, removeCount);
         }
 
         private void DeleteAllBackups()
         {
-            var backupKeys = GetBackupKeysSorted();
-            foreach (var backupKey in backupKeys)
+            var manifest = LoadManifest();
+            foreach (var entry in manifest.Backups)
             {
-                SecureStorageJson.Delete(backupKey);
+                _secureStorage.Delete(entry.Key);
             }
+
+            manifest.Backups.Clear();
+            SaveManifest(manifest);
+            _secureStorage.Delete(ManifestKey);
         }
 
         #endregion

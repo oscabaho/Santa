@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -14,13 +14,13 @@ public class FadeInTask : TransitionTask
     [SerializeField]
     private float duration = 0.5f;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
         GameObject target = context.GetTarget(targetId);
         if (target == null)
         {
             GameLog.LogWarning($"FadeInTask: Target '{targetId}' not found in context.");
-            yield break;
+            return;
         }
 
         // Try to find an existing CanvasGroup. If none, add one.
@@ -41,12 +41,11 @@ public class FadeInTask : TransitionTask
         {
             elapsed += Time.deltaTime;
             canvasGroup.alpha = Mathf.Clamp01(elapsed / duration);
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
         canvasGroup.alpha = 1f;
 
         // If we added the CanvasGroup only for this fade, optionally leave it — removal may cause visual flicker if other tasks expect it.
-        yield break;
     }
 }

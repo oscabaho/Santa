@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -10,11 +9,92 @@ public class UIManager : MonoBehaviour, IUIManager
 {
     private readonly Dictionary<string, GameObject> _addressToInstanceMap = new Dictionary<string, GameObject>();
     private IObjectResolver _resolver;
+    [SerializeField] private Transform dynamicPanelsParent; // Optional parent for runtime Addressables panels
 
     [Inject]
     public void Construct(IObjectResolver resolver)
     {
         _resolver = resolver;
+    }
+
+    private void Awake()
+    {
+        // Auto-find UI/DynamicPanels if not assigned, to avoid manual setup
+        if (dynamicPanelsParent == null)
+        {
+            // Prefer an object named exactly "DynamicPanels"
+            var allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < allTransforms.Length; i++)
+            {
+                var t = allTransforms[i];
+                if (t != null && t.name == "DynamicPanels")
+                {
+                    dynamicPanelsParent = t;
+                    break;
+                }
+            }
+        }
+    }
+
+    private static void EnsureUnderCanvas(GameObject instance)
+    {
+        if (instance == null) return;
+
+        // If the instance already has a Canvas in its parent chain, we're good
+        var parentCanvas = instance.GetComponentInParent<Canvas>(true);
+        if (parentCanvas != null) return;
+
+        // Find any Canvas in the scene (prefer one named "StaticCanvas" if present)
+        Canvas targetCanvas = null;
+        var canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < canvases.Length; i++)
+        {
+            var c = canvases[i];
+            if (c == null) continue;
+            if (c.name == "StaticCanvas") { targetCanvas = c; break; }
+            if (targetCanvas == null) targetCanvas = c;
+        }
+
+        if (targetCanvas != null)
+        {
+            instance.transform.SetParent(targetCanvas.transform, false);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log($"UIManager: Reparented '{instance.name}' under Canvas '{targetCanvas.name}' to ensure visibility.");
+#endif
+        }
+        else
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"UIManager: No Canvas found in scene. UI element '{instance.name}' may not render.");
+#endif
+        }
+    }
+
+    private static void BringToFront(GameObject instance)
+    {
+        if (instance == null) return;
+
+        // If this panel has its own Canvas, bump its sorting order
+        var selfCanvas = instance.GetComponent<Canvas>();
+        if (selfCanvas != null)
+        {
+            selfCanvas.overrideSorting = true;
+            // Use different orders to guarantee PauseMenu above HUD
+            var isPauseMenu = instance.name.StartsWith("PauseMenu");
+            var targetOrder = isPauseMenu ? 6000 : 5000;
+            if (selfCanvas.sortingOrder != targetOrder)
+                selfCanvas.sortingOrder = targetOrder;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log($"UIManager: '{instance.name}' Canvas sortingOrder set to {selfCanvas.sortingOrder}.");
+#endif
+            return;
+        }
+
+        // Otherwise, move to the end within its parent to render on top within that Canvas
+        instance.transform.SetAsLastSibling();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log($"UIManager: '{instance.name}' moved to last sibling for top render order.");
+#endif
     }
 
     /// <summary>
@@ -39,7 +119,7 @@ public class UIManager : MonoBehaviour, IUIManager
         _addressToInstanceMap.Clear();
     }
 
-    public async Task ShowPanel(string panelAddress)
+    public async UniTask ShowPanel(string panelAddress)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
@@ -55,6 +135,7 @@ public class UIManager : MonoBehaviour, IUIManager
             var panelComponent = panelInstance.GetComponent<UIPanel>();
             if (panelComponent != null)
             {
+                BringToFront(panelInstance);
                 panelComponent.Show();
             }
             else
@@ -69,8 +150,9 @@ public class UIManager : MonoBehaviour, IUIManager
         // If not cached, load and instantiate it.
         try
         {
-            var handle = Addressables.InstantiateAsync(panelAddress, transform);
-            await handle.Task;
+            var parent = dynamicPanelsParent != null ? dynamicPanelsParent : transform;
+            var handle = Addressables.InstantiateAsync(panelAddress, parent);
+            await handle.ToUniTask();
 
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
@@ -83,9 +165,13 @@ public class UIManager : MonoBehaviour, IUIManager
                     InjectRecursively(newPanelInstance);
                 }
 
+                // Ensure visibility by parenting under a Canvas if needed
+                EnsureUnderCanvas(newPanelInstance);
+
                 var panelComponent = newPanelInstance.GetComponent<UIPanel>();
                 if (panelComponent != null)
                 {
+                    BringToFront(newPanelInstance);
                     panelComponent.Show();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.Log(string.Format(Santa.Core.Config.LogMessages.UI.PanelLoadedAndShown, panelAddress));
@@ -139,7 +225,7 @@ public class UIManager : MonoBehaviour, IUIManager
         }
     }
 
-    public async Task SwitchToPanel(string panelAddress)
+    public async UniTask SwitchToPanel(string panelAddress)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
@@ -168,7 +254,7 @@ public class UIManager : MonoBehaviour, IUIManager
     /// Preloads a UI panel by address without showing it, caching the instance for later use.
     /// If the panel is already cached, this is a no-op.
     /// </summary>
-    public async Task PreloadPanel(string panelAddress)
+    public async UniTask PreloadPanel(string panelAddress)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
@@ -186,8 +272,9 @@ public class UIManager : MonoBehaviour, IUIManager
 
         try
         {
-            var handle = Addressables.InstantiateAsync(panelAddress, transform);
-            await handle.Task;
+            var parent = dynamicPanelsParent != null ? dynamicPanelsParent : transform;
+            var handle = Addressables.InstantiateAsync(panelAddress, parent);
+            await handle.ToUniTask();
 
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
@@ -199,6 +286,9 @@ public class UIManager : MonoBehaviour, IUIManager
                 {
                     InjectRecursively(instance);
                 }
+
+                // Ensure visibility by parenting under a Canvas if needed
+                EnsureUnderCanvas(instance);
 
                 var panel = instance.GetComponent<UIPanel>();
                 if (panel != null)

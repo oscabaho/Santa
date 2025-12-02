@@ -6,8 +6,9 @@ namespace Santa.Core.Save
     /// <summary>
     /// Centralized registry for ISaveContributor components.
     /// Replaces expensive FindObjectsByType calls with O(1) registration.
+    /// Plain C# class for VContainer Singleton registration.
     /// </summary>
-    public class SaveContributorRegistry : MonoBehaviour, ISaveContributorRegistry
+    public class SaveContributorRegistry : ISaveContributorRegistry
     {
         private readonly HashSet<ISaveContributor> _contributors = new();
         private readonly List<ISaveContributor> _validContributors = new();
@@ -87,7 +88,10 @@ namespace Santa.Core.Save
 #endif
         }
 
-        private void OnDestroy()
+        /// <summary>
+        /// Clears all registered contributors. Called when container is disposed.
+        /// </summary>
+        public void Clear()
         {
             _contributors.Clear();
             _validContributors.Clear();

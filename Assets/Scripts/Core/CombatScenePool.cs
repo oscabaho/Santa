@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
 #if UNITY_ADDRESSABLES
@@ -17,7 +17,7 @@ public class CombatScenePool : MonoBehaviour
     private IObjectResolver _resolver;
 
     private readonly Dictionary<string, Queue<GameObject>> _pool = new Dictionary<string, Queue<GameObject>>();
-    private readonly Dictionary<string, Task<GameObject>> _pendingInstantiations = new Dictionary<string, Task<GameObject>>();
+    private readonly Dictionary<string, UniTask<GameObject>> _pendingInstantiations = new Dictionary<string, UniTask<GameObject>>();
     private readonly Vector3 _combatSceneOffset = new Vector3(0f, GameConstants.CombatScene.OffsetY, 0f);
 
     [Inject]
@@ -28,9 +28,9 @@ public class CombatScenePool : MonoBehaviour
 
     /// <summary>
     /// Get an instance for the given key. If pool has available instance, returns it.
-    /// Otherwise loads/instantiates asynchronously and returns the instance via Task.
+    /// Otherwise loads/instantiates asynchronously and returns the instance via UniTask.
     /// </summary>
-    public async Task<GameObject> GetInstanceAsync(string key, ICombatEncounter encounter)
+    public async UniTask<GameObject> GetInstanceAsync(string key, ICombatEncounter encounter)
     {
         if (string.IsNullOrEmpty(key))
         {
@@ -66,14 +66,14 @@ public class CombatScenePool : MonoBehaviour
         }
     }
 
-    private async Task<GameObject> InstantiateNewInstanceAsync(string key, ICombatEncounter encounter)
+    private async UniTask<GameObject> InstantiateNewInstanceAsync(string key, ICombatEncounter encounter)
     {
 #if UNITY_ADDRESSABLES
         if (encounter != null && !string.IsNullOrEmpty(encounter.CombatSceneAddress))
         {
             // Instantiates the prefab at the specified offset position
             var handle = Addressables.InstantiateAsync(encounter.CombatSceneAddress, _combatSceneOffset, Quaternion.identity, transform);
-            var inst = await handle.Task;
+            var inst = await handle.ToUniTask();
 
             if (handle.Status == AsyncOperationStatus.Succeeded && inst != null)
             {
@@ -163,7 +163,7 @@ public class CombatScenePool : MonoBehaviour
         q.Enqueue(instance);
     }
 
-    public async Task PrewarmAsync(string key, int count, ICombatEncounter encounter)
+    public async UniTask PrewarmAsync(string key, int count, ICombatEncounter encounter)
     {
         if (string.IsNullOrEmpty(key) || encounter == null) return;
 

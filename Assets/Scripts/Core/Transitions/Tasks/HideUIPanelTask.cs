@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -10,12 +10,12 @@ public class HideUIPanelTask : TransitionTask
     [SerializeField]
     private string panelAddress;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override UniTask Execute(TransitionContext context)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
             GameLog.LogError("HideUIPanelTask: Panel Address is not valid.");
-            yield break;
+            return UniTask.CompletedTask;
         }
 
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
@@ -27,7 +27,7 @@ public class HideUIPanelTask : TransitionTask
         {
             GameLog.LogError("HideUIPanelTask: IUIManager not found in TransitionContext.");
         }
-        
-        yield break;
+
+        return UniTask.CompletedTask;
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -11,12 +11,12 @@ public class ShowUIPanelTask : TransitionTask
     [SerializeField]
     private AssetReferenceGameObject panelReference;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
         if (panelReference == null || !panelReference.RuntimeKeyIsValid())
         {
             GameLog.LogError("ShowUIPanelTask: Panel Reference is not valid.");
-            yield break;
+            return;
         }
 
         // The RuntimeKey is the addressable address string.
@@ -25,11 +25,7 @@ public class ShowUIPanelTask : TransitionTask
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            var task = uiManager.ShowPanel(panelAddress);
-            if (task != null)
-            {
-                yield return new WaitUntil(() => task.IsCompleted);
-            }
+            await uiManager.ShowPanel(panelAddress);
         }
         else
         {

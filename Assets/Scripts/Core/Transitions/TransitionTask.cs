@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -7,9 +7,9 @@ using UnityEngine;
 public abstract class TransitionTask : ScriptableObject
 {
     /// <summary>
-    /// Executes the task as a coroutine.
+    /// Executes the task as an async UniTask.
     /// </summary>
     /// <param name="context">The context providing access to scene objects.</param>
-    /// <returns>An IEnumerator to allow the task to run over multiple frames.</returns>
-    public abstract IEnumerator Execute(TransitionContext context);
+    /// <returns>A UniTask to allow the task to run asynchronously.</returns>
+    public abstract UniTask Execute(TransitionContext context);
 }

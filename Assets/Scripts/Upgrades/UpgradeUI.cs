@@ -1,3 +1,5 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,16 +29,18 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     private IUpgradeService _upgradeService;
     private ILevelService _levelService;
     private ICombatTransitionService _combatTransitionService;
+    private TurnBasedCombatManager _combatManager;
 
-    // Track active fade coroutine to prevent StopAllCoroutines from canceling other coroutines
-    private Coroutine _fadeCoroutine;
+    // Track active fade cancellation to prevent overlapping animations
+    private CancellationTokenSource _fadeCTS;
 
     [Inject]
-    public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService)
+    public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService, TurnBasedCombatManager combatManager = null)
     {
         _upgradeService = upgradeService;
         _levelService = levelService;
         _combatTransitionService = combatTransitionService;
+        _combatManager = combatManager;
     }
 
     private void Awake()
@@ -111,12 +115,10 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         // Fade in with CanvasGroup
         if (canvasGroup != null)
         {
-            // Stop only the active fade coroutine, not all coroutines
-            if (_fadeCoroutine != null)
-            {
-                StopCoroutine(_fadeCoroutine);
-            }
-            _fadeCoroutine = StartCoroutine(FadeIn());
+            // Stop only the active fade
+            _fadeCTS?.Cancel();
+            _fadeCTS = new CancellationTokenSource();
+            FadeIn(_fadeCTS.Token).Forget();
         }
     }
 
@@ -135,8 +137,9 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             canvasGroup.blocksRaycasts = false;
         }
 
-        // Clear fade coroutine reference
-        _fadeCoroutine = null;
+        // Clear fade CTS reference
+        _fadeCTS?.Cancel();
+        _fadeCTS = null;
     }
 
     /// <summary>
@@ -146,12 +149,10 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     {
         if (canvasGroup != null)
         {
-            // Stop only the active fade coroutine, not all coroutines
-            if (_fadeCoroutine != null)
-            {
-                StopCoroutine(_fadeCoroutine);
-            }
-            _fadeCoroutine = StartCoroutine(FadeOut());
+            // Stop only the active fade
+            _fadeCTS?.Cancel();
+            _fadeCTS = new CancellationTokenSource();
+            FadeOut(_fadeCTS.Token).Forget();
         }
         else
         {
@@ -159,34 +160,37 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         }
     }
 
-    private System.Collections.IEnumerator FadeIn()
+    private async UniTaskVoid FadeIn(CancellationToken token)
     {
         float elapsed = 0f;
         canvasGroup.interactable = false; // Disable during animation
 
         while (elapsed < fadeInDuration)
         {
+            if (token.IsCancellationRequested) return;
+
             elapsed += Time.deltaTime;
             canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
-        _fadeCoroutine = null; // Clear reference when complete
     }
 
-    private System.Collections.IEnumerator FadeOut()
+    private async UniTaskVoid FadeOut(CancellationToken token)
     {
         float elapsed = 0f;
         canvasGroup.interactable = false;
 
         while (elapsed < fadeInDuration)
         {
+            if (token.IsCancellationRequested) return;
+
             elapsed += Time.deltaTime;
             canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeInDuration));
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
         canvasGroup.alpha = 0f;
@@ -194,8 +198,6 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
         if (upgradePanel != null)
             upgradePanel.SetActive(false);
-
-        _fadeCoroutine = null; // Clear reference when complete
     }
 
     /// <summary>
@@ -229,7 +231,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
         // 5. Deactivate TurnBasedCombatManager now that upgrade is selected
         // This was previously happening too early in TurnBasedCombatManager.EndCombat()
-        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        var combatManager = _combatManager;
+        if (combatManager == null)
+        {
+            combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        }
         if (combatManager != null)
         {
             combatManager.gameObject.SetActive(false);
@@ -254,7 +260,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         _combatTransitionService?.EndCombat(true);
 
         // Deactivate combat manager when closing without selection
-        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        var combatManager = _combatManager;
+        if (combatManager == null)
+        {
+            combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        }
         if (combatManager != null)
         {
             combatManager.gameObject.SetActive(false);

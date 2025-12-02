@@ -8,7 +8,14 @@ namespace Santa.Core.Save
     {
         // Scene and time
         public string sceneName;
-        public DateTime savedAtUtc;
+        public long savedAtUtcTicks; // DateTime stored as ticks for JsonUtility compatibility
+
+        // Helper property for easy DateTime access
+        public DateTime savedAtUtc
+        {
+            get => savedAtUtcTicks > 0 ? new DateTime(savedAtUtcTicks, DateTimeKind.Utc) : default;
+            set => savedAtUtcTicks = value.Ticks;
+        }
 
         // Player state
         public Vector3 playerPosition;
@@ -38,8 +45,8 @@ namespace Santa.Core.Save
             }
 
             // Player position should be within reasonable bounds
-            // Assuming game world is within ±10,000 units
-            if (playerPosition.magnitude > 10000f)
+            // Assuming game world is within defined bounds
+            if (playerPosition.magnitude > GameConstants.PlayerStats.MaxPlayerPositionMagnitude)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"SaveData.Validate: Player position out of bounds: {playerPosition}");
@@ -48,10 +55,11 @@ namespace Santa.Core.Save
             }
 
             // Timestamp should not be in the future
-            if (savedAtUtc > DateTime.UtcNow.AddMinutes(5))
+            var savedTime = savedAtUtc;
+            if (savedTime > DateTime.UtcNow.AddMinutes(5))
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogWarning($"SaveData.Validate: Save timestamp is in the future: {savedAtUtc}");
+                GameLog.LogWarning($"SaveData.Validate: Save timestamp is in the future: {savedTime}");
 #endif
                 return false;
             }

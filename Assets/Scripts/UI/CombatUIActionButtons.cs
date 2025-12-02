@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -56,7 +56,7 @@ public class CombatUIActionButtons : MonoBehaviour
     /// <summary>
     /// Loads all combat abilities from Addressables asynchronously.
     /// </summary>
-    public async Task LoadAbilitiesAsync()
+    public async UniTask LoadAbilitiesAsync()
     {
         try
         {
@@ -64,17 +64,17 @@ public class CombatUIActionButtons : MonoBehaviour
             GameLog.LogVerbose("CombatUIActionButtons: Loading abilities via Addressables...");
 #endif
 
-            var directTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Direct).Task;
-            var areaTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Area).Task;
-            var specialTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Special).Task;
-            var meditateTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.GainAP).Task;
+            var directTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Direct).ToUniTask();
+            var areaTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Area).ToUniTask();
+            var specialTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.Special).ToUniTask();
+            var meditateTask = Addressables.LoadAssetAsync<Ability>(Santa.Core.Addressables.AddressableKeys.Abilities.GainAP).ToUniTask();
 
-            await Task.WhenAll(directTask, areaTask, specialTask, meditateTask);
+            var (direct, area, special, meditate) = await UniTask.WhenAll(directTask, areaTask, specialTask, meditateTask);
 
-            _directAttackAbility = directTask.Result;
-            _areaAttackAbility = areaTask.Result;
-            _specialAttackAbility = specialTask.Result;
-            _meditateAbility = meditateTask.Result;
+            _directAttackAbility = direct;
+            _areaAttackAbility = area;
+            _specialAttackAbility = special;
+            _meditateAbility = meditate;
 
             _abilitiesLoaded = true;
             SetupButtonListeners();

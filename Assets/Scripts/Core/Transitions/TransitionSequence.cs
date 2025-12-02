@@ -1,9 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
-/// A ScriptableObject that holds a series of TransitionTasks to be executed in order as a coroutine.
+/// A ScriptableObject that holds a series of TransitionTasks to be executed in order as a UniTask.
 /// </summary>
 [CreateAssetMenu(fileName = "NewTransitionSequence", menuName = "Transitions/Transition Sequence")]
 public class TransitionSequence : ScriptableObject
@@ -11,13 +11,13 @@ public class TransitionSequence : ScriptableObject
     [SerializeReference] // Use SerializeReference to allow polymorphism for the abstract TransitionTask
     public List<TransitionTask> Tasks = new List<TransitionTask>();
 
-    public IEnumerator Execute(TransitionContext context)
+    public async UniTask Execute(TransitionContext context)
     {
         foreach (var task in Tasks)
         {
             if (task != null)
             {
-                yield return task.Execute(context);
+                await task.Execute(context);
             }
         }
     }

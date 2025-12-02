@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -10,22 +10,18 @@ public class SwitchUIPanelTask : TransitionTask
     [SerializeField]
     private string panelAddress;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
             GameLog.LogError("SwitchUIPanelTask: Panel Address is not valid.");
-            yield break;
+            return;
         }
 
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            var task = uiManager.SwitchToPanel(panelAddress);
-            if (task != null)
-            {
-                yield return new WaitUntil(() => task.IsCompleted);
-            }
+            await uiManager.SwitchToPanel(panelAddress);
         }
         else
         {

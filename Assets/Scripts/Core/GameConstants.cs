@@ -22,6 +22,11 @@ public static class GameConstants
         public const double DefaultMobileRefreshRate = 60d;
     }
 
+    public static class Addressables
+    {
+        // Addressable keys
+    }
+
     public static class CombatScene
     {
         // Combat scene pool configuration
@@ -41,5 +46,8 @@ public static class GameConstants
         public const int DefaultGlobalAPCostReduction = 0;
         public const int DefaultGlobalActionSpeedBonus = 0;
         public const float DefaultBaseCriticalHitChance = 0.1f;
+
+        // Validation constants
+        public const float MaxPlayerPositionMagnitude = 10000f;
     }
 }

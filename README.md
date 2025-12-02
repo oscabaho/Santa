@@ -2,6 +2,18 @@
 
 Proyecto Unity para un roguelike con combate por turnos y UIs direccionadas por Addressables. Este repositorio incluye múltiples módulos (.csproj) y documentación para flujos de combate, transición, y un sistema de Upgrade UI modular.
 
+## 🚀 Optimización Móvil
+
+Este proyecto está optimizado para dispositivos móviles con 60 FPS estable:
+- **UniTask** - Zero-allocation async/await  
+- **LINQ-Free Hot Paths** - Eliminación de allocations en código crítico  
+- **VContainer DI** - Arquitectura limpia y performante
+
+### Guías de Optimización:
+- 📊 **[ARCHITECTURE_OPTIMIZATION_PROGRESS.md](ARCHITECTURE_OPTIMIZATION_PROGRESS.md)** - Progreso y métricas
+- 🚀 **[UNITASK_MIGRATION_GUIDE.md](UNITASK_MIGRATION_GUIDE.md)** - Guía de UniTask
+- ⚡ **[LINQ_OPTIMIZATION_SUMMARY.md](LINQ_OPTIMIZATION_SUMMARY.md)** - Eliminación de LINQ
+
 ## Documentación principal
 
 ### Sistema de Upgrade UI

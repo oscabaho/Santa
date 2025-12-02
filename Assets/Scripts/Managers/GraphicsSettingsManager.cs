@@ -12,8 +12,12 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
 
     private void Awake()
     {
-        // We want this to persist across scenes.
-        DontDestroyOnLoad(gameObject);
+        // Persist across scenes only when this is a root object
+        // (Unity requires DontDestroyOnLoad targets to be at the scene root).
+        if (transform.parent == null)
+        {
+            DontDestroyOnLoad(gameObject);
+        }
     }
 
     private void Start()

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using VContainer;
 
@@ -24,52 +23,24 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     // Track all acquired upgrades for persistence
     private readonly List<string> _acquiredUpgrades = new List<string>();
 
-    // Player Stats - These will be modified by upgrades.
-    // Initialized from baseStatsConfig.
-    public int DirectAttackDamage { get; private set; }
-    public int AreaAttackDamage { get; private set; }
-    public int SpecialAttackDamage { get; private set; }
-    public float SpecialAttackMissChance { get; private set; }
-    public int APRecoveryAmount { get; private set; }
-    public int MaxActionPoints { get; private set; }
-    public int MaxHealth { get; private set; }
-    public int GlobalAPCostReduction { get; private set; }
-    public int GlobalActionSpeedBonus { get; private set; }
-    public float CriticalHitChance { get; private set; }
+    private Santa.Core.Upgrades.UpgradeStatsContainer _stats = new Santa.Core.Upgrades.UpgradeStatsContainer();
+
+    // Player Stats - Delegated to container
+    public int DirectAttackDamage => _stats.DirectAttackDamage;
+    public int AreaAttackDamage => _stats.AreaAttackDamage;
+    public int SpecialAttackDamage => _stats.SpecialAttackDamage;
+    public float SpecialAttackMissChance => _stats.SpecialAttackMissChance;
+    public int APRecoveryAmount => _stats.APRecoveryAmount;
+    public int MaxActionPoints => _stats.MaxActionPoints;
+    public int MaxHealth => _stats.MaxHealth;
+    public int GlobalAPCostReduction => _stats.GlobalAPCostReduction;
+    public int GlobalActionSpeedBonus => _stats.GlobalActionSpeedBonus;
+    public float CriticalHitChance => _stats.CriticalHitChance;
 
     private void Awake()
     {
         // Initialize stats from config
-        if (baseStatsConfig != null)
-        {
-            DirectAttackDamage = baseStatsConfig.DirectAttackDamage;
-            AreaAttackDamage = baseStatsConfig.AreaAttackDamage;
-            SpecialAttackDamage = baseStatsConfig.SpecialAttackDamage;
-            SpecialAttackMissChance = baseStatsConfig.SpecialAttackMissChance;
-            APRecoveryAmount = baseStatsConfig.APRecoveryAmount;
-            MaxActionPoints = baseStatsConfig.MaxActionPoints;
-            MaxHealth = baseStatsConfig.MaxHealth;
-            GlobalAPCostReduction = baseStatsConfig.GlobalAPCostReduction;
-            GlobalActionSpeedBonus = baseStatsConfig.GlobalActionSpeedBonus;
-            CriticalHitChance = baseStatsConfig.BaseCriticalHitChance;
-        }
-        else
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError(Santa.Core.Config.LogMessages.Upgrades.ConfigNotAssigned);
-#endif
-            // Fallback to constants from GameConstants.PlayerStats
-            DirectAttackDamage = GameConstants.PlayerStats.DefaultDirectAttackDamage;
-            AreaAttackDamage = GameConstants.PlayerStats.DefaultAreaAttackDamage;
-            SpecialAttackDamage = GameConstants.PlayerStats.DefaultSpecialAttackDamage;
-            SpecialAttackMissChance = GameConstants.PlayerStats.DefaultSpecialAttackMissChance;
-            APRecoveryAmount = GameConstants.PlayerStats.DefaultAPRecoveryAmount;
-            MaxActionPoints = GameConstants.PlayerStats.DefaultMaxActionPoints;
-            MaxHealth = GameConstants.PlayerStats.DefaultMaxHealth;
-            GlobalAPCostReduction = GameConstants.PlayerStats.DefaultGlobalAPCostReduction;
-            GlobalActionSpeedBonus = GameConstants.PlayerStats.DefaultGlobalActionSpeedBonus;
-            CriticalHitChance = GameConstants.PlayerStats.DefaultBaseCriticalHitChance;
-        }
+        _stats.InitializeFromConfig(baseStatsConfig);
     }
 
     [Inject]
@@ -89,7 +60,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (allPossibleUpgrades == null || allPossibleUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning(Santa.Core.Config.LogMessages.Upgrades.NotEnoughUpgrades);
+            GameLog.LogWarning("Not enough upgrades defined in UpgradeManager to offer a choice.");
 #endif
             return;
         }
@@ -105,7 +76,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (availableUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning(string.Format(Santa.Core.Config.LogMessages.Upgrades.NotEnoughUniqueUpgrades, availableUpgrades.Count));
+            GameLog.LogWarning($"Not enough unique upgrades to offer a choice. Only {availableUpgrades.Count} available.");
 #endif
             // If there's at least one, we could offer it, but for now, we just end combat gracefully.
             _combatTransitionService?.EndCombat(true);
@@ -124,7 +95,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         AbilityUpgrade option2 = availableUpgrades[index2];
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.OfferingUpgrades, option1.UpgradeName, option2.UpgradeName));
+        GameLog.Log($"Offering upgrades: {option1.UpgradeName} vs {option2.UpgradeName}");
 #endif
         _upgradeUI.ShowUpgrades(option1, option2);
     }
@@ -134,10 +105,10 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         if (upgrade == null) return;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.ApplyingUpgrade, upgrade.UpgradeName));
+        GameLog.Log($"Applying upgrade: {upgrade.UpgradeName}");
 #endif
 
-        // Apply the strategy to THIS manager (which holds the stats)
+        // Apply the strategy to THIS manager (which delegates to container via IUpgradeTarget)
         upgrade.Strategy.Apply(this);
 
         // Track selection
@@ -150,6 +121,21 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         SaveStats();
     }
 
+    // --- IUpgradeTarget Implementation (Delegated to Container) ---
+
+    public void IncreaseDirectAttackDamage(int amount) => _stats.IncreaseDirectAttackDamage(amount);
+    public void IncreaseAreaAttackDamage(int amount) => _stats.IncreaseAreaAttackDamage(amount);
+    public void IncreaseSpecialAttackDamage(int amount) => _stats.IncreaseSpecialAttackDamage(amount);
+    public void ReduceSpecialAttackMissChance(float amount) => _stats.ReduceSpecialAttackMissChance(amount);
+    public void IncreaseAPRecoveryAmount(int amount) => _stats.IncreaseAPRecoveryAmount(amount);
+    public void IncreaseMaxActionPoints(int amount) => _stats.IncreaseMaxActionPoints(amount);
+    public void IncreaseMaxHealth(int amount) => _stats.IncreaseMaxHealth(amount);
+    public void IncreaseGlobalAPCostReduction(int amount) => _stats.IncreaseGlobalAPCostReduction(amount);
+    public void IncreaseGlobalActionSpeed(int amount) => _stats.IncreaseGlobalActionSpeed(amount);
+    public void IncreaseCriticalHitChance(float amount) => _stats.IncreaseCriticalHitChance(amount);
+
+    // --- Persistence (Mobile-friendly secure storage) ---
+
     private void SaveStats()
     {
         Santa.Core.Security.SecureStorage.SetString(Santa.Core.Config.GameKeys.LastUpgrade, _lastSelectedUpgrade);
@@ -161,7 +147,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         {
             _lastSelectedUpgrade = stored;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log(string.Format(Santa.Core.Config.LogMessages.Upgrades.LastUpgradeLoaded, _lastSelectedUpgrade));
+            GameLog.Log($"Last selected upgrade loaded: {_lastSelectedUpgrade}");
 #endif
         }
     }
@@ -172,89 +158,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         _lastSelectedUpgrade = null;
         Santa.Core.Security.SecureStorage.Delete(Santa.Core.Config.GameKeys.LastUpgrade);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log(Santa.Core.Config.LogMessages.Upgrades.ResetLastUpgrade);
-#endif
-    }
-
-    // --- IUpgradeTarget Implementation ---
-
-    public void IncreaseDirectAttackDamage(int amount)
-    {
-        DirectAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"DirectAttackDamage increased by {amount}. New Value: {DirectAttackDamage}");
-#endif
-    }
-
-    public void IncreaseAreaAttackDamage(int amount)
-    {
-        AreaAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"AreaAttackDamage increased by {amount}. New Value: {AreaAttackDamage}");
-#endif
-    }
-
-    public void IncreaseSpecialAttackDamage(int amount)
-    {
-        SpecialAttackDamage += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"SpecialAttackDamage increased by {amount}. New Value: {SpecialAttackDamage}");
-#endif
-    }
-
-    public void ReduceSpecialAttackMissChance(float amount)
-    {
-        SpecialAttackMissChance = Mathf.Max(0f, SpecialAttackMissChance - amount);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"SpecialAttackMissChance reduced by {amount}. New Value: {SpecialAttackMissChance}");
-#endif
-    }
-
-    public void IncreaseAPRecoveryAmount(int amount)
-    {
-        APRecoveryAmount += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"APRecoveryAmount increased by {amount}. New Value: {APRecoveryAmount}");
-#endif
-    }
-
-    public void IncreaseMaxActionPoints(int amount)
-    {
-        MaxActionPoints += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"MaxActionPoints increased by {amount}. New Value: {MaxActionPoints}");
-#endif
-    }
-
-    public void IncreaseMaxHealth(int amount)
-    {
-        MaxHealth += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"MaxHealth increased by {amount}. New Value: {MaxHealth}");
-#endif
-    }
-
-    public void IncreaseGlobalAPCostReduction(int amount)
-    {
-        GlobalAPCostReduction += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"GlobalAPCostReduction increased by {amount}. New Value: {GlobalAPCostReduction}");
-#endif
-    }
-
-    public void IncreaseGlobalActionSpeed(int amount)
-    {
-        GlobalActionSpeedBonus += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"GlobalActionSpeedBonus increased by {amount}. New Value: {GlobalActionSpeedBonus}");
-#endif
-    }
-
-    public void IncreaseCriticalHitChance(float amount)
-    {
-        CriticalHitChance += amount;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // GameLog.LogVerbose($"CriticalHitChance increased by {amount}. New Value: {CriticalHitChance}");
+        GameLog.Log("Reset last selected upgrade.");
 #endif
     }
 
@@ -262,58 +166,39 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     public void WriteTo(ref Santa.Core.Save.SaveData data)
     {
         data.lastUpgrade = _lastSelectedUpgrade;
-        data.acquiredUpgrades = _acquiredUpgrades.ToArray();
+        // Direct assignment to avoid ToArray allocation if list is already array-compatible
+        data.acquiredUpgrades = _acquiredUpgrades.Count > 0 ? _acquiredUpgrades.ToArray() : System.Array.Empty<string>();
     }
 
     public void ReadFrom(in Santa.Core.Save.SaveData data)
     {
         // Restore stats from base, then re-apply upgrades
-        RestoreBaseStats();
+        _stats.InitializeFromConfig(baseStatsConfig);
         _acquiredUpgrades.Clear();
 
         if (data.acquiredUpgrades != null && allPossibleUpgrades != null)
         {
             foreach (var name in data.acquiredUpgrades)
             {
-                var upgrade = allPossibleUpgrades.FirstOrDefault(u => u.UpgradeName == name);
+                // Manual search to avoid LINQ allocation (FirstOrDefault)
+                AbilityUpgrade upgrade = null;
+                for (int i = 0; i < allPossibleUpgrades.Count; i++)
+                {
+                    if (allPossibleUpgrades[i].UpgradeName == name)
+                    {
+                        upgrade = allPossibleUpgrades[i];
+                        break;
+                    }
+                }
+
                 if (upgrade != null)
                 {
+                    // Apply to THIS manager (which delegates to container)
                     upgrade.Strategy.Apply(this);
                     _acquiredUpgrades.Add(name);
                 }
             }
         }
         _lastSelectedUpgrade = data.lastUpgrade;
-    }
-
-    private void RestoreBaseStats()
-    {
-        if (baseStatsConfig != null)
-        {
-            DirectAttackDamage = baseStatsConfig.DirectAttackDamage;
-            AreaAttackDamage = baseStatsConfig.AreaAttackDamage;
-            SpecialAttackDamage = baseStatsConfig.SpecialAttackDamage;
-            SpecialAttackMissChance = baseStatsConfig.SpecialAttackMissChance;
-            APRecoveryAmount = baseStatsConfig.APRecoveryAmount;
-            MaxActionPoints = baseStatsConfig.MaxActionPoints;
-            MaxHealth = baseStatsConfig.MaxHealth;
-            GlobalAPCostReduction = baseStatsConfig.GlobalAPCostReduction;
-            GlobalActionSpeedBonus = baseStatsConfig.GlobalActionSpeedBonus;
-            CriticalHitChance = baseStatsConfig.BaseCriticalHitChance;
-        }
-        else
-        {
-            // Fallback to constants from GameConstants.PlayerStats
-            DirectAttackDamage = GameConstants.PlayerStats.DefaultDirectAttackDamage;
-            AreaAttackDamage = GameConstants.PlayerStats.DefaultAreaAttackDamage;
-            SpecialAttackDamage = GameConstants.PlayerStats.DefaultSpecialAttackDamage;
-            SpecialAttackMissChance = GameConstants.PlayerStats.DefaultSpecialAttackMissChance;
-            APRecoveryAmount = GameConstants.PlayerStats.DefaultAPRecoveryAmount;
-            MaxActionPoints = GameConstants.PlayerStats.DefaultMaxActionPoints;
-            MaxHealth = GameConstants.PlayerStats.DefaultMaxHealth;
-            GlobalAPCostReduction = GameConstants.PlayerStats.DefaultGlobalAPCostReduction;
-            GlobalActionSpeedBonus = GameConstants.PlayerStats.DefaultGlobalActionSpeedBonus;
-            CriticalHitChance = GameConstants.PlayerStats.DefaultBaseCriticalHitChance;
-        }
     }
 }

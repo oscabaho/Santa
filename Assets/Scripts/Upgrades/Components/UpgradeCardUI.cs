@@ -1,8 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using TMPro;
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Represents an individual upgrade card in the UI.
@@ -22,11 +24,11 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] private Color hoverColor = new Color(0.3f, 0.3f, 0.3f);
     [SerializeField] private float hoverScale = 1.05f;
     [SerializeField] private float animationDuration = 0.2f;
-    
+
     private AbilityUpgrade _currentUpgrade;
     private Image _cardBackground;
     private Vector3 _originalScale;
-    private Coroutine _scaleCoroutine;
+    private CancellationTokenSource _scaleCTS;
 
     public event Action<AbilityUpgrade> OnUpgradeSelected;
 
@@ -34,7 +36,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         _cardBackground = GetComponent<Image>();
         _originalScale = transform.localScale;
-        
+
         if (selectButton != null)
         {
             selectButton.onClick.AddListener(OnSelectButtonClicked);
@@ -102,10 +104,9 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             _cardBackground.color = hoverColor;
 
         // Scale animation on hover
-        if (_scaleCoroutine != null)
-            StopCoroutine(_scaleCoroutine);
-        
-        _scaleCoroutine = StartCoroutine(AnimateScale(_originalScale * hoverScale));
+        _scaleCTS?.Cancel();
+        _scaleCTS = new CancellationTokenSource();
+        AnimateScale(_originalScale * hoverScale, _scaleCTS.Token).Forget();
     }
 
     // IPointerExitHandler implementation
@@ -115,30 +116,31 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             _cardBackground.color = normalColor;
 
         // Return to original scale
-        if (_scaleCoroutine != null)
-            StopCoroutine(_scaleCoroutine);
-        
-        _scaleCoroutine = StartCoroutine(AnimateScale(_originalScale));
+        _scaleCTS?.Cancel();
+        _scaleCTS = new CancellationTokenSource();
+        AnimateScale(_originalScale, _scaleCTS.Token).Forget();
     }
 
     /// <summary>
     /// Smoothly animates scale change.
     /// </summary>
-    private System.Collections.IEnumerator AnimateScale(Vector3 targetScale)
+    private async UniTaskVoid AnimateScale(Vector3 targetScale, CancellationToken token)
     {
         Vector3 startScale = transform.localScale;
         float elapsed = 0f;
 
         while (elapsed < animationDuration)
         {
+            if (token.IsCancellationRequested) return;
+
             elapsed += Time.unscaledDeltaTime;
             float t = elapsed / animationDuration;
-            
+
             // Ease-out cubic for a smooth animation
             t = 1f - Mathf.Pow(1f - t, 3f);
-            
+
             transform.localScale = Vector3.Lerp(startScale, targetScale, t);
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
         transform.localScale = targetScale;
