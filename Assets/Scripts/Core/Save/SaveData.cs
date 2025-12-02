@@ -8,7 +8,14 @@ namespace Santa.Core.Save
     {
         // Scene and time
         public string sceneName;
-        public DateTime savedAtUtc;
+        public long savedAtUtcTicks; // DateTime stored as ticks for JsonUtility compatibility
+
+        // Helper property for easy DateTime access
+        public DateTime savedAtUtc
+        {
+            get => savedAtUtcTicks > 0 ? new DateTime(savedAtUtcTicks, DateTimeKind.Utc) : default;
+            set => savedAtUtcTicks = value.Ticks;
+        }
 
         // Player state
         public Vector3 playerPosition;
