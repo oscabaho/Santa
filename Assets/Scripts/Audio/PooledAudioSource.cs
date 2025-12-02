@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -12,7 +14,7 @@ using UnityEngine.Pool;
 public class PooledAudioSource : MonoBehaviour
 {
     private AudioSource _audioSource;
-    private Coroutine _returnToPoolCoroutine;
+    private CancellationTokenSource _playbackCTS;
 
     /// <summary>
     /// The native AudioSource component. Useful for advanced configurations (e.g., 3D).
@@ -51,12 +53,14 @@ public class PooledAudioSource : MonoBehaviour
         _audioSource.loop = forceLoop || audioData.loop;
         _audioSource.outputAudioMixerGroup = audioData.outputMixerGroup;
         _audioSource.spatialBlend = spatialBlend;
-        
+
         _audioSource.Play();
 
         if (!_audioSource.loop)
         {
-            _returnToPoolCoroutine = StartCoroutine(ReturnToPoolWhenFinished());
+            _playbackCTS?.Cancel();
+            _playbackCTS = new CancellationTokenSource();
+            ReturnToPoolWhenFinishedAsync(_playbackCTS.Token).Forget();
         }
 
         return true;
@@ -73,18 +77,27 @@ public class PooledAudioSource : MonoBehaviour
 
     private void ReturnToPool()
     {
-        if (_returnToPoolCoroutine != null)
+        if (_playbackCTS != null)
         {
-            StopCoroutine(_returnToPoolCoroutine);
-            _returnToPoolCoroutine = null;
+            _playbackCTS.Cancel();
+            _playbackCTS = null;
         }
-        
+
         Pool?.Release(this);
     }
 
-    private IEnumerator ReturnToPoolWhenFinished()
+    private async UniTaskVoid ReturnToPoolWhenFinishedAsync(CancellationToken token)
     {
-        yield return new WaitWhile(() => _audioSource.isPlaying);
-        ReturnToPool();
+        // Wait while playing, checking every frame (PlayerLoopTiming.Update)
+        // If cancelled (Stop called), this throws OperationCanceledException which is handled by UniTaskVoid (logs if not handled, but here it just stops)
+        // Actually UniTaskVoid.Forget() swallows exceptions usually, but cancellation is fine.
+        // To be safe against cancellation throwing, we can try/catch or use SuppressCancellationThrow
+
+        bool canceled = await UniTask.WaitWhile(() => _audioSource != null && _audioSource.isPlaying, PlayerLoopTiming.Update, token).SuppressCancellationThrow();
+
+        if (!canceled)
+        {
+            ReturnToPool();
+        }
     }
 }

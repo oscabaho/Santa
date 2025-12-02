@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
 
@@ -25,7 +25,7 @@ public class CombatEncounterManager : MonoBehaviour, ICombatEncounterManager
         _combatService = combatService;
     }
 
-    public async Task<bool> StartEncounterAsync(CombatEncounter encounter)
+    public async UniTask<bool> StartEncounterAsync(CombatEncounter encounter)
     {
         if (encounter == null)
         {
@@ -70,7 +70,7 @@ public class CombatEncounterManager : MonoBehaviour, ICombatEncounterManager
             }
 
             // 3. Start Combat Services
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new UniTaskCompletionSource<bool>();
 
             void OnCombatEnded(bool playerWon)
             {

@@ -9,18 +9,15 @@ namespace Santa.Core.Save
     public class SaveService : MonoBehaviour, ISaveService
     {
         private const string SaveKey = "GameSave";
+        private const string ManifestKey = "GameSave_Manifest";
+        private const string BackupKeyPrefix = "GameSave_Backup_";
+        private const int MaxBackups = 5;
 
         private ICombatService _combatService;
-<<<<<<< Updated upstream
-
-        [Inject]
-        public void Construct(ICombatService combatService)
-        {
-            _combatService = combatService;
-=======
         private ISaveContributorRegistry _registry;
         private ISecureStorageService _secureStorage;
         private Santa.Core.Player.IPlayerReference _playerRef;
+        private float _lastSaveTime;
 
         [Inject]
         public void Construct(ICombatService combatService, ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, Santa.Core.Player.IPlayerReference playerRef = null)
@@ -29,7 +26,6 @@ namespace Santa.Core.Save
             _secureStorage = secureStorage;
             _registry = registry;
             _playerRef = playerRef;
->>>>>>> Stashed changes
         }
 
         public bool CanSaveNow()
@@ -69,10 +65,6 @@ namespace Santa.Core.Save
 
             // Allow scene components to contribute data
             WriteContributors(ref data);
-<<<<<<< Updated upstream
-            SecureStorageJson.Set(SaveKey, data);
-            Debug.Log("SaveService: Game saved.");
-=======
 
             // Validate before saving
             if (!data.Validate())
@@ -89,15 +81,10 @@ namespace Santa.Core.Save
             _lastSaveTime = Time.time;
 
             GameLog.Log("SaveService: Game saved.");
->>>>>>> Stashed changes
         }
 
         public bool TryLoad(out SaveData data)
         {
-<<<<<<< Updated upstream
-            var ok = SecureStorageJson.TryGet(SaveKey, out data);
-            if (!ok) return false;
-=======
             // Try main save first
             var ok = _secureStorage.TryLoad(SaveKey, out data);
 
@@ -125,7 +112,6 @@ namespace Santa.Core.Save
                 data = default;
                 return false;
             }
->>>>>>> Stashed changes
 
             // Restore player position
             var playerGo = GetPlayerObject();
@@ -141,14 +127,9 @@ namespace Santa.Core.Save
 
         public void Delete()
         {
-<<<<<<< Updated upstream
-            SecureStorageJson.Delete(SaveKey);
-            Debug.Log("SaveService: Save deleted.");
-=======
             _secureStorage.Delete(SaveKey);
             DeleteAllBackups();
             GameLog.Log("SaveService: Save and all backups deleted.");
->>>>>>> Stashed changes
         }
 
         public bool TryGetLastSaveTimeUtc(out DateTime utc)
@@ -222,12 +203,8 @@ namespace Santa.Core.Save
                 }
             }
         }
-<<<<<<< Updated upstream
-=======
 
         #region Backup System
-
-        private const string ManifestKey = "GameSave_Manifest";
 
         private SaveManifest LoadManifest()
         {
@@ -341,6 +318,5 @@ namespace Santa.Core.Save
         }
 
         #endregion
->>>>>>> Stashed changes
     }
 }

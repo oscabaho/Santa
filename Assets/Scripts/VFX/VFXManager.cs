@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Pool;
 using VContainer;
@@ -139,12 +140,12 @@ public class VFXManager : MonoBehaviour, IVFXService
 
     public void PlayFadeAndDestroyEffect(GameObject targetObject, float duration)
     {
-        StartCoroutine(FadeRoutine(targetObject, duration));
+        FadeRoutineAsync(targetObject, duration).Forget();
     }
 
-    private IEnumerator FadeRoutine(GameObject targetObject, float duration)
+    private async UniTaskVoid FadeRoutineAsync(GameObject targetObject, float duration)
     {
-        yield return new WaitForSeconds(duration);
+        await UniTask.Delay(System.TimeSpan.FromSeconds(duration));
 
         if (targetObject != null)
         {

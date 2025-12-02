@@ -28,6 +28,45 @@ namespace Santa.Core.Save
 
         // Extensible key/value pairs for other systems
         public SerializableKV[] extras;
+
+        /// <summary>
+        /// Validates that this save data contains reasonable values.
+        /// Helps prevent loading corrupted or tampered save files.
+        /// </summary>
+        public bool Validate()
+        {
+            // Scene name should not be empty
+            if (string.IsNullOrEmpty(sceneName))
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("SaveData.Validate: Scene name is null or empty.");
+#endif
+                return false;
+            }
+
+            // Player position should be within reasonable bounds
+            // Assuming game world is within defined bounds
+            if (playerPosition.magnitude > GameConstants.PlayerStats.MaxPlayerPositionMagnitude)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SaveData.Validate: Player position out of bounds: {playerPosition}");
+#endif
+                return false;
+            }
+
+            // Timestamp should not be in the future
+            var savedTime = savedAtUtc;
+            if (savedTime > DateTime.UtcNow.AddMinutes(5))
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SaveData.Validate: Save timestamp is in the future: {savedTime}");
+#endif
+                return false;
+            }
+
+            // All checks passed
+            return true;
+        }
     }
 
     [Serializable]

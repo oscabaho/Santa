@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
 
@@ -31,8 +33,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     // --- Runtime State ---
     private GameObject _currentCombatSceneParent;
     private TransitionContext _currentContext;
-    private Coroutine _startSequenceRoutine;
-    private Coroutine _endSequenceRoutine;
+    private CancellationTokenSource _sequenceCTS;
 
     [Inject]
     public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null, Santa.Core.Player.IPlayerReference playerRef = null)
@@ -112,12 +113,13 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             return;
         }
 
-        if (_startSequenceRoutine != null)
+        if (_sequenceCTS != null)
         {
-            StopCoroutine(_startSequenceRoutine);
+            _sequenceCTS.Cancel();
         }
+        _sequenceCTS = new CancellationTokenSource();
 
-        _startSequenceRoutine = StartCoroutine(ExecuteStartSequence());
+        ExecuteStartSequence(_sequenceCTS.Token).Forget();
     }
 
     public void EndCombat(bool playerWon)
@@ -130,14 +132,15 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             return;
         }
 
-        if (_endSequenceRoutine != null)
+        if (_sequenceCTS != null)
         {
-            StopCoroutine(_endSequenceRoutine);
+            _sequenceCTS.Cancel();
         }
+        _sequenceCTS = new CancellationTokenSource();
 
         if (endCombatSequence != null)
         {
-            _endSequenceRoutine = StartCoroutine(ExecuteEndSequence(playerWon));
+            ExecuteEndSequence(playerWon, _sequenceCTS.Token).Forget();
         }
         else
         {
@@ -151,20 +154,21 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         }
     }
 
-    private IEnumerator ExecuteStartSequence()
+    private async UniTaskVoid ExecuteStartSequence(CancellationToken token)
     {
-        yield return startCombatSequence.Execute(_currentContext);
-        _startSequenceRoutine = null;
+        await startCombatSequence.Execute(_currentContext);
     }
 
-    private IEnumerator ExecuteEndSequence(bool playerWon)
+    private async UniTaskVoid ExecuteEndSequence(bool playerWon, CancellationToken token)
     {
         // Change game state FIRST, before visual transitions
         // This ensures that events (OnCombatEnded) fire before UI changes
         _gameStateService?.EndCombat(playerWon);
 
         // Now execute visual transitions (UI switch, camera transitions, etc.)
-        yield return endCombatSequence.Execute(_currentContext);
+        await endCombatSequence.Execute(_currentContext);
+
+        if (token.IsCancellationRequested) return;
 
         // Deactivate combat cameras explicitly AFTER the visual transition is complete.
         // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
@@ -180,7 +184,6 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         }
 
         CleanupContext();
-        _endSequenceRoutine = null;
     }
 
     private void RepositionPlayerOnDefeat()
@@ -200,5 +203,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     {
         _currentCombatSceneParent = null;
         _currentContext = null;
+        _sequenceCTS?.Cancel();
+        _sequenceCTS = null;
     }
 }

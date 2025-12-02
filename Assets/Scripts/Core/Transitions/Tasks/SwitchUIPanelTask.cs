@@ -1,6 +1,5 @@
-using System.Collections;
-using UnityEngine;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager.
@@ -11,18 +10,18 @@ public class SwitchUIPanelTask : TransitionTask
     [SerializeField]
     private string panelAddress;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
         if (string.IsNullOrEmpty(panelAddress))
         {
             GameLog.LogError("SwitchUIPanelTask: Panel Address is not valid.");
-            yield break;
+            return;
         }
 
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            yield return uiManager.SwitchToPanel(panelAddress).ToCoroutine();
+            await uiManager.SwitchToPanel(panelAddress);
         }
         else
         {

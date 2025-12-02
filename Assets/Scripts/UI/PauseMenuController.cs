@@ -10,6 +10,7 @@ namespace Santa.UI
     /// </summary>
     public class PauseMenuController : MonoBehaviour, Santa.Core.IPauseMenuService
     {
+        private VContainer.IObjectResolver _resolver;
         private IUIManager _uiManager;
         private ICombatService _combatService;
         private InputReader _input;
@@ -17,12 +18,22 @@ namespace Santa.UI
 
         public bool IsPaused { get; private set; }
 
+        // Lazy resolve UIManager to break circular dependency (UIManager injects IPauseMenuService)
+        private IUIManager UIManager => _uiManager ??= _resolver.Resolve<IUIManager>();
+
         [Inject]
-        public void Construct(IUIManager uiManager, InputReader inputReader, ICombatService combatService)
+        public void Construct(IObjectResolver resolver, ICombatService combatService, InputReader inputReader = null)
         {
-            _uiManager = uiManager;
+            _resolver = resolver;
             _input = inputReader;
             _combatService = combatService;
+            
+            if (_input == null)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("PauseMenuController: InputReader not assigned. Pause via Escape key will not work.");
+#endif
+            }
         }
 
         private void OnEnable()
@@ -64,9 +75,9 @@ namespace Santa.UI
             IsPaused = true;
             Time.timeScale = 0f;
                GameLog.Log($"PauseMenuController.ShowPauseMenu: Calling UIManager.ShowPanel({PauseMenuAddress})");
-            await _uiManager.ShowPanel(PauseMenuAddress);
+            await UIManager.ShowPanel(PauseMenuAddress);
                 // Hide exploration HUD while paused (VirtualGamepad)
-                _uiManager.HidePanel("VirtualGamepad");
+                UIManager.HidePanel("VirtualGamepad");
                GameLog.Log("PauseMenuController.ShowPauseMenu: FINISHED");
         }
 
@@ -78,9 +89,9 @@ namespace Santa.UI
             Time.timeScale = 1f;
             
             // Hide the pause menu panel via UIManager (CanvasGroup-based)
-            _uiManager.HidePanel(PauseMenuAddress);
+            UIManager.HidePanel(PauseMenuAddress);
                 // Restore exploration HUD (VirtualGamepad)
-                _uiManager.ShowPanel("VirtualGamepad").Forget();
+                UIManager.ShowPanel("VirtualGamepad").Forget();
         }
 
         public async UniTask TogglePause()

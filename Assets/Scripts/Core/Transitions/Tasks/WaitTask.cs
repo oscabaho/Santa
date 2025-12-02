@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -10,8 +10,8 @@ public class WaitTask : TransitionTask
     [SerializeField]
     private float duration = 1f;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
-        yield return new WaitForSeconds(duration);
+        await UniTask.Delay((int)(duration * 1000));
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -12,7 +12,7 @@ public class SetGameObjectActiveTask : TransitionTask
     [SerializeField]
     private bool active;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override UniTask Execute(TransitionContext context)
     {
         GameObject target = context.GetTarget(targetId);
         if (target != null)
@@ -23,6 +23,7 @@ public class SetGameObjectActiveTask : TransitionTask
         {
             GameLog.LogWarning($"SetGameObjectActiveTask: Target '{targetId}' not found in context.");
         }
-        yield break;
+
+        return UniTask.CompletedTask;
     }
 }

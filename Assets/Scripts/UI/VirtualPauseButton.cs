@@ -1,13 +1,13 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
-using Cysharp.Threading.Tasks;
 
 namespace Santa.UI
 {
     /// <summary>
     /// Pause button inside the VirtualGamepad UI.
-    /// Calls IPauseMenuService to toggle pause state instead of directly manipulating panels.
+    /// Calls Santa.Core.IPauseMenuService to toggle pause state.
     /// Hook this to the Button's OnClick.
     /// </summary>
     public class VirtualPauseButton : MonoBehaviour
@@ -20,7 +20,7 @@ namespace Santa.UI
         [Inject]
         public void Construct(InputReader input, Santa.Core.IPauseMenuService pauseService = null)
         {
-               GameLog.Log($"VirtualPauseButton.Construct: pauseService = {(pauseService != null ? "INJECTED" : "NULL")}");
+            GameLog.Log($"VirtualPauseButton.Construct: pauseService = {(pauseService != null ? "INJECTED" : "NULL")}");
             _input = input;
             _pauseService = pauseService; // may be null if controller not in scene
         }

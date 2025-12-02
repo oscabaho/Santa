@@ -13,13 +13,18 @@ public static class GameConstants
         // Add scene names here if needed
     }
 
-    public static class Addressables
+    public static class Graphics
     {
         // PC default graphics settings
         public const int DefaultPCWidth = 1920;
         public const int DefaultPCHeight = 1080;
         public const int DefaultTargetFrameRate = 60;
         public const double DefaultMobileRefreshRate = 60d;
+    }
+
+    public static class Addressables
+    {
+        // Addressable keys
     }
 
     public static class CombatScene

@@ -44,7 +44,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         if (levels != null && levels.Count > 0)
         {
-            SetLevel(0);
+            SetLevel(0).Forget();
         }
         else
         {
@@ -103,7 +103,7 @@ public class LevelManager : MonoBehaviour, ILevelService
         int nextLevelIndex = currentLevelIndex + 1;
         if (levels != null && nextLevelIndex < levels.Count)
         {
-            SetLevel(nextLevelIndex);
+            SetLevel(nextLevelIndex).Forget();
         }
         else
         {

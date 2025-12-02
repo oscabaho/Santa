@@ -179,7 +179,8 @@ public class GameLifetimeScope : LifetimeScope
             GameLog.LogWarning("GameLifetimeScope: PauseMenuController not found. Pause functionality disabled.");
         }
 
-        TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
+        // Legacy binder removed; Pause is driven by IPauseMenuService + Addressables
+        // TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
         TryRegisterOptionalComponent<Santa.UI.VirtualPauseButton>(builder);
 
         // NOTE: CombatUI and UpgradeUI are instantiated dynamically via Addressables (see UIManager)

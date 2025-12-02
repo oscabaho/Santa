@@ -1,4 +1,4 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -17,18 +17,18 @@ public class SetComponentEnabledTask : TransitionTask
     [SerializeField]
     private bool enabled;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override UniTask Execute(TransitionContext context)
     {
         GameObject target = context.GetTarget(targetId);
         if (target == null)
         {
             GameLog.LogWarning($"SetComponentEnabledTask: Target '{targetId}' not found in context.");
-            yield break;
+            return UniTask.CompletedTask;
         }
 
         // Note: This is a simplified way to get a component by its string name.
         // For a more robust solution, you might use reflection or a custom component registry.
-        var component = target.GetComponent(componentType) as Behaviour; 
+        var component = target.GetComponent(componentType) as Behaviour;
         if (component != null)
         {
             component.enabled = enabled;
@@ -37,6 +37,7 @@ public class SetComponentEnabledTask : TransitionTask
         {
             GameLog.LogWarning($"SetComponentEnabledTask: Component '{componentType}' not found on target '{target.name}'.");
         }
-        yield break;
+
+        return UniTask.CompletedTask;
     }
 }

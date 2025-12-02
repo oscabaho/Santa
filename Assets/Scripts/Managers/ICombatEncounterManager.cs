@@ -1,5 +1,4 @@
-using System.Threading.Tasks;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Manages the lifecycle of a combat encounter, including pooling, initialization, and cleanup.
@@ -11,5 +10,5 @@ public interface ICombatEncounterManager
     /// </summary>
     /// <param name="encounter">The encounter configuration to start.</param>
     /// <returns>True if the player won, false otherwise.</returns>
-    Task<bool> StartEncounterAsync(CombatEncounter encounter);
+    UniTask<bool> StartEncounterAsync(CombatEncounter encounter);
 }

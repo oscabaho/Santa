@@ -1,7 +1,6 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager without hiding others.
@@ -12,12 +11,12 @@ public class ShowUIPanelTask : TransitionTask
     [SerializeField]
     private AssetReferenceGameObject panelReference;
 
-    public override IEnumerator Execute(TransitionContext context)
+    public override async UniTask Execute(TransitionContext context)
     {
         if (panelReference == null || !panelReference.RuntimeKeyIsValid())
         {
             GameLog.LogError("ShowUIPanelTask: Panel Reference is not valid.");
-            yield break;
+            return;
         }
 
         // The RuntimeKey is the addressable address string.
@@ -26,7 +25,7 @@ public class ShowUIPanelTask : TransitionTask
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            yield return uiManager.ShowPanel(panelAddress).ToCoroutine();
+            await uiManager.ShowPanel(panelAddress);
         }
         else
         {
