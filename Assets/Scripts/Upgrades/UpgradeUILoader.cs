@@ -1,3 +1,8 @@
+<<<<<<< Updated upstream
+=======
+using System.Threading;
+using Cysharp.Threading.Tasks;
+>>>>>>> Stashed changes
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -85,7 +90,7 @@ public class UpgradeUILoader : IUpgradeUI
     /// Preloads the upgrade UI in the background without showing it.
     /// Useful to call at the start of a combat level to avoid later delay.
     /// </summary>
-    public async Task PreloadAsync()
+    public async UniTask PreloadAsync()
     {
         // Do not overwrite current show cancellation; separate preload lifecycle
         if (_isLoaded)
@@ -118,16 +123,29 @@ public class UpgradeUILoader : IUpgradeUI
         }
     }
 
+    private UniTask _loadingTask;
+
     /// <summary>
     /// Loads the UpgradeUI prefab via Addressables.
     /// </summary>
-    private async Task LoadUpgradeUI()
+    private async UniTask LoadUpgradeUI()
     {
-        if (_isLoading || _isLoaded)
+        if (_isLoaded) return;
+
+        // If already loading, return the existing task
+        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
+        {
+            await _loadingTask;
             return;
+        }
 
         _isLoading = true;
+        _loadingTask = LoadInternal();
+        await _loadingTask;
+    }
 
+    private async UniTask LoadInternal()
+    {
         try
         {
             #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -136,7 +154,7 @@ public class UpgradeUILoader : IUpgradeUI
 
             // Load and instantiate via Addressables
             _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
-            await _loadHandle.Task;
+            await _loadHandle.ToUniTask();
 
             if (_loadHandle.Status == AsyncOperationStatus.Succeeded)
             {
@@ -188,17 +206,18 @@ public class UpgradeUILoader : IUpgradeUI
         finally
         {
             _isLoading = false;
+            _loadingTask = UniTask.CompletedTask;
         }
     }
 
     /// <summary>
     /// Waits for the in-progress load to finish.
     /// </summary>
-    private async Task WaitForLoad()
+    private async UniTask WaitForLoad()
     {
-        while (_isLoading)
+        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
         {
-            await Task.Yield();
+            await _loadingTask;
         }
     }
 

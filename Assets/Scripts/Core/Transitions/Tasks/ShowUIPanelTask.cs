@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager without hiding others.
@@ -25,11 +26,7 @@ public class ShowUIPanelTask : TransitionTask
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            var task = uiManager.ShowPanel(panelAddress);
-            if (task != null)
-            {
-                yield return new WaitUntil(() => task.IsCompleted);
-            }
+            yield return uiManager.ShowPanel(panelAddress).ToCoroutine();
         }
         else
         {

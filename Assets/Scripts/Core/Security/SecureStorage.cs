@@ -37,6 +37,15 @@ namespace Santa.Core.Security
                 value = Encoding.UTF8.GetString(plaintext);
                 return true;
             }
+            catch (CryptographicException e)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SecureStorage: Failed to decrypt '{key}': {e.Message}. Deleting corrupted entry.");
+#endif
+                // Corrupted or incompatible data; delete to self-heal
+                Delete(key);
+                return false;
+            }
             catch (Exception e)
             {
                 Debug.LogWarning($"SecureStorage: Failed to read '{key}': {e.Message}");

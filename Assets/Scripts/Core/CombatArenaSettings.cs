@@ -19,7 +19,22 @@ public class CombatArenaSettings : MonoBehaviour
 
     private void OnValidate()
     {
+<<<<<<< Updated upstream
         if (mainCombatCamera == null) Debug.LogWarning($"{name}: MainCombatCamera is not assigned.", this);
         if (targetSelectionCamera == null) Debug.LogWarning($"{name}: TargetSelectionCamera is not assigned.", this);
+=======
+        if (mainCombatCamera == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"{name}: MainCombatCamera is not assigned.", this);
+#endif
+        }
+        if (targetSelectionCamera == null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning($"{name}: TargetSelectionCamera is not assigned.", this);
+#endif
+        }
+>>>>>>> Stashed changes
     }
 }

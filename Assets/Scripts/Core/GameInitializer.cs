@@ -1,10 +1,15 @@
 using UnityEngine;
 using VContainer;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
+/// <summary>
+/// Initializes core game systems at startup.
+/// Shows initial UI (VirtualGamepad) as early as possible for input readiness.
+/// </summary>
 public class GameInitializer : MonoBehaviour
 {
     private const string InitialUIPanelAddress = Santa.Core.Addressables.AddressableKeys.UIPanels.VirtualGamepad;
-    private const string PauseMenuAddress = Santa.Core.Addressables.AddressableKeys.UIPanels.PauseMenu;
     private IUIManager _uiManager;
     private bool _shown;
 
@@ -25,23 +30,9 @@ public class GameInitializer : MonoBehaviour
             _ = _uiManager.ShowPanel(InitialUIPanelAddress);
             _shown = true;
         }
-        else
-        {
-#if UNITY_EDITOR
-            // Fallback (Editor only): attempt to find a UIManager in the scene if DI hasn't injected yet.
-            var fallback = Object.FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
-            if (fallback != null)
-            {
-                _uiManager = fallback;
-                _ = _uiManager.ShowPanel(InitialUIPanelAddress);
-                _shown = true;
-                GameLog.Log("GameInitializer: Fallback acquired UIManager from scene hierarchy (Editor only).");
-            }
-#endif
-        }
     }
 
-    void Start()
+    async void Start()
     {
         // Show the initial UI immediately to ensure input/UI is ready before gameplay interactions.
         if (!_shown && _uiManager != null)
@@ -51,17 +42,27 @@ public class GameInitializer : MonoBehaviour
         }
         else if (_uiManager == null)
         {
-            GameLog.LogError("GameInitializer: IUIManager service was not injected. Make sure it's registered in a LifetimeScope.");
-        }
-
-        // Optional: Preload Pause Menu ready for input-triggered opening
-        try
-        {
-            _ = _uiManager.PreloadPanel(PauseMenuAddress);
-        }
-        catch (System.Exception ex)
-        {
-            GameLog.LogWarning($"GameInitializer: Failed to preload PauseMenu. Check Addressables configuration. Error: {ex.Message}");
+            // Fallback: Instantiate VirtualGamepad directly via Addressables so exploration UI is available
+            try
+            {
+                AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(InitialUIPanelAddress);
+                var go = await handle.Task;
+                if (go != null)
+                {
+                    _shown = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log("GameInitializer: Loaded VirtualGamepad via Addressables fallback.");
+#endif
+                }
+                else
+                {
+                    GameLog.LogError("GameInitializer: Failed to load VirtualGamepad via Addressables fallback.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                GameLog.LogError($"GameInitializer: Addressables fallback failed for VirtualGamepad. Error: {ex.Message}");
+            }
         }
     }
 }

@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
+<<<<<<< Updated upstream
 using System.Linq;
+=======
+using UnityEngine;
+>>>>>>> Stashed changes
 
 // The EnemyBrain now needs an AbilityHolder to know what it can do.
 [RequireComponent(typeof(ActionPointComponentBehaviour))]

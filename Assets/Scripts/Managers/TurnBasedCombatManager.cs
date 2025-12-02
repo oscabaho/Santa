@@ -1,8 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -363,10 +362,10 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             _combatState.PendingActions,
             playerAction);
 
-        _ = ExecuteTurnAsync();
+        ExecuteTurnAsync().Forget();
     }
 
-    private async Task ExecuteTurnAsync()
+    private async UniTaskVoid ExecuteTurnAsync()
     {
         PrepareExecutionPhase();
 
@@ -416,10 +415,11 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         });
     }
 
-    private async Task<CombatResult> ProcessActionAsync(PendingAction action)
+    private async UniTask<CombatResult> ProcessActionAsync(PendingAction action)
     {
         _actionExecutor.Execute(action, _combatState.AllCombatants, _combatState.HealthComponents, _upgradeService);
 
+<<<<<<< Updated upstream
         // Wait for a moment to let players see the action
         // Using a loop with Task.Yield to respect Time.timeScale and avoid Task.Delay (which uses system time)
         float endTime = Time.time + _delayBetweenActions;
@@ -428,6 +428,10 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
             if (!Application.isPlaying) return CombatResult.Ongoing; // Safety check
             await Task.Yield();
         }
+=======
+        // Wait for visual feedback using UniTask (allocation-free)
+        await Santa.Core.Utils.AsyncUtils.Wait(_delayBetweenActions, this.GetCancellationTokenOnDestroy());
+>>>>>>> Stashed changes
 
         return _winConditionChecker.Check(_combatState);
     }

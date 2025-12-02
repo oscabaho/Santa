@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using VContainer;
 
@@ -24,22 +23,24 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     // Track all acquired upgrades for persistence
     private readonly List<string> _acquiredUpgrades = new List<string>();
 
-    // Player Stats - These will be modified by upgrades.
-    // Initialized from baseStatsConfig.
-    public int DirectAttackDamage { get; private set; }
-    public int AreaAttackDamage { get; private set; }
-    public int SpecialAttackDamage { get; private set; }
-    public float SpecialAttackMissChance { get; private set; }
-    public int APRecoveryAmount { get; private set; }
-    public int MaxActionPoints { get; private set; }
-    public int MaxHealth { get; private set; }
-    public int GlobalAPCostReduction { get; private set; }
-    public int GlobalActionSpeedBonus { get; private set; }
-    public float CriticalHitChance { get; private set; }
+    private Santa.Core.Upgrades.UpgradeStatsContainer _stats = new Santa.Core.Upgrades.UpgradeStatsContainer();
+
+    // Player Stats - Delegated to container
+    public int DirectAttackDamage => _stats.DirectAttackDamage;
+    public int AreaAttackDamage => _stats.AreaAttackDamage;
+    public int SpecialAttackDamage => _stats.SpecialAttackDamage;
+    public float SpecialAttackMissChance => _stats.SpecialAttackMissChance;
+    public int APRecoveryAmount => _stats.APRecoveryAmount;
+    public int MaxActionPoints => _stats.MaxActionPoints;
+    public int MaxHealth => _stats.MaxHealth;
+    public int GlobalAPCostReduction => _stats.GlobalAPCostReduction;
+    public int GlobalActionSpeedBonus => _stats.GlobalActionSpeedBonus;
+    public float CriticalHitChance => _stats.CriticalHitChance;
 
     private void Awake()
     {
         // Initialize stats from config
+<<<<<<< Updated upstream
         if (baseStatsConfig != null)
         {
             DirectAttackDamage = baseStatsConfig.DirectAttackDamage;
@@ -70,6 +71,9 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
             GlobalActionSpeedBonus = 0;
             CriticalHitChance = 0.1f;
         }
+=======
+        _stats.InitializeFromConfig(baseStatsConfig);
+>>>>>>> Stashed changes
     }
 
     [Inject]
@@ -137,7 +141,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         GameLog.Log($"Applying upgrade: {upgrade.UpgradeName}");
 #endif
 
-        // Apply the strategy to THIS manager (which holds the stats)
+        // Apply the strategy to THIS manager (which delegates to container via IUpgradeTarget)
         upgrade.Strategy.Apply(this);
 
         // Track selection
@@ -260,8 +264,39 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     #endif
         }
 
+<<<<<<< Updated upstream
         // --- Save/Load Contributions ---
         public void WriteTo(ref Santa.Core.Save.SaveData data)
+=======
+    // --- IUpgradeTarget Implementation (Delegated to Container) ---
+
+    public void IncreaseDirectAttackDamage(int amount) => _stats.IncreaseDirectAttackDamage(amount);
+    public void IncreaseAreaAttackDamage(int amount) => _stats.IncreaseAreaAttackDamage(amount);
+    public void IncreaseSpecialAttackDamage(int amount) => _stats.IncreaseSpecialAttackDamage(amount);
+    public void ReduceSpecialAttackMissChance(float amount) => _stats.ReduceSpecialAttackMissChance(amount);
+    public void IncreaseAPRecoveryAmount(int amount) => _stats.IncreaseAPRecoveryAmount(amount);
+    public void IncreaseMaxActionPoints(int amount) => _stats.IncreaseMaxActionPoints(amount);
+    public void IncreaseMaxHealth(int amount) => _stats.IncreaseMaxHealth(amount);
+    public void IncreaseGlobalAPCostReduction(int amount) => _stats.IncreaseGlobalAPCostReduction(amount);
+    public void IncreaseGlobalActionSpeed(int amount) => _stats.IncreaseGlobalActionSpeed(amount);
+    public void IncreaseCriticalHitChance(float amount) => _stats.IncreaseCriticalHitChance(amount);
+
+    // --- Save/Load Contributions ---
+    public void WriteTo(ref Santa.Core.Save.SaveData data)
+    {
+        data.lastUpgrade = _lastSelectedUpgrade;
+        // Direct assignment to avoid ToArray allocation if list is already array-compatible
+        data.acquiredUpgrades = _acquiredUpgrades.Count > 0 ? _acquiredUpgrades.ToArray() : System.Array.Empty<string>();
+    }
+
+    public void ReadFrom(in Santa.Core.Save.SaveData data)
+    {
+        // Restore stats from base, then re-apply upgrades
+        _stats.InitializeFromConfig(baseStatsConfig);
+        _acquiredUpgrades.Clear();
+
+        if (data.acquiredUpgrades != null && allPossibleUpgrades != null)
+>>>>>>> Stashed changes
         {
             data.lastUpgrade = _lastSelectedUpgrade;
             data.acquiredUpgrades = _acquiredUpgrades.ToArray();
@@ -275,6 +310,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
 
             if (data.acquiredUpgrades != null && allPossibleUpgrades != null)
             {
+<<<<<<< Updated upstream
                 foreach (var name in data.acquiredUpgrades)
                 {
                     var upgrade = allPossibleUpgrades.FirstOrDefault(u => u.UpgradeName == name);
@@ -283,10 +319,29 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
                         upgrade.Strategy.Apply(this);
                         _acquiredUpgrades.Add(name);
                     }
+=======
+                // Manual search to avoid LINQ allocation (FirstOrDefault)
+                AbilityUpgrade upgrade = null;
+                for (int i = 0; i < allPossibleUpgrades.Count; i++)
+                {
+                    if (allPossibleUpgrades[i].UpgradeName == name)
+                    {
+                        upgrade = allPossibleUpgrades[i];
+                        break;
+                    }
+                }
+                
+                if (upgrade != null)
+                {
+                    // Apply to THIS manager (which delegates to container)
+                    upgrade.Strategy.Apply(this);
+                    _acquiredUpgrades.Add(name);
+>>>>>>> Stashed changes
                 }
             }
             _lastSelectedUpgrade = data.lastUpgrade;
         }
+<<<<<<< Updated upstream
 
         private void RestoreBaseStats()
         {
@@ -317,4 +372,8 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
                 CriticalHitChance = 0.1f;
             }
         }
+=======
+        _lastSelectedUpgrade = data.lastUpgrade;
+    }
+>>>>>>> Stashed changes
 }

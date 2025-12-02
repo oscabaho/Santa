@@ -1,6 +1,8 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Santa.Core.Pooling;
+using Santa.Core.Player;
 
 public class GameLifetimeScope : LifetimeScope
 {
@@ -73,6 +75,16 @@ public class GameLifetimeScope : LifetimeScope
         // Registramos GameEventBus como Singleton
         builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
+        // Register SecureStorage (non-MonoBehaviour service)
+        builder.Register<Santa.Core.Security.SecureStorageService>(Lifetime.Singleton)
+            .As<Santa.Core.Security.ISecureStorageService>()
+            .AsSelf();
+
+        // Register SaveContributorRegistry as singleton
+        builder.Register<Santa.Core.Save.SaveContributorRegistry>(Lifetime.Singleton)
+            .As<Santa.Core.Save.ISaveContributorRegistry>()
+            .AsSelf();
+
         RegisterService<IGameStateService, GameStateManager>(builder, gameStateManagerInstance);
         RegisterService<IGameplayUIService, GameplayUIManager>(builder, gameplayUIManagerInstance);
         RegisterService<ILevelService, LevelManager>(builder, levelManagerInstance);
@@ -114,7 +126,26 @@ public class GameLifetimeScope : LifetimeScope
         // Preload frequently used panels like CombatUI at startup
         builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
 
-        // --- Save System ---
+        // --- Pooling Service ---
+        builder.Register<PoolService>(Lifetime.Singleton).As<IPoolService>();
+
+        // --- Player Reference ---
+        // Prefer component in hierarchy so designers can assign the player explicitly.
+        var playerRef = FindFirstObjectByType<PlayerReference>(FindObjectsInactive.Include);
+        if (playerRef != null)
+        {
+            builder.RegisterComponent(playerRef).As<IPlayerReference>().AsSelf();
+        }
+        else
+        {
+            // Create a scene GameObject with PlayerReference if missing
+            var go = new GameObject("[Auto] PlayerReference");
+            playerRef = go.AddComponent<PlayerReference>();
+            DontDestroyOnLoad(go);
+            builder.RegisterComponent(playerRef).As<IPlayerReference>().AsSelf();
+            GameLog.LogWarning("GameLifetimeScope: PlayerReference component not found. Created auto-discovery instance. Consider adding PlayerReference to the base scene for reliability.");
+        }
+
         // Register SaveService from hierarchy only if it exists (optional for test scenes)
         var saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>(FindObjectsInactive.Include);
         if (saveService != null)
@@ -130,7 +161,20 @@ public class GameLifetimeScope : LifetimeScope
         // These components are optional and will be registered only if found in the scene
         TryRegisterOptionalComponent<GameInitializer>(builder);
         TryRegisterOptionalComponent<PlayerInteraction>(builder);
-        TryRegisterOptionalComponent<Santa.UI.PauseMenuController>(builder);
+
+        // PauseMenuController as IPauseMenuService (required for exploration pause)
+        var pauseMenuController = FindFirstObjectByType<Santa.UI.PauseMenuController>(FindObjectsInactive.Include);
+           GameLog.Log($"GameLifetimeScope: Searching for PauseMenuController... Found: {pauseMenuController != null}");
+        if (pauseMenuController != null)
+        {
+               GameLog.Log($"GameLifetimeScope: Registering PauseMenuController '{pauseMenuController.gameObject.name}' as IPauseMenuService");
+            builder.RegisterComponent(pauseMenuController).As<Santa.Core.IPauseMenuService>().AsSelf();
+        }
+        else
+        {
+            GameLog.LogWarning("GameLifetimeScope: PauseMenuController not found. Pause functionality disabled.");
+        }
+
         TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
         TryRegisterOptionalComponent<Santa.UI.VirtualPauseButton>(builder);
 
@@ -147,6 +191,14 @@ public class GameLifetimeScope : LifetimeScope
         }
 
         TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
+
+        // Save-related optional components
+        var decorState = FindFirstObjectByType<Santa.Core.Save.EnvironmentDecorState>(FindObjectsInactive.Include);
+        if (decorState != null)
+        {
+            builder.RegisterComponent(decorState).AsSelf();
+        }
+        // If not found, LevelManager will use FindFirstObjectByType fallback
 
         GameLog.Log("GameLifetimeScope CONFIGURED!");
     }

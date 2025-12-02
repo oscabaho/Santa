@@ -19,7 +19,16 @@ namespace Santa.Core.Save
 
         public void WriteTo(ref SaveData data)
         {
-            data.environmentChangeIds = new List<string>(_appliedChangeIds).ToArray();
+            // Avoid List allocation: copy HashSet directly to array
+            if (_appliedChangeIds.Count == 0)
+            {
+                data.environmentChangeIds = System.Array.Empty<string>();
+            }
+            else
+            {
+                data.environmentChangeIds = new string[_appliedChangeIds.Count];
+                _appliedChangeIds.CopyTo(data.environmentChangeIds);
+            }
         }
 
         public void ReadFrom(in SaveData data)
