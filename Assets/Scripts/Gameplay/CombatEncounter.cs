@@ -62,4 +62,34 @@ public class CombatEncounter : MonoBehaviour, ICombatEncounter
         return combatSceneAddress;
     }
 
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (!string.IsNullOrEmpty(combatSceneAddress))
+        {
+            // Simple validation to check if the key looks like a valid arena key
+            // In a real scenario, we might check against the Addressables catalog, but that's async/complex in OnValidate.
+            // Here we just check if it matches one of our known constants for safety.
+
+            var fields = typeof(Santa.Core.Addressables.AddressableKeys.CombatArenas)
+                .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy);
+            
+            bool isKnown = false;
+            for (int i = 0; i < fields.Length; i++)
+            {
+                var f = fields[i];
+                if (f.IsLiteral && !f.IsInitOnly && (string)f.GetValue(null) == combatSceneAddress)
+                {
+                    isKnown = true;
+                    break;
+                }
+            }
+
+            if (!isKnown && !combatSceneAddress.StartsWith("CombatArena_"))
+            {
+                Debug.LogWarning($"CombatEncounter '{gameObject.name}': '{combatSceneAddress}' is not a known constant in AddressableKeys.CombatArenas and doesn't follow the 'CombatArena_' naming convention.");
+            }
+        }
+    }
+#endif
 }

@@ -1,4 +1,6 @@
 using UnityEngine;
+using Cysharp.Threading.Tasks;
+using Santa.UI;
 
 /// <summary>
 /// Base component for a UI Panel, using a CanvasGroup for efficient show/hide functionality.
@@ -51,13 +53,19 @@ public class UIPanel : MonoBehaviour
             return;
         }
 
-        CanvasGroup.alpha = 1f;
-        CanvasGroup.interactable = true;
-        CanvasGroup.blocksRaycasts = true;
-
-        gameObject.SetActive(true);
+                var animator = GetComponent<PauseMenuAnimator>();
+                if (animator != null)
+                {
+                        animator.FadeIn().Forget();
+                }
+                else
+                {
+                        CanvasGroup.alpha = 1f;
+                        CanvasGroup.interactable = true;
+                        CanvasGroup.blocksRaycasts = true;
+                }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"UIPanel.Show() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+        GameLog.Log($"UIPanel.Show() finished for {gameObject.name}.", gameObject);
 #endif
     }
 
@@ -84,12 +92,19 @@ public class UIPanel : MonoBehaviour
             return;
         }
 
-        CanvasGroup.alpha = 0f;
-        CanvasGroup.interactable = false;
-        CanvasGroup.blocksRaycasts = false;
-        gameObject.SetActive(false);
+                var animator = GetComponent<PauseMenuAnimator>();
+                if (animator != null)
+                {
+                        animator.FadeOut().Forget();
+                }
+                else
+                {
+                        CanvasGroup.alpha = 0f;
+                        CanvasGroup.interactable = false;
+                        CanvasGroup.blocksRaycasts = false;
+                }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}. Is active: {gameObject.activeSelf}", gameObject);
+        GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}.", gameObject);
 #endif
     }
 }

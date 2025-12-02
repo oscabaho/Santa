@@ -6,5 +6,6 @@ namespace Santa.Core.Save
         void Save();
         bool TryLoad(out SaveData data);
         void Delete();
+        bool TryGetLastSaveTimeUtc(out System.DateTime utc);
     }
 }

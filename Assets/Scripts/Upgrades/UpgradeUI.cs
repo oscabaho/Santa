@@ -27,16 +27,18 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
     private IUpgradeService _upgradeService;
     private ILevelService _levelService;
     private ICombatTransitionService _combatTransitionService;
+    private TurnBasedCombatManager _combatManager;
 
     // Track active fade coroutine to prevent StopAllCoroutines from canceling other coroutines
     private Coroutine _fadeCoroutine;
 
     [Inject]
-    public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService)
+    public void Construct(IUpgradeService upgradeService, ILevelService levelService, ICombatTransitionService combatTransitionService, TurnBasedCombatManager combatManager = null)
     {
         _upgradeService = upgradeService;
         _levelService = levelService;
         _combatTransitionService = combatTransitionService;
+        _combatManager = combatManager;
     }
 
     private void Awake()
@@ -229,7 +231,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
         // 5. Deactivate TurnBasedCombatManager now that upgrade is selected
         // This was previously happening too early in TurnBasedCombatManager.EndCombat()
-        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        var combatManager = _combatManager;
+        if (combatManager == null)
+        {
+            combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        }
         if (combatManager != null)
         {
             combatManager.gameObject.SetActive(false);
@@ -254,7 +260,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
         _combatTransitionService?.EndCombat(true);
 
         // Deactivate combat manager when closing without selection
-        var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        var combatManager = _combatManager;
+        if (combatManager == null)
+        {
+            combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+        }
         if (combatManager != null)
         {
             combatManager.gameObject.SetActive(false);

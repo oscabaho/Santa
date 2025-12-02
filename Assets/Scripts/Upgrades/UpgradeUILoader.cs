@@ -1,5 +1,7 @@
 using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -85,42 +87,71 @@ public class UpgradeUILoader : IUpgradeUI
     /// Preloads the upgrade UI in the background without showing it.
     /// Useful to call at the start of a combat level to avoid later delay.
     /// </summary>
-    public async Task PreloadAsync()
+    public async UniTask PreloadAsync()
     {
         // Do not overwrite current show cancellation; separate preload lifecycle
         if (_isLoaded)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
+#endif
             return;
         }
 
         if (_isLoading)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUILoader: Already loading, waiting...");
+#endif
             await WaitForLoad();
             return;
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
+#endif
         await LoadUpgradeUI();
 
         if (_isLoaded)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUILoader: Preload completed successfully.");
+#endif
         }
     }
+
+    private UniTask _loadingTask;
 
     /// <summary>
     /// Loads the UpgradeUI prefab via Addressables.
     /// </summary>
-    private async Task LoadUpgradeUI()
+    private async UniTask LoadUpgradeUI()
     {
-        if (_isLoading || _isLoaded)
+        if (_isLoaded) return;
+
+        // If already loading, return the existing task
+        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
+        {
+            await _loadingTask;
             return;
+        }
 
         _isLoading = true;
+        _loadingTask = LoadInternal();
+        await _loadingTask;
+    }
 
+    private async UniTask LoadInternal()
+    {
         try
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
+#endif
+
             // Load and instantiate via Addressables
             _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
-            await _loadHandle.Task;
+            await _loadHandle.ToUniTask();
 
             if (_loadHandle.Status == AsyncOperationStatus.Succeeded)
             {
@@ -143,6 +174,9 @@ public class UpgradeUILoader : IUpgradeUI
                     Object.DontDestroyOnLoad(instantiatedObject);
 
                     _isLoaded = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
+#endif
                 }
                 else
                 {
@@ -169,17 +203,18 @@ public class UpgradeUILoader : IUpgradeUI
         finally
         {
             _isLoading = false;
+            _loadingTask = UniTask.CompletedTask;
         }
     }
 
     /// <summary>
     /// Waits for the in-progress load to finish.
     /// </summary>
-    private async Task WaitForLoad()
+    private async UniTask WaitForLoad()
     {
-        while (_isLoading)
+        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
         {
-            await Task.Yield();
+            await _loadingTask;
         }
     }
 
@@ -196,6 +231,9 @@ public class UpgradeUILoader : IUpgradeUI
             Addressables.ReleaseInstance(_loadHandle.Result);
             _upgradeUIInstance = null;
             _isLoaded = false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUILoader: UpgradeUI resources released.");
+#endif
         }
     }
 }

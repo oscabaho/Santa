@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Interface for a UI Manager that can show, hide, and switch between UI panels.
@@ -9,7 +9,7 @@ public interface IUIManager
     /// Shows a specific panel without hiding others.
     /// </summary>
     /// <param name="panelAddress">The addressable address of the panel prefab to show.</param>
-    Task ShowPanel(string panelAddress);
+    UniTask ShowPanel(string panelAddress);
 
     /// <summary>
     /// Hides a specific panel.
@@ -21,11 +21,11 @@ public interface IUIManager
     /// Hides all other panels and shows the specified one.
     /// </summary>
     /// <param name="panelAddress">The addressable address of the panel prefab to switch to.</param>
-    Task SwitchToPanel(string panelAddress);
+    UniTask SwitchToPanel(string panelAddress);
 
     /// <summary>
     /// Preloads a panel instance into cache without showing it.
     /// </summary>
     /// <param name="panelAddress">The addressable address of the panel prefab to preload.</param>
-    Task PreloadPanel(string panelAddress);
+    UniTask PreloadPanel(string panelAddress);
 }

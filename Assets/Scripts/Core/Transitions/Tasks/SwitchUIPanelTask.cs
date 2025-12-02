@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager.
@@ -21,11 +22,7 @@ public class SwitchUIPanelTask : TransitionTask
         var uiManager = context.GetFromContext<IUIManager>("UIManager");
         if (uiManager != null)
         {
-            var task = uiManager.SwitchToPanel(panelAddress);
-            if (task != null)
-            {
-                yield return new WaitUntil(() => task.IsCompleted);
-            }
+            yield return uiManager.SwitchToPanel(panelAddress).ToCoroutine();
         }
         else
         {

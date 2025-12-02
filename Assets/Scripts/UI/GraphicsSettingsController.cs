@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 using System.Collections.Generic;
 using VContainer;
 
@@ -57,7 +56,14 @@ public class GraphicsSettingsController : MonoBehaviour
         if (qualityDropdown == null) return;
         
         qualityDropdown.ClearOptions();
-        qualityDropdown.AddOptions(QualitySettings.names.ToList());
+        // Avoid ToList allocation: AddOptions accepts List<string>
+        var names = QualitySettings.names;
+        var namesList = new List<string>(names.Length);
+        for (int i = 0; i < names.Length; i++)
+        {
+            namesList.Add(names[i]);
+        }
+        qualityDropdown.AddOptions(namesList);
         qualityDropdown.value = QualitySettings.GetQualityLevel();
         qualityDropdown.RefreshShownValue();
     }

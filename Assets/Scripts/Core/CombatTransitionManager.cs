@@ -26,6 +26,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     // --- Discovered References ---
     private GameObject _explorationCamera;
     private GameObject _explorationPlayer;
+    private Santa.Core.Player.IPlayerReference _playerRef;
 
     // --- Runtime State ---
     private GameObject _currentCombatSceneParent;
@@ -34,18 +35,24 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
     private Coroutine _endSequenceRoutine;
 
     [Inject]
-    public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null)
+    public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null, Santa.Core.Player.IPlayerReference playerRef = null)
     {
         _uiManager = uiManager;
         _gameStateService = gameStateService;
         _combatCameraManager = combatCameraManager; // May be null; will log on use.
+        _playerRef = playerRef;
     }
 
     private void Awake()
     {
         // Discover persistent exploration objects
-        var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
-        _explorationPlayer = playerIdentifier != null ? playerIdentifier.gameObject : null;
+        // Prefer injected player reference
+        _explorationPlayer = _playerRef != null ? _playerRef.Player : null;
+        if (_explorationPlayer == null)
+        {
+            var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
+            _explorationPlayer = playerIdentifier != null ? playerIdentifier.gameObject : null;
+        }
         _explorationCamera = Camera.main != null ? Camera.main.gameObject : null;
 
         if (_explorationPlayer == null)

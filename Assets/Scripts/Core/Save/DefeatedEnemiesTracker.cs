@@ -56,7 +56,16 @@ namespace Santa.Core.Save
 
         public void WriteTo(ref SaveData data)
         {
-            data.defeatedEnemyIds = new List<string>(_defeated).ToArray();
+            // Avoid List allocation: copy HashSet directly to array
+            if (_defeated.Count == 0)
+            {
+                data.defeatedEnemyIds = System.Array.Empty<string>();
+            }
+            else
+            {
+                data.defeatedEnemyIds = new string[_defeated.Count];
+                _defeated.CopyTo(data.defeatedEnemyIds);
+            }
         }
 
         public void ReadFrom(in SaveData data)

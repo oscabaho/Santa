@@ -13,7 +13,7 @@ public static class GameConstants
         // Add scene names here if needed
     }
 
-    public static class Graphics
+    public static class Addressables
     {
         // PC default graphics settings
         public const int DefaultPCWidth = 1920;
@@ -41,5 +41,8 @@ public static class GameConstants
         public const int DefaultGlobalAPCostReduction = 0;
         public const int DefaultGlobalActionSpeedBonus = 0;
         public const float DefaultBaseCriticalHitChance = 0.1f;
+
+        // Validation constants
+        public const float MaxPlayerPositionMagnitude = 10000f;
     }
 }
