@@ -54,8 +54,9 @@ public class UIEventSystemConfigurator : MonoBehaviour
         }
         else
         {
+            // Guard: continue without binding to avoid null errors; warn in editor/dev builds
             #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogWarning("UIEventSystemConfigurator: No actions asset assigned. Drag 'ActionMap.inputactions' into the component.", this);
+            GameLog.LogWarning("UIEventSystemConfigurator: 'actionsAsset' not assigned. UI will use default inputs if present; please assign your ActionMap.", this);
             #endif
         }
 

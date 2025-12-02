@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
+using Santa.Core.Addressables;
 
 public class UIManager : MonoBehaviour, IUIManager
 {
@@ -147,9 +148,21 @@ public class UIManager : MonoBehaviour, IUIManager
             return;
         }
 
-        // If not cached, load and instantiate it.
+        // If not cached, verify key exists, then load and instantiate it.
         try
         {
+            var locationsHandle = Addressables.LoadResourceLocationsAsync(panelAddress);
+            await locationsHandle.ToUniTask();
+            if (locationsHandle.Status != AsyncOperationStatus.Succeeded || locationsHandle.Result == null || locationsHandle.Result.Count == 0)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"UIManager: Addressables key '{panelAddress}' not found. Skipping load.");
+#endif
+                Addressables.Release(locationsHandle);
+                return;
+            }
+            Addressables.Release(locationsHandle);
+
             var parent = dynamicPanelsParent != null ? dynamicPanelsParent : transform;
             var handle = Addressables.InstantiateAsync(panelAddress, parent);
             await handle.ToUniTask();
@@ -199,6 +212,12 @@ public class UIManager : MonoBehaviour, IUIManager
 #endif
         }
     }
+
+    // Convenience helpers to avoid hardcoded keys
+    public UniTask ShowPauseMenu() => ShowPanel(AddressableKeys.UIPanels.PauseMenu);
+    public UniTask ShowCombatUI() => ShowPanel(AddressableKeys.UIPanels.CombatUI);
+    public UniTask PreloadPauseMenu() => PreloadPanel(AddressableKeys.UIPanels.PauseMenu);
+    public UniTask PreloadCombatUI() => PreloadPanel(AddressableKeys.UIPanels.CombatUI);
 
     public void HidePanel(string panelAddress)
     {
@@ -272,6 +291,18 @@ public class UIManager : MonoBehaviour, IUIManager
 
         try
         {
+            var locationsHandle = Addressables.LoadResourceLocationsAsync(panelAddress);
+            await locationsHandle.ToUniTask();
+            if (locationsHandle.Status != AsyncOperationStatus.Succeeded || locationsHandle.Result == null || locationsHandle.Result.Count == 0)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"UIManager: Addressables key '{panelAddress}' not found for preload. Skipping.");
+#endif
+                Addressables.Release(locationsHandle);
+                return;
+            }
+            Addressables.Release(locationsHandle);
+
             var parent = dynamicPanelsParent != null ? dynamicPanelsParent : transform;
             var handle = Addressables.InstantiateAsync(panelAddress, parent);
             await handle.ToUniTask();
