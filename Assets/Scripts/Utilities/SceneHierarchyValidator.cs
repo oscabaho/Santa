@@ -8,15 +8,15 @@ using UnityEngine.SceneManagement;
 public class SceneHierarchyValidator : MonoBehaviour
 {
     [Header("Expected Roots (Exact Names)")]
-    [SerializeField] private string managersRoot = "Managers";
-    [SerializeField] private string servicesRoot = "Services"; // optional
-    [SerializeField] private string uiRoot = "UI";
-    [SerializeField] private string camerasRoot = "Cameras";
-    [SerializeField] private string actorsRoot = "Actors";
-    [SerializeField] private string environmentRoot = "Environment";
-    [SerializeField] private string poolsRoot = "Pools";
-    [SerializeField] private string dynamicPanelsName = "DynamicPanels";
-    [SerializeField] private string combatCamerasName = "CombatCameras";
+    [SerializeField] private string managersRoot = GameConstants.Hierarchy.Managers;
+    [SerializeField] private string servicesRoot = GameConstants.Hierarchy.Services; // optional
+    [SerializeField] private string uiRoot = GameConstants.Hierarchy.UI;
+    [SerializeField] private string camerasRoot = GameConstants.Hierarchy.Cameras;
+    [SerializeField] private string actorsRoot = GameConstants.Hierarchy.Actors;
+    [SerializeField] private string environmentRoot = GameConstants.Hierarchy.Environment;
+    [SerializeField] private string poolsRoot = GameConstants.Hierarchy.Pools;
+    [SerializeField] private string dynamicPanelsName = GameConstants.Hierarchy.DynamicPanels;
+    [SerializeField] private string combatCamerasName = GameConstants.Hierarchy.CombatCameras;
 
     private void Start()
     {
