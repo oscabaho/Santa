@@ -7,6 +7,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "73a63b7f672b88f7e9992f6917eb458a8cbb6fa9"
+    },
     "com.unity.addressables": {
       "version": "2.7.6",
       "depth": 0,
@@ -24,7 +31,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.addressables.android": {
-      "version": "1.0.8",
+      "version": "1.0.9",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -62,7 +69,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.25",
+      "version": "1.8.26",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -235,6 +242,15 @@
       "dependencies": {
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.settings-manager": "2.0.1"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.postprocessing": {
+      "version": "3.5.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },

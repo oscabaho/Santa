@@ -1,8 +1,11 @@
-// This helper is editor-only to avoid shipping auto-combat in builds.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using UnityEngine;
 using System.Collections.Generic;
+using Santa.Core;
 using VContainer;
+
+namespace Santa.Editor
+{
 
 /// <summary>
 /// This script is for testing purposes only.
@@ -64,5 +67,6 @@ public class CombatTestInitiator : MonoBehaviour
         GameLog.Log("CombatTestInitiator is starting combat...");
         _combatService.StartCombat(participants);
     }
+}
 }
 #endif

@@ -1,7 +1,11 @@
+using Santa.Presentation.Upgrades;
 using UnityEngine;
 using VContainer;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+namespace Santa.Editor
+{
 
 /// <summary>
 /// Example showing how to release UpgradeUI resources when returning to the main menu.
@@ -29,5 +33,5 @@ public class ReleaseUpgradeUIOnMenuReturn : MonoBehaviour
         GameLog.Log("ReleaseUpgradeUIOnMenuReturn: Resources released.");
     }
 }
-
+}
 #endif
