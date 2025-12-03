@@ -10,13 +10,13 @@
   <Project Path="Unity.TerrainTools.Editor.csproj" />
   <Project Path="Unity.Addressables.Editor.csproj" />
   <Project Path="Unity.Collections.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.ProBuilder.Poly2Tri.csproj" />
   <Project Path="Unity.VisualScripting.Core.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.Editor.csproj" />
   <Project Path="Unity.Splines.csproj" />
   <Project Path="Unity.Burst.csproj" />
   <Project Path="Unity.VisualScripting.Flow.Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.ProBuilder.Csg.csproj" />
   <Project Path="Unity.Animation.Rigging.csproj" />
   <Project Path="VContainer.csproj" />
@@ -38,8 +38,8 @@
   <Project Path="Unity.Cinemachine.csproj" />
   <Project Path="Unity.Addressables.DocExampleCode.Editor.Tests.csproj" />
   <Project Path="Unity.Postprocessing.Editor.csproj" />
-  <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Polybrush.Editor.csproj" />
+  <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Splines.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.csproj" />
   <Project Path="Unity.Formats.Alembic.Runtime.csproj" />

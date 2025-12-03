@@ -1,61 +1,80 @@
-using UnityEngine;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Santa.UI
 {
     /// <summary>
-    /// Simple CanvasGroup-based fade animator for PauseMenu.
-    /// Attach to the PauseMenu root and assign CanvasGroup.
+    /// Handles fade in/out animations for the pause menu using a CanvasGroup.
     /// </summary>
+    [RequireComponent(typeof(CanvasGroup))]
     public class PauseMenuAnimator : MonoBehaviour
     {
-        [SerializeField] private CanvasGroup canvasGroup;
-        [SerializeField] private float fadeDuration = 0.2f;
+        [SerializeField] private float fadeDuration = 0.3f;
 
-        private void Reset()
+        private CanvasGroup _canvasGroup;
+
+        private void Awake()
         {
-            if (canvasGroup == null)
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
             {
-                canvasGroup = GetComponent<CanvasGroup>();
+                GameLog.LogError($"PauseMenuAnimator on {gameObject.name} requires a CanvasGroup component.", this);
             }
         }
 
+        /// <summary>
+        /// Fades in the pause menu.
+        /// </summary>
         public async UniTask FadeIn()
         {
-            if (canvasGroup == null)
+            if (_canvasGroup == null)
             {
-                return;
+                _canvasGroup = GetComponent<CanvasGroup>();
+                if (_canvasGroup == null) return;
             }
-            canvasGroup.blocksRaycasts = true;
-            canvasGroup.interactable = true;
-            float t = 0f;
-            float start = canvasGroup.alpha;
-            while (t < fadeDuration)
+
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = true;
+
+            float elapsed = 0f;
+            float startAlpha = _canvasGroup.alpha;
+
+            while (elapsed < fadeDuration)
             {
-                t += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Lerp(start, 1f, t / fadeDuration);
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                elapsed += Time.unscaledDeltaTime;
+                _canvasGroup.alpha = Mathf.Lerp(startAlpha, 1f, elapsed / fadeDuration);
+                await UniTask.Yield();
             }
-            canvasGroup.alpha = 1f;
+
+            _canvasGroup.alpha = 1f;
+            _canvasGroup.interactable = true;
         }
 
+        /// <summary>
+        /// Fades out the pause menu.
+        /// </summary>
         public async UniTask FadeOut()
         {
-            if (canvasGroup == null)
+            if (_canvasGroup == null)
             {
-                return;
+                _canvasGroup = GetComponent<CanvasGroup>();
+                if (_canvasGroup == null) return;
             }
-            canvasGroup.blocksRaycasts = false;
-            canvasGroup.interactable = false;
-            float t = 0f;
-            float start = canvasGroup.alpha;
-            while (t < fadeDuration)
+
+            _canvasGroup.interactable = false;
+
+            float elapsed = 0f;
+            float startAlpha = _canvasGroup.alpha;
+
+            while (elapsed < fadeDuration)
             {
-                t += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Lerp(start, 0f, t / fadeDuration);
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                elapsed += Time.unscaledDeltaTime;
+                _canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / fadeDuration);
+                await UniTask.Yield();
             }
-            canvasGroup.alpha = 0f;
+
+            _canvasGroup.alpha = 0f;
+            _canvasGroup.blocksRaycasts = false;
         }
     }
 }
