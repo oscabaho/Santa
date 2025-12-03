@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Domain.Combat;
+using Santa.Presentation.Combat;
 
-/// <summary>
-/// Interface for managing the state of combat, including participants, components, and synchronization.
-/// </summary>
-public interface ICombatStateManager
+namespace Santa.Core
+{
+    /// <summary>
+    /// Interface for managing the state of combat, including participants, components, and synchronization.
+    /// </summary>
+    public interface ICombatStateManager
 {
     /// <summary>
     /// The current combat state containing all participants and their components.
@@ -39,4 +43,5 @@ public interface ICombatStateManager
     /// </summary>
     /// <returns>Read-only list of EnemyTarget components</returns>
     IReadOnlyList<EnemyTarget> GetEnemyTargets();
+    }
 }

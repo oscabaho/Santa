@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
 
-[CreateAssetMenu(fileName = "New Gain AP Ability", menuName = "Santa/Abilities/Gain AP Ability")]
-public class GainAPAbility : Ability
+namespace Santa.Domain.Combat
+{
+    [CreateAssetMenu(fileName = "New Gain AP Ability", menuName = "Santa/Abilities/Gain AP Ability")]
+    public class GainAPAbility : Ability
 {
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
@@ -24,5 +27,6 @@ public class GainAPAbility : Ability
 #endif
             }
         }
+    }
     }
 }

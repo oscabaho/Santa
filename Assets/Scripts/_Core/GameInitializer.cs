@@ -2,6 +2,7 @@ using UnityEngine;
 using VContainer;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Santa.Core;
 
 /// <summary>
 /// Initializes core game systems at startup.
@@ -32,37 +33,45 @@ public class GameInitializer : MonoBehaviour
         }
     }
 
-    async void Start()
+    async Cysharp.Threading.Tasks.UniTaskVoid Start()
     {
-        // Show the initial UI immediately to ensure input/UI is ready before gameplay interactions.
-        if (!_shown && _uiManager != null)
+        try
         {
-            _ = _uiManager.ShowPanel(InitialUIPanelAddress);
-            _shown = true;
-        }
-        else if (_uiManager == null)
-        {
-            // Fallback: Instantiate VirtualGamepad directly via Addressables so exploration UI is available
-            try
+            // Show the initial UI immediately to ensure input/UI is ready before gameplay interactions.
+            if (!_shown && _uiManager != null)
             {
-                AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(InitialUIPanelAddress);
-                var go = await handle.Task;
-                if (go != null)
+                await _uiManager.ShowPanel(InitialUIPanelAddress);
+                _shown = true;
+            }
+            else if (_uiManager == null)
+            {
+                // Fallback: Instantiate VirtualGamepad directly via Addressables so exploration UI is available
+                try
                 {
-                    _shown = true;
+                    AsyncOperationHandle<GameObject> handle = Addressables.InstantiateAsync(InitialUIPanelAddress);
+                    var go = await handle.Task;
+                    if (go != null)
+                    {
+                        _shown = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log("GameInitializer: Loaded VirtualGamepad via Addressables fallback.");
+                        GameLog.Log("GameInitializer: Loaded VirtualGamepad via Addressables fallback.");
 #endif
+                    }
+                    else
+                    {
+                        GameLog.LogError("GameInitializer: Failed to load VirtualGamepad via Addressables fallback.");
+                    }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    GameLog.LogError("GameInitializer: Failed to load VirtualGamepad via Addressables fallback.");
+                    GameLog.LogError($"GameInitializer: Addressables fallback failed for VirtualGamepad. Error: {ex.Message}");
                 }
             }
-            catch (System.Exception ex)
-            {
-                GameLog.LogError($"GameInitializer: Addressables fallback failed for VirtualGamepad. Error: {ex.Message}");
-            }
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"GameInitializer.Start: Unhandled exception: {ex.Message}");
+            GameLog.LogException(ex);
         }
     }
 }

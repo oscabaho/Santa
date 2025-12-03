@@ -3,9 +3,14 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
+using Santa.Core;
+using Santa.Core.Transitions;
+using Santa.Infrastructure.Camera;
 
-/// <summary>
-/// Manages the visual transition between the exploration state and the combat state.
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Manages the visual transition between the exploration state and the combat state.
 /// This version is decoupled from scene references and discovers objects at runtime.
 /// </summary>
 public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
@@ -54,7 +59,7 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
             var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
             _explorationPlayer = playerIdentifier != null ? playerIdentifier.gameObject : null;
         }
-        _explorationCamera = Camera.main != null ? Camera.main.gameObject : null;
+        _explorationCamera = UnityEngine.Camera.main != null ? UnityEngine.Camera.main.gameObject : null;
 
         if (_explorationPlayer == null)
         {
@@ -156,34 +161,66 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
 
     private async UniTaskVoid ExecuteStartSequence(CancellationToken token)
     {
-        await startCombatSequence.Execute(_currentContext);
+        try
+        {
+            await startCombatSequence.Execute(_currentContext);
+        }
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("CombatTransitionManager: Start sequence cancelled.");
+#endif
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"CombatTransitionManager.ExecuteStartSequence: Exception: {ex.Message}");
+            GameLog.LogException(ex);
+        }
     }
 
     private async UniTaskVoid ExecuteEndSequence(bool playerWon, CancellationToken token)
     {
-        // Change game state FIRST, before visual transitions
-        // This ensures that events (OnCombatEnded) fire before UI changes
-        _gameStateService?.EndCombat(playerWon);
-
-        // Now execute visual transitions (UI switch, camera transitions, etc.)
-        await endCombatSequence.Execute(_currentContext);
-
-        if (token.IsCancellationRequested) return;
-
-        // Deactivate combat cameras explicitly AFTER the visual transition is complete.
-        // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
-        if (_combatCameraManager != null)
+        try
         {
-            _combatCameraManager.DeactivateCameras();
-        }
+            // Change game state FIRST, before visual transitions
+            // This ensures that events (OnCombatEnded) fire before UI changes
+            _gameStateService?.EndCombat(playerWon);
 
-        // Reposition player AFTER the camera transition is complete
-        if (!playerWon)
+            // Now execute visual transitions (UI switch, camera transitions, etc.)
+            await endCombatSequence.Execute(_currentContext);
+
+            if (token.IsCancellationRequested) return;
+
+            // Deactivate combat cameras explicitly AFTER the visual transition is complete.
+            // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
+            if (_combatCameraManager != null)
+            {
+                _combatCameraManager.DeactivateCameras();
+            }
+
+            // Reposition player AFTER the camera transition is complete
+            if (!playerWon)
+            {
+                RepositionPlayerOnDefeat();
+            }
+
+            CleanupContext();
+        }
+        catch (System.OperationCanceledException)
         {
-            RepositionPlayerOnDefeat();
+            // Expected during scene transitions
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("CombatTransitionManager: End sequence cancelled.");
+#endif
+            CleanupContext();
         }
-
-        CleanupContext();
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"CombatTransitionManager.ExecuteEndSequence: Exception: {ex.Message}");
+            GameLog.LogException(ex);
+            CleanupContext();
+        }
     }
 
     private void RepositionPlayerOnDefeat()
@@ -206,4 +243,5 @@ public class CombatTransitionManager : MonoBehaviour, ICombatTransitionService
         _sequenceCTS?.Cancel();
         _sequenceCTS = null;
     }
+}
 }

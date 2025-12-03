@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Santa.Core;
 using Santa.Core.Addressables;
+using Santa.Core.Config;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
+
+namespace Santa.Presentation.UI
+{
 
 public class UIManager : MonoBehaviour, IUIManager
 {
@@ -201,8 +206,8 @@ public class UIManager : MonoBehaviour, IUIManager
     }
 
     // Convenience helpers to avoid hardcoded keys
-    public UniTask LoadPauseMenuPanel() => ShowPanel(AddressableKeys.UIPanels.PauseMenu);
-    public UniTask LoadCombatUIPanel() => ShowPanel(AddressableKeys.UIPanels.CombatUI);
+    public UniTask ShowPauseMenuPanel() => ShowPanel(AddressableKeys.UIPanels.PauseMenu);
+    public UniTask ShowCombatUIPanel() => ShowPanel(AddressableKeys.UIPanels.CombatUI);
     public UniTask PreloadPauseMenu() => PreloadPanel(AddressableKeys.UIPanels.PauseMenu);
     public UniTask PreloadCombatUI() => PreloadPanel(AddressableKeys.UIPanels.CombatUI);
 
@@ -348,4 +353,5 @@ public class UIManager : MonoBehaviour, IUIManager
 #endif
         }
     }
+}
 }

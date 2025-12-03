@@ -1,9 +1,13 @@
 using UnityEngine;
 using VContainer;
+using Santa.Core;
+using Santa.Infrastructure.Input;
 
-// It is expected that this component is attached to the same GameObject as the Movement script.
-// It requires an InputReader to be assigned in the inspector.
-public class PlayerInteraction : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    // It is expected that this component is attached to the same GameObject as the Movement script.
+    // It requires an InputReader to be assigned in the inspector.
+    public class PlayerInteraction : MonoBehaviour
 {
     [Header("Dependencies")]
     [Tooltip("The InputReader ScriptableObject that provides player input events.")]
@@ -64,13 +68,13 @@ public class PlayerInteraction : MonoBehaviour
         if (_gameplayUIService != null && !_readyHooked)
         {
             _readyHooked = true;
-            _gameplayUIService.WhenReady(this, () =>
+            _gameplayUIService.Ready += () =>
             {
                 if (_desiredActionVisible.HasValue)
                 {
                     _gameplayUIService.ShowActionButton(_desiredActionVisible.Value);
                 }
-            });
+            };
         }
     }
 
@@ -116,7 +120,7 @@ public class PlayerInteraction : MonoBehaviour
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogVerbose($"PlayerInteraction: Starting combat interaction on trigger '{_currentCombatTrigger.name}'.", this);
 #endif
-            _currentCombatTrigger.StartCombatInteraction();
+            _currentCombatTrigger.StartCombatInteraction().Forget();
         }
         else
         {
@@ -162,4 +166,5 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
     }
+}
 }

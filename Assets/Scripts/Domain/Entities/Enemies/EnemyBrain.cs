@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
+using Santa.Domain.Combat;
 
-// The EnemyBrain now needs an AbilityHolder to know what it can do.
-[RequireComponent(typeof(ActionPointComponentBehaviour))]
-[RequireComponent(typeof(AbilityHolder))]
-public class EnemyBrain : MonoBehaviour, IBrain
+namespace Santa.Domain.Entities
 {
+    // The EnemyBrain now needs an AbilityHolder to know what it can do.
+    [RequireComponent(typeof(ActionPointComponentBehaviour))]
+    [RequireComponent(typeof(AbilityHolder))]
+    public class EnemyBrain : MonoBehaviour, IBrain
+    {
     private AbilityHolder _abilityHolder;
 
     private void Awake()
@@ -71,5 +75,6 @@ public class EnemyBrain : MonoBehaviour, IBrain
             // Return an empty action if no ability can be used.
             return new PendingAction();
         }
+    }
     }
 }

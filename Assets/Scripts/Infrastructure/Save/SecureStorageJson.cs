@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
-namespace Santa.Core.Security
+namespace Santa.Core.Save
 {
     /// <summary>
     /// Wrapper for save data with integrity validation

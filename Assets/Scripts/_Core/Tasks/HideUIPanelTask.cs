@@ -1,5 +1,10 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Transitions;
 using UnityEngine;
+
+namespace Santa.UI
+{
 
 /// <summary>
 /// A transition task that hides a specific UI panel via the UIManager.
@@ -30,4 +35,5 @@ public class HideUIPanelTask : TransitionTask
 
         return UniTask.CompletedTask;
     }
+}
 }

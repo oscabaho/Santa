@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core.Config;
 
-/// <summary>
-/// Represents a combat area, automatically detecting all combatants within it.
-/// This component should be on the root GameObject of a pre-staged combat scene.
-/// </summary>
-public class CombatArena : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Represents a combat area, automatically detecting all combatants within it.
+    /// This component should be on the root GameObject of a pre-staged combat scene.
+    /// </summary>
+    public class CombatArena : MonoBehaviour
 {
     private List<GameObject> _combatants;
 
@@ -92,4 +95,5 @@ public class CombatArena : MonoBehaviour
             }
         }
     }
+}
 }

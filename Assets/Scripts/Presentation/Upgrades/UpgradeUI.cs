@@ -1,9 +1,16 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Domain.Combat;
+using Santa.Infrastructure.Combat;
+using AbilityUpgrade = Santa.Domain.Combat.AbilityUpgrade;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
+
+namespace Santa.Presentation.Upgrades
+{
 
 /// <summary>
 /// Manages the UI screen for choosing an ability upgrade after winning a battle.
@@ -162,42 +169,75 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
 
     private async UniTaskVoid FadeIn(CancellationToken token)
     {
-        float elapsed = 0f;
-        canvasGroup.interactable = false; // Disable during animation
-
-        while (elapsed < fadeInDuration)
+        try
         {
-            if (token.IsCancellationRequested) return;
+            float elapsed = 0f;
+            canvasGroup.interactable = false; // Disable during animation
 
-            elapsed += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
-            await UniTask.Yield(PlayerLoopTiming.Update);
+            while (elapsed < fadeInDuration)
+            {
+                if (token.IsCancellationRequested) return;
+
+                elapsed += Time.deltaTime;
+                canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
+                await UniTask.Yield(PlayerLoopTiming.Update);
+            }
+
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
         }
-
-        canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeUI.FadeIn: Exception: {ex.Message}");
+            GameLog.LogException(ex);
+            // Ensure UI is in a valid state
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
     }
 
     private async UniTaskVoid FadeOut(CancellationToken token)
     {
-        float elapsed = 0f;
-        canvasGroup.interactable = false;
-
-        while (elapsed < fadeInDuration)
+        try
         {
-            if (token.IsCancellationRequested) return;
+            float elapsed = 0f;
+            canvasGroup.interactable = false;
 
-            elapsed += Time.deltaTime;
-            canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeInDuration));
-            await UniTask.Yield(PlayerLoopTiming.Update);
+            while (elapsed < fadeInDuration)
+            {
+                if (token.IsCancellationRequested) return;
+
+                elapsed += Time.deltaTime;
+                canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeInDuration));
+                await UniTask.Yield(PlayerLoopTiming.Update);
+            }
+
+            canvasGroup.alpha = 0f;
+            canvasGroup.blocksRaycasts = false;
+
+            if (upgradePanel != null)
+                upgradePanel.SetActive(false);
         }
-
-        canvasGroup.alpha = 0f;
-        canvasGroup.blocksRaycasts = false;
-
-        if (upgradePanel != null)
-            upgradePanel.SetActive(false);
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeUI.FadeOut: Exception: {ex.Message}");
+            GameLog.LogException(ex);
+            // Ensure UI is hidden
+            canvasGroup.alpha = 0f;
+            canvasGroup.blocksRaycasts = false;
+            if (upgradePanel != null)
+                upgradePanel.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -270,4 +310,5 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             combatManager.gameObject.SetActive(false);
         }
     }
+}
 }

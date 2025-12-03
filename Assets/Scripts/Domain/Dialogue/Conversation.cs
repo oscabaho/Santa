@@ -1,4 +1,9 @@
+using Santa.Core;
+using Santa.Core.Config;
 using UnityEngine;
+
+namespace Santa.Domain.Dialogue
+{
 
 /// <summary>
 /// Component added to NPCs or objects that can start a conversation.
@@ -45,4 +50,5 @@ public class Conversation : MonoBehaviour, IInteractable
             dialogueUI.StartDialogue();
         }
     }
+}
 }

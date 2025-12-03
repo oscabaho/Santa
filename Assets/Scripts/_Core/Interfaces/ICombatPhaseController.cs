@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Interface for controlling combat phases, managing turn flow, and enemy target states.
-/// </summary>
-public interface ICombatPhaseController
+namespace Santa.Core
+{
+    /// <summary>
+    /// Interface for controlling combat phases, managing turn flow, and enemy target states.
+    /// </summary>
+    public interface ICombatPhaseController
 {
     /// <summary>
     /// The current phase of combat.
@@ -63,4 +65,5 @@ public interface ICombatPhaseController
     /// </summary>
     /// <param name="active">True to enable, false to disable</param>
     void SetEnemyTargetsActive(bool active);
+    }
 }

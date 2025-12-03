@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
 
-/// <summary>
-/// Base class for all abilities, implemented as a ScriptableObject.
-/// This allows creating abilities as data assets in the editor.
-/// </summary>
-public abstract class Ability : ScriptableObject
+namespace Santa.Domain.Combat
+{
+    /// <summary>
+    /// Base class for all abilities, implemented as a ScriptableObject.
+    /// This allows creating abilities as data assets in the editor.
+    /// </summary>
+    public abstract class Ability : ScriptableObject
 {
     [Header("Info")]
     [SerializeField] private string _abilityName;
@@ -67,4 +70,5 @@ public abstract class Ability : ScriptableObject
         }
     }
 #endif
+}
 }

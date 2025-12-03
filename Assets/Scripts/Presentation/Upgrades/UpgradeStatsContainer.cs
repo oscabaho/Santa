@@ -1,6 +1,8 @@
+using Santa.Core.Config;
+using Santa.Domain.Upgrades;
 using UnityEngine;
 
-namespace Santa.Core.Upgrades
+namespace Santa.Presentation.Upgrades
 {
     /// <summary>
     /// Encapsulates player stats and their modification logic.

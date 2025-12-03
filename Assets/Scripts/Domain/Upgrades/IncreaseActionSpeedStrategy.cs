@@ -1,12 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IncreaseActionSpeedStrategy", menuName = "Santa/Upgrades/Strategies/Increase Action Speed")]
-public class IncreaseActionSpeedStrategy : UpgradeStrategySO
+namespace Santa.Domain.Upgrades
 {
-    public int SpeedBonus = 20;
-
-    public override void Apply(IUpgradeTarget target)
+    [CreateAssetMenu(fileName = "IncreaseActionSpeedStrategy", menuName = "Santa/Upgrades/Strategies/Increase Action Speed")]
+    public class IncreaseActionSpeedStrategy : UpgradeStrategySO
     {
-        target.IncreaseGlobalActionSpeed(SpeedBonus);
+        public int SpeedBonus = 20;
+
+        public override void Apply(IUpgradeTarget target)
+        {
+            target.IncreaseGlobalActionSpeed(SpeedBonus);
+        }
     }
 }

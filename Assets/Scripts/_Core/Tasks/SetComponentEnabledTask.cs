@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Santa.Core.Transitions;
 
 /// <summary>
 /// A transition task that enables or disables a target Component on a GameObject.

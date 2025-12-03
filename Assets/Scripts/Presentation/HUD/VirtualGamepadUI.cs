@@ -1,3 +1,5 @@
+using Santa.Core;
+using Santa.Infrastructure.Input;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -5,6 +7,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 #endif
 using VContainer;
+
+namespace Santa.Presentation.HUD
+{
 
 public class VirtualGamepadUI : MonoBehaviour
 {
@@ -175,4 +180,5 @@ public class VirtualGamepadUI : MonoBehaviour
 #endif
         inputReader.RaiseInteract();
     }
+}
 }

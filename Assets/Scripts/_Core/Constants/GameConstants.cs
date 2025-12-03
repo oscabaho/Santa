@@ -1,18 +1,23 @@
-public static class GameConstants
+namespace Santa.Core.Config
 {
-    public static class Tags
+    public static class GameConstants
     {
-        public const string Player = "Player";
-        public const string Enemy = "Enemy";
-        public const string MainCombatCamera = "MainCombatCamera";
-        public const string TargetSelectionCamera = "TargetSelectionCamera";
-    }
+        public static class Tags
+        {
+            public const string Player = "Player";
+            public const string Enemy = "Enemy";
+            public const string MainCombatCamera = "MainCombatCamera";
+            public const string TargetSelectionCamera = "TargetSelectionCamera";
+        }
 
     public static class Scenes
     {
         // Add scene names here if needed
     }
 
+    /// <summary>
+    /// Contains constants for scene hierarchy GameObject names.
+    /// </summary>
     public static class Hierarchy
     {
         public const string Managers = "Managers";
@@ -27,10 +32,13 @@ public static class GameConstants
         public const string StaticCanvas = "StaticCanvas";
     }
 
+    /// <summary>
+    /// Contains constants for PlayerPrefs key names.
+    /// </summary>
     public static class PlayerPrefsKeys
     {
         public const string MusicVolume = "MusicVolume";
-        public const string SfxVolume = "SFXVolume";
+        public const string SfxVolume = "SfxVolume";
     }
 
     public static class Graphics
@@ -69,5 +77,6 @@ public static class GameConstants
 
         // Validation constants
         public const float MaxPlayerPositionMagnitude = 10000f;
+    }
     }
 }

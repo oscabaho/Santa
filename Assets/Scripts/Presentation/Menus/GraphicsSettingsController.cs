@@ -1,7 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Santa.Core;
 using VContainer;
+
+namespace Santa.Presentation.Menus
+{
 
 public class GraphicsSettingsController : MonoBehaviour
 {
@@ -120,4 +124,5 @@ public class GraphicsSettingsController : MonoBehaviour
             fullscreenToggle.onValueChanged.AddListener(isFullscreen => graphicsService.SetFullscreen(isFullscreen));
         #endif
     }
+}
 }

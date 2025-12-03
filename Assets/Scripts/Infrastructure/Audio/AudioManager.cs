@@ -1,7 +1,13 @@
 using System.Collections.Generic;
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Domain.Combat;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Pool;
+
+namespace Santa.Infrastructure.Audio
+{
 
 /// <summary>
 /// Manages playback of all game sounds and music.
@@ -182,4 +188,5 @@ public class AudioManager : MonoBehaviour, IAudioService
         Destroy(pooledSource.gameObject);
     }
     #endregion
+}
 }

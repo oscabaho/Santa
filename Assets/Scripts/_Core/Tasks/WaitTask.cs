@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Santa.Core.Transitions;
 
 /// <summary>
 /// A transition task that simply waits for a specified duration.

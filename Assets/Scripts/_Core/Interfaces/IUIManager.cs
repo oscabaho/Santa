@@ -1,9 +1,11 @@
 using Cysharp.Threading.Tasks;
 
-/// <summary>
-/// Interface for a UI Manager that can show, hide, and switch between UI panels.
-/// </summary>
-public interface IUIManager
+namespace Santa.Core
+{
+    /// <summary>
+    /// Interface for a UI Manager that can show, hide, and switch between UI panels.
+    /// </summary>
+    public interface IUIManager
 {
     /// <summary>
     /// Shows a specific panel without hiding others.
@@ -28,4 +30,5 @@ public interface IUIManager
     /// </summary>
     /// <param name="panelAddress">The addressable address of the panel prefab to preload.</param>
     UniTask PreloadPanel(string panelAddress);
+    }
 }

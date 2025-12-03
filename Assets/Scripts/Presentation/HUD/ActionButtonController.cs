@@ -1,3 +1,5 @@
+using Santa.Core;
+using Santa.Infrastructure.Input;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -5,6 +7,9 @@ using VContainer;
 #if UNITY_EDITOR
 using UnityEngine.SceneManagement;
 #endif
+
+namespace Santa.Presentation.HUD
+{
 
 /// <summary>
 /// Dedicated controller for the on-screen Action Button.
@@ -184,4 +189,5 @@ public class ActionButtonController : MonoBehaviour
 #endif
         inputReader.RaiseInteract();
     }
+}
 }

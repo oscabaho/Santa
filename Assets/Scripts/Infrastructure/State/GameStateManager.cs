@@ -1,5 +1,9 @@
 using System;
+using Santa.Core;
 using UnityEngine;
+
+namespace Santa.Infrastructure.State
+{
 
 /// <summary>
 /// Manages the global state of the game (Exploration, Combat) using events to announce changes.
@@ -49,4 +53,5 @@ public class GameStateManager : MonoBehaviour, IGameStateService
         #endif
         OnCombatEnded?.Invoke(playerWon);
     }
+}
 }

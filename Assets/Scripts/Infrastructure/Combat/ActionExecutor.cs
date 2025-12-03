@@ -1,25 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Domain.Combat;
 
-/// <summary>
-/// Defines the contract for a service that executes a single combat action.
-/// </summary>
-public interface IActionExecutor
+namespace Santa.Infrastructure.Combat
 {
     /// <summary>
-    /// Executes a given pending action.
+    /// Handles the logic for executing a single combat action.
     /// </summary>
-    /// <param name="action">The action to execute.</param>
-    /// <param name="allCombatants">A read-only list of all combatants.</param>
-    /// <param name="healthCache">A cache of health components for performance.</param>
-    /// <param name="upgradeService">Service providing player stats from upgrades.</param>
-    void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache, IUpgradeService upgradeService);
-}
-
-/// <summary>
-/// Handles the logic for executing a single combat action.
-/// </summary>
-public class ActionExecutor : MonoBehaviour, IActionExecutor
+    public class ActionExecutor : MonoBehaviour, IActionExecutor
 {
     // Reusable list to avoid allocations during Execute
     private readonly List<GameObject> _targetList = new List<GameObject>(8);
@@ -183,5 +173,6 @@ public class ActionExecutor : MonoBehaviour, IActionExecutor
         }
 
         return highestHPEnemy;
+    }
     }
 }

@@ -1,6 +1,9 @@
-public enum AbilityType
+namespace Santa.Core
 {
-    DirectAttack,
-    AreaAttack,
-    SpecialAttack
+    public enum AbilityType
+    {
+        DirectAttack,
+        AreaAttack,
+        SpecialAttack
+    }
 }

@@ -1,10 +1,13 @@
 using UnityEngine;
 
-/// <summary>
-/// Interface for items that can be used from the inventory.
-/// </summary>
-public interface IUsableItem
+namespace Santa.Core
 {
-    bool IsConsumable { get; }
-    void Use(GameObject user);
+    /// <summary>
+    /// Interface for items that can be used from the inventory.
+    /// </summary>
+    public interface IUsableItem
+    {
+        bool IsConsumable { get; }
+        void Use(GameObject user);
+    }
 }

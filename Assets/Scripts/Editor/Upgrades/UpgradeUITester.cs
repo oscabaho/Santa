@@ -1,7 +1,12 @@
+using Santa.Core;
+using Santa.Domain.Combat;
 using UnityEngine;
 using VContainer;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+namespace Santa.Editor
+{
 
 /// <summary>
 /// Testing script to try the Upgrade UI without having to complete combats.
@@ -81,5 +86,5 @@ public class UpgradeUITester : MonoBehaviour
         }
     }
 }
-
+}
 #endif

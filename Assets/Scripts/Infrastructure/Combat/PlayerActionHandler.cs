@@ -1,11 +1,15 @@
 using System;
 using UnityEngine;
+using Santa.Core;
+using Santa.Domain.Combat;
 
-/// <summary>
-/// Handles player action submission, validation, targeting flow, and AP cost calculation.
-/// Extracted from TurnBasedCombatManager to follow Single Responsibility Principle.
-/// </summary>
-public class PlayerActionHandler : IPlayerActionHandler
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Handles player action submission, validation, targeting flow, and AP cost calculation.
+    /// Extracted from TurnBasedCombatManager to follow Single Responsibility Principle.
+    /// </summary>
+    public class PlayerActionHandler : IPlayerActionHandler
 {
     public event Action<Ability> OnTargetingStarted;
     public event Action OnTargetingCancelled;
@@ -186,4 +190,5 @@ public class PlayerActionHandler : IPlayerActionHandler
             OnTargetingCancelled?.Invoke();
         }
     }
+}
 }

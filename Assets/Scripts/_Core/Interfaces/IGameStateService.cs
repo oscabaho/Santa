@@ -1,7 +1,9 @@
 using System;
 
-public interface IGameStateService
+namespace Santa.Core
 {
+    public interface IGameStateService
+    {
 
     /// <summary>
     /// Gets the current state of the game.
@@ -28,4 +30,5 @@ public interface IGameStateService
     /// Event fired when combat ends. Parameter indicates if player won.
     /// </summary>
     event Action<bool> OnCombatEnded;
+    }
 }

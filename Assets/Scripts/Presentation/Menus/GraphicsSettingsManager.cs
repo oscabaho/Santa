@@ -1,4 +1,9 @@
+using Santa.Core;
+using Santa.Core.Config;
 using UnityEngine;
+
+namespace Santa.Presentation.Menus
+{
 
 /// <summary>
 /// Manages the game's graphics settings. Behaves differently based on the platform.
@@ -130,4 +135,5 @@ public class GraphicsSettingsManager : MonoBehaviour, IGraphicsSettingsService
     {
         QualitySettings.vSyncCount = isVsyncOn ? 1 : 0;
     }
+}
 }

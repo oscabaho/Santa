@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
+using Santa.Core.Config;
 
-/// <summary>
-/// Holds all the data for the current combat session.
-/// This class is responsible for managing the state of combatants, not the flow of combat.
-/// </summary>
-public class CombatState
+namespace Santa.Domain.Combat
+{
+    /// <summary>
+    /// Holds all the data for the current combat session.
+    /// This class is responsible for managing the state of combatants, not the flow of combat.
+    /// </summary>
+    public class CombatState
 {
     public IReadOnlyList<GameObject> AllCombatants => _combatants;
     public IReadOnlyList<GameObject> Enemies => _enemies;
@@ -69,4 +73,5 @@ public class CombatState
         _brains.Clear();
         PendingActions.Clear();
     }
+}
 }

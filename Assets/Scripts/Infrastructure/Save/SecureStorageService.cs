@@ -1,6 +1,6 @@
 using System;
 
-namespace Santa.Core.Security
+namespace Santa.Core.Save
 {
     /// <summary>
     /// Interface for secure storage operations, allowing for dependency injection and mocking.

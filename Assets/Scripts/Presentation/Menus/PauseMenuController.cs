@@ -1,4 +1,7 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Addressables;
+using Santa.Infrastructure.Input;
 using UnityEngine;
 using VContainer;
 
@@ -52,16 +55,24 @@ namespace Santa.UI
             }
         }
 
-        private async void OnPauseInput()
+        private void OnPauseInput()
         {
-            await TogglePause();
+            try
+            {
+                TogglePause().Forget();
+            }
+            catch (System.Exception ex)
+            {
+                GameLog.LogError($"PauseMenuController.OnPauseInput: Exception during toggle: {ex.Message}");
+                GameLog.LogException(ex);
+            }
         }
 
         public async UniTask ShowPauseMenu()
         {
             GameLog.Log("PauseMenuController.ShowPauseMenu: CALLED");
             // Don't allow pause during combat
-            if (global::TurnBasedCombatManager.CombatIsInitialized)
+            if (Santa.Infrastructure.Combat.TurnBasedCombatManager.CombatIsInitialized)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning("PauseMenuController.ShowPauseMenu: BLOCKED - Combat is active");

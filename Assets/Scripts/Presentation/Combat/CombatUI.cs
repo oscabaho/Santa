@@ -1,7 +1,14 @@
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Domain.Combat;
+using Santa.Presentation.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
+
+namespace Santa.Presentation.Combat
+{
 
 /// <summary>
 /// Orchestrates the combat UI, coordinating between stats display and action buttons.
@@ -330,4 +337,5 @@ public class CombatUI : UIPanel
             _combatService.CancelTargeting();
         }
     }
+}
 }

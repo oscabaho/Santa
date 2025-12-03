@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 
-namespace Santa.Core.Security
+namespace Santa.Core.Save
 {
     /// <summary>
     /// Provides obfuscated cryptographic salts to prevent easy extraction via decompilation.

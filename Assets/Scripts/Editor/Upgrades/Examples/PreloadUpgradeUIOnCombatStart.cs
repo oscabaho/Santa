@@ -1,7 +1,11 @@
+using Santa.Presentation.Upgrades;
 using UnityEngine;
 using VContainer;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+namespace Santa.Editor
+{
 
 /// <summary>
 /// Example of manually preloading the UpgradeUI at the start of a combat level.
@@ -29,5 +33,5 @@ public class PreloadUpgradeUIOnCombatStart : MonoBehaviour
         GameLog.Log("PreloadUpgradeUIOnCombatStart: Preload completed.");
     }
 }
-
+}
 #endif

@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using Santa.Core;
 
-/// <summary>
-/// Responsible for managing the flow of combat turns and phases.
-/// </summary>
-public class TurnScheduler
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Responsible for managing the flow of combat turns and phases.
+    /// </summary>
+    public class TurnScheduler
 {
     public event Action<CombatPhase> OnPhaseChanged;
     public event Action OnPlayerTurnStarted;
@@ -60,4 +63,5 @@ public class TurnScheduler
     {
         OnPlayerTurnEnded?.Invoke();
     }
+}
 }

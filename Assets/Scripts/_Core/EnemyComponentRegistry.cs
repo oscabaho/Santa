@@ -1,4 +1,5 @@
 using UnityEngine;
+using Santa.Core;
 
 /// <summary>
 /// Concrete implementation of the component registry for Enemies.

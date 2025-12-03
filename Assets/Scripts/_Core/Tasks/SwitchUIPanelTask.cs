@@ -1,5 +1,10 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Transitions;
 using UnityEngine;
+
+namespace Santa.UI
+{
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager.
@@ -28,4 +33,5 @@ public class SwitchUIPanelTask : TransitionTask
             GameLog.LogError("SwitchUIPanelTask: IUIManager not found in TransitionContext.");
         }
     }
+}
 }

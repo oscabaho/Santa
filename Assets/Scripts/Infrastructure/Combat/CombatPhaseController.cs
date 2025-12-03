@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
 
-/// <summary>
-/// Controls combat phases, manages turn flow, and handles enemy target activation.
-/// Delegates to TurnScheduler for phase timing and coordinates with CombatStateManager.
-/// </summary>
-public class CombatPhaseController : ICombatPhaseController
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Controls combat phases, manages turn flow, and handles enemy target activation.
+    /// Delegates to TurnScheduler for phase timing and coordinates with CombatStateManager.
+    /// </summary>
+    public class CombatPhaseController : ICombatPhaseController
 {
     public CombatPhase CurrentPhase => _turnScheduler.CurrentPhase;
 
@@ -110,4 +113,5 @@ public class CombatPhaseController : ICombatPhaseController
             }
         }
     }
+}
 }

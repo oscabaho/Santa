@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 
-namespace Santa.Core.Security
+namespace Santa.Core.Save
 {
     // Lightweight secure storage helper.
     // Mobile-first: uses AES encryption with a device-bound key and stores bytes under Application.persistentDataPath.

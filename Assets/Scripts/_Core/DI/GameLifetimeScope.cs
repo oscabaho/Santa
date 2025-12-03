@@ -1,8 +1,19 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Santa.Core;
 using Santa.Core.Pooling;
 using Santa.Core.Player;
+using Santa.Infrastructure.Input;
+using Santa.Infrastructure.Combat;
+using Santa.Infrastructure.State;
+using Santa.Infrastructure.Level;
+using Santa.Infrastructure.Camera;
+using Santa.Presentation.UI;
+using Santa.Presentation.Upgrades;
+using Santa.Presentation.HUD;
+using Santa.Presentation.Menus;
+using Santa.Domain.Upgrades;
 
 public class GameLifetimeScope : LifetimeScope
 {
@@ -80,8 +91,8 @@ public class GameLifetimeScope : LifetimeScope
         builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
 
         // Register SecureStorage (non-MonoBehaviour service)
-        builder.Register<Santa.Core.Security.SecureStorageService>(Lifetime.Singleton)
-            .As<Santa.Core.Security.ISecureStorageService>()
+        builder.Register<Santa.Core.Save.SecureStorageService>(Lifetime.Singleton)
+            .As<Santa.Core.Save.ISecureStorageService>()
             .AsSelf();
 
         // Register SaveContributorRegistry as singleton
@@ -151,7 +162,7 @@ public class GameLifetimeScope : LifetimeScope
         }
 
         // Register SaveService from hierarchy only if it exists (optional for test scenes)
-        var saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>(FindObjectsInactive.Include);
+        var saveService = FindFirstObjectByType<Santa.Infrastructure.SaveService>(FindObjectsInactive.Include);
         if (saveService != null)
         {
             builder.RegisterComponent(saveService).As<Santa.Core.Save.ISaveService>().AsSelf();
@@ -181,7 +192,7 @@ public class GameLifetimeScope : LifetimeScope
 
         // Legacy binder removed; Pause is driven by IPauseMenuService + Addressables
         // TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
-        TryRegisterOptionalComponent<Santa.UI.VirtualPauseButton>(builder);
+        TryRegisterOptionalComponent<Santa.Presentation.HUD.VirtualPauseButton>(builder);
 
         // NOTE: CombatUI and UpgradeUI are instantiated dynamically via Addressables (see UIManager)
         // They should not be registered here nor in the base scene.

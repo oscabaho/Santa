@@ -1,6 +1,10 @@
+using Santa.Core;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+
+namespace Santa.Presentation.Upgrades
+{
 
 /// <summary>
 /// Manager que controla el ciclo de vida optimizado de la UpgradeUI.
@@ -38,7 +42,7 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         // On entering combat, preload the UI
         if (currentState == GameState.Combat && _previousState != GameState.Combat)
         {
-            OnEnterCombat();
+            OnEnterCombat().Forget();
         }
         // On leaving combat to exploration, release the UI (optional)
         else if (currentState == GameState.Exploration && _previousState == GameState.Combat)
@@ -49,16 +53,24 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         _previousState = currentState;
     }
 
-    private async void OnEnterCombat()
+    private async Cysharp.Threading.Tasks.UniTaskVoid OnEnterCombat()
     {
         if (_hasPreloadedForCombat)
             return;
 
+        try
+        {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("UpgradeUILifecycleManager: Entering combat. Preloading UpgradeUI...");
+            GameLog.Log("UpgradeUILifecycleManager: Entering combat. Preloading UpgradeUI...");
 #endif
-        await _upgradeUILoader.PreloadAsync();
-        _hasPreloadedForCombat = true;
+            await _upgradeUILoader.PreloadAsync();
+            _hasPreloadedForCombat = true;
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeUILifecycleManager.OnEnterCombat: Failed to preload UI: {ex.Message}");
+            GameLog.LogException(ex);
+        }
     }
 
     private void OnExitCombat()
@@ -69,4 +81,5 @@ public class UpgradeUILifecycleManager : IStartable, ITickable
         _upgradeUILoader.Release();
         _hasPreloadedForCombat = false;
     }
+}
 }

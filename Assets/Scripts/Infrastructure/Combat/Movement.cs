@@ -1,9 +1,12 @@
 using UnityEngine;
+using Santa.Infrastructure.Input;
 
-[RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(ActionPointComponentBehaviour))]
-[RequireComponent(typeof(ExplorationPlayerIdentifier))]
-public class Movement : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(ActionPointComponentBehaviour))]
+    [RequireComponent(typeof(ExplorationPlayerIdentifier))]
+    public class Movement : MonoBehaviour
 {
     [Header("Dependencies")]
     [Tooltip("The InputReader ScriptableObject that provides player input events.")]
@@ -23,7 +26,7 @@ public class Movement : MonoBehaviour
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
-        _mainCameraTransform = Camera.main.transform;
+        _mainCameraTransform = UnityEngine.Camera.main.transform;
 
         if (inputReader == null)
         {
@@ -81,4 +84,5 @@ public class Movement : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
         }
     }
+}
 }

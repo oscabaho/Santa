@@ -1,9 +1,11 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Infrastructure.Input;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
-namespace Santa.UI
+namespace Santa.Presentation.HUD
 {
     /// <summary>
     /// Pause button inside the VirtualGamepad UI.

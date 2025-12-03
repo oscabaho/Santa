@@ -4,8 +4,11 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
+using Santa.Core;
 
-public class CombatEncounterManager : MonoBehaviour, ICombatEncounterManager
+namespace Santa.Infrastructure.Combat
+{
+    public class CombatEncounterManager : MonoBehaviour, ICombatEncounterManager
 {
     private IGameStateService _gameStateService;
     private ICombatTransitionService _combatTransitionService;
@@ -110,4 +113,5 @@ public class CombatEncounterManager : MonoBehaviour, ICombatEncounterManager
             _combatScenePool.ReleaseInstance(key, instance, releaseAddressables);
         }
     }
+}
 }

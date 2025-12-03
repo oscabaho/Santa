@@ -1,5 +1,13 @@
+using Santa.Core.Config;
+using Santa.Infrastructure.Combat;
+using Santa.Infrastructure.Level;
+using Santa.Presentation.UI;
+using Santa.Presentation.Menus;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+namespace Santa.Utils
+{
 
 /// <summary>
 /// Validates presence and placement of key scene roots to keep hierarchy consistent.
@@ -40,7 +48,7 @@ public class SceneHierarchyValidator : MonoBehaviour
         WarnIfMissingComponentInRoot<LevelManager>(managersRoot, nameof(LevelManager));
         WarnIfMissingComponentInRoot<TurnBasedCombatManager>(managersRoot, nameof(TurnBasedCombatManager));
         ValidateGraphicsSettingsManagerPlacement();
-        WarnIfMissingComponentInRoot<Santa.Core.Save.SaveService>(managersRoot, "SaveService");
+        WarnIfMissingComponentInRoot<Santa.Infrastructure.SaveService>(managersRoot, "SaveService");
         WarnIfMissingComponentInRoot<Santa.UI.PauseMenuController>(servicesRoot, "PauseMenuController");
 
         // Directional Light recommendation
@@ -138,4 +146,5 @@ public class SceneHierarchyValidator : MonoBehaviour
 
         GameLog.LogWarning("SceneValidator: 'GraphicsSettingsManager' not found. Add it under 'Managers' or as a root to manage platform-specific graphics settings.");
     }
+}
 }

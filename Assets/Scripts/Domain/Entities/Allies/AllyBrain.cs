@@ -1,10 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Santa.Core;
+using Santa.Domain.Combat;
 
-[RequireComponent(typeof(AbilityHolder))]
-public class AllyBrain : MonoBehaviour, IBrain
+namespace Santa.Domain.Entities
 {
+    [RequireComponent(typeof(AbilityHolder))]
+    public class AllyBrain : MonoBehaviour, IBrain
+    {
     private AbilityHolder _abilityHolder;
 
     private void Awake()
@@ -142,5 +146,6 @@ public class AllyBrain : MonoBehaviour, IBrain
 
         // Fallback, should not be reached if there are any active enemies
         return activeEnemiesWithHealth.Count > 0 ? activeEnemiesWithHealth[0].Enemy : null;
+    }
     }
 }

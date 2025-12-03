@@ -1,11 +1,18 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Addressables;
+using Santa.Domain.Combat;
+using AbilityUpgrade = Santa.Domain.Combat.AbilityUpgrade;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
 using VContainer.Unity;
+
+namespace Santa.Presentation.Upgrades
+{
 
 /// <summary>
 /// Loader that manages loading and access to the UpgradeUI via Addressables.
@@ -39,46 +46,57 @@ public class UpgradeUILoader : IUpgradeUI
 
     /// <summary>
     /// Shows the upgrade UI. Loads the prefab via Addressables if needed.
+    /// Matches IUpgradeUI signature (void) and runs async internally.
     /// </summary>
-    public async void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
+    public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
     {
-        _showCancellation?.Cancel();
-        _showCancellation?.Dispose();
-        _showCancellation = new CancellationTokenSource();
-        var ct = _showCancellation.Token;
+        ShowUpgradesAsync(upgrade1, upgrade2).Forget();
+    }
 
-        // If already loaded, just show it
-        if (_isLoaded && _upgradeUIInstance != null)
+    private async UniTaskVoid ShowUpgradesAsync(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
+    {
+        try
         {
-            _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
-            return;
-        }
+            _showCancellation?.Cancel();
+            _showCancellation?.Dispose();
+            _showCancellation = new CancellationTokenSource();
+            var ct = _showCancellation.Token;
 
-        // If currently loading, wait
-        if (_isLoading)
-        {
-            await WaitForLoad();
+            if (_isLoaded && _upgradeUIInstance != null)
+            {
+                _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                return;
+            }
+
+            if (_isLoading)
+            {
+                await WaitForLoad();
+                if (ct.IsCancellationRequested) return;
+                if (_upgradeUIInstance != null)
+                {
+                    _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                }
+                return;
+            }
+
+            await LoadUpgradeUI();
             if (ct.IsCancellationRequested) return;
+
             if (_upgradeUIInstance != null)
             {
                 _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
             }
-            return;
-        }
-
-        // First-time load
-        await LoadUpgradeUI();
-        if (ct.IsCancellationRequested) return;
-
-        if (_upgradeUIInstance != null)
-        {
-            _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
-        }
-        else
-        {
+            else
+            {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
+                GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
 #endif
+            }
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeUILoader.ShowUpgrades: Exception while showing upgrades: {ex.Message}");
+            GameLog.LogException(ex);
         }
     }
 
@@ -235,4 +253,5 @@ public class UpgradeUILoader : IUpgradeUI
 #endif
         }
     }
+}
 }

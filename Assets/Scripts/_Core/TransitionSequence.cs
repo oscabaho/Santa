@@ -2,22 +2,25 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-/// <summary>
-/// A ScriptableObject that holds a series of TransitionTasks to be executed in order as a UniTask.
-/// </summary>
-[CreateAssetMenu(fileName = "NewTransitionSequence", menuName = "Transitions/Transition Sequence")]
-public class TransitionSequence : ScriptableObject
+namespace Santa.Core.Transitions
 {
-    [SerializeReference] // Use SerializeReference to allow polymorphism for the abstract TransitionTask
-    public List<TransitionTask> Tasks = new List<TransitionTask>();
-
-    public async UniTask Execute(TransitionContext context)
+    /// <summary>
+    /// A ScriptableObject that holds a series of TransitionTasks to be executed in order as a UniTask.
+    /// </summary>
+    [CreateAssetMenu(fileName = "NewTransitionSequence", menuName = "Transitions/Transition Sequence")]
+    public class TransitionSequence : ScriptableObject
     {
-        foreach (var task in Tasks)
+        [SerializeReference] // Use SerializeReference to allow polymorphism for the abstract TransitionTask
+        public List<TransitionTask> Tasks = new List<TransitionTask>();
+
+        public async UniTask Execute(TransitionContext context)
         {
-            if (task != null)
+            foreach (var task in Tasks)
             {
-                await task.Execute(context);
+                if (task != null)
+                {
+                    await task.Execute(context);
+                }
             }
         }
     }

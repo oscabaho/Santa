@@ -1,14 +1,16 @@
 using UnityEngine;
 using UnityEngine.Audio;
 
-/// <summary>
-/// ScriptableObject containing configuration for a sound event.
-/// Lets sound designers create and tweak sounds as assets,
-/// decoupling audio data from code.
-/// </summary>
-[CreateAssetMenu(menuName = "ProyectSecret/Audio/Audio Data", fileName = "NewAudioData")]
-public class AudioData : ScriptableObject
+namespace Santa.Domain.Combat
 {
+    /// <summary>
+    /// ScriptableObject containing configuration for a sound event.
+    /// Lets sound designers create and tweak sounds as assets,
+    /// decoupling audio data from code.
+    /// </summary>
+    [CreateAssetMenu(menuName = "ProyectSecret/Audio/Audio Data", fileName = "NewAudioData")]
+    public class AudioData : ScriptableObject
+    {
     [Header("Sound Definition")]
     [Tooltip("Audio clip(s) to play. If more than one, one will be chosen at random.")]
     public AudioClip[] clips;
@@ -54,4 +56,5 @@ public class AudioData : ScriptableObject
         if (pitchVariation <= 0f) return pitch;
         return pitch * (1 + UnityEngine.Random.Range(-pitchVariation / 2f, pitchVariation / 2f));
     }
+}
 }

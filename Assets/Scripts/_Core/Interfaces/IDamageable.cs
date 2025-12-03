@@ -1,7 +1,10 @@
-/// <summary>
-/// Interface for objects that can receive damage.
-/// </summary>
-public interface IDamageable
+namespace Santa.Core
 {
-    void TakeDamage(int amount);
+    /// <summary>
+    /// Interface for objects that can receive damage.
+    /// </summary>
+    public interface IDamageable
+    {
+        void TakeDamage(int amount);
+    }
 }

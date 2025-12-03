@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Santa.Core;
 using Santa.Core.Pooling;
 using UnityEngine;
 using VContainer;
+
+namespace Santa.Infrastructure.Level
+{
 
 /// <summary>
 /// Manages the game's level progression, including visual transformation of areas by instantiating prefabs.
@@ -161,12 +165,14 @@ public class LevelManager : MonoBehaviour, ILevelService
         catch (System.OperationCanceledException)
         {
             // Level change was cancelled, cleanup already happened
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("LevelManager: Level change cancelled.");
+#endif
         }
         catch (System.Exception ex)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogError($"LevelManager.SetLevel: Exception during level change: {ex.Message}");
             GameLog.LogException(ex);
-#endif
         }
     }
 
@@ -296,4 +302,5 @@ public class LevelManager : MonoBehaviour, ILevelService
         }
         _activeLiberatedVisuals.Clear();
     }
+}
 }

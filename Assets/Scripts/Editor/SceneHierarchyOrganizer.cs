@@ -3,6 +3,16 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using Santa.Presentation.UI;
+using Santa.Presentation.Menus;
+using Santa.Infrastructure.Input;
+using Santa.Infrastructure.Combat;
+using Santa.Infrastructure.State;
+using Santa.Infrastructure.Level;
+using Santa.Infrastructure.Camera;
+using Santa.Infrastructure;
+using Santa.Presentation.Upgrades;
+using Santa.Core.Pooling;
 
 namespace Santa.Editor
 {
@@ -341,7 +351,7 @@ namespace Santa.Editor
                 EnsureManagerComponent<CombatEncounterManager>(managersRoot, "CombatEncounterManager");
                 // Camera manager used by combat transitions
                 EnsureManagerComponent<CombatCameraManager>(managersRoot, "CombatCameraManager");
-                EnsureManagerComponent<Santa.Core.Save.SaveService>(managersRoot, "SaveService");
+                EnsureManagerComponent<Santa.Infrastructure.SaveService>(managersRoot, "SaveService");
                 EnsureManagerComponent<UpgradeManager>(managersRoot, "UpgradeManager");
                 EnsureManagerComponent<GameInitializer>(managersRoot, "GameInitializer");
                 // Scene pool used by encounters

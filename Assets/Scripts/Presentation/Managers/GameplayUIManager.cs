@@ -1,7 +1,10 @@
 using System;
+using Santa.Core;
 using UnityEngine;
 
-public class GameplayUIManager : MonoBehaviour, IGameplayUIService
+namespace Santa.Presentation.UI
+{
+    public class GameplayUIManager : MonoBehaviour, IGameplayUIService
 {
     // The actual button object, assigned at runtime.
     private GameObject actionButtonGameObject;
@@ -125,4 +128,5 @@ public class GameplayUIManager : MonoBehaviour, IGameplayUIService
             #endif
         }
     }
+}
 }
