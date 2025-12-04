@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Santa.Domain.Combat;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.Exceptions;
 using UnityEngine.UI;
+
+namespace Santa.Presentation.Combat
+{
 
 /// <summary>
 /// Manages combat action buttons and ability loading.
@@ -194,4 +198,5 @@ public class CombatUIActionButtons : MonoBehaviour
             }
         }
     }
+}
 }

@@ -1,13 +1,12 @@
+using Santa.Domain.Combat;
 using UnityEditor;
 using UnityEngine;
 
-/// <summary>
-/// Custom editor for Ability to conditionally hide Target Percentage field
-/// when it's not being used by the selected targeting strategy.
-/// </summary>
-#if UNITY_EDITOR
-[CustomEditor(typeof(Ability), true)]
-public class AbilityEditor : Editor
+namespace Santa.Editor
+{
+    #if UNITY_EDITOR
+    [CustomEditor(typeof(Ability), true)]
+public class AbilityEditor : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {
@@ -39,4 +38,5 @@ public class AbilityEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
-#endif
+    #endif
+}

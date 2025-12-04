@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Santa.Infrastructure.Combat;
 
 /// <summary>
 /// Interface for managing combat encounters.

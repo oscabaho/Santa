@@ -1,13 +1,16 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ReduceSpecialMissChanceStrategy", menuName = "Santa/Upgrades/Strategies/Reduce Special Miss Chance")]
-public class ReduceSpecialMissChanceStrategy : UpgradeStrategySO
+namespace Santa.Domain.Upgrades
 {
-    [Range(0f, 1f)]
-    public float MissChanceReduction;
-
-    public override void Apply(IUpgradeTarget target)
+    [CreateAssetMenu(fileName = "ReduceSpecialMissChanceStrategy", menuName = "Santa/Upgrades/Strategies/Reduce Special Miss Chance")]
+    public class ReduceSpecialMissChanceStrategy : UpgradeStrategySO
     {
-        target.ReduceSpecialAttackMissChance(MissChanceReduction);
+        [Range(0f, 1f)]
+        public float MissChanceReduction;
+
+        public override void Apply(IUpgradeTarget target)
+        {
+            target.ReduceSpecialAttackMissChance(MissChanceReduction);
+        }
     }
 }

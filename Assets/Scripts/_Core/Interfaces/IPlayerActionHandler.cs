@@ -1,10 +1,13 @@
 using System;
 using UnityEngine;
+using Santa.Domain.Combat;
 
-/// <summary>
-/// Interface for handling player actions in combat including validation, targeting, and submission.
-/// </summary>
-public interface IPlayerActionHandler
+namespace Santa.Core
+{
+    /// <summary>
+    /// Interface for handling player actions in combat including validation, targeting, and submission.
+    /// </summary>
+    public interface IPlayerActionHandler
 {
     /// <summary>
     /// Fired when the player enters targeting mode for single-target abilities.
@@ -46,4 +49,5 @@ public interface IPlayerActionHandler
     /// Cancels the current targeting mode if active.
     /// </summary>
     void CancelTargeting();
+    }
 }

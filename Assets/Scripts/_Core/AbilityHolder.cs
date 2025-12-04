@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Santa.Domain.Combat;
 
 /// <summary>
 /// A simple component that holds a list of abilities for a combatant.

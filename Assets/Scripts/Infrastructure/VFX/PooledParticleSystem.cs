@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
+namespace Santa.Infrastructure.VFX
+{
+
 /// <summary>
 /// Component for a particle system managed by an ObjectPool.
 /// Returns itself to the pool when its effect ends.
@@ -32,4 +35,5 @@ public class PooledParticleSystem : MonoBehaviour
         // Return to pool when the particle system stops
         Pool?.Release(this);
     }
+}
 }

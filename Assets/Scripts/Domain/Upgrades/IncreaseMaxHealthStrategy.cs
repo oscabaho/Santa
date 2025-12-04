@@ -1,12 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IncreaseMaxHealthStrategy", menuName = "Santa/Upgrades/Strategies/Increase Max Health")]
-public class IncreaseMaxHealthStrategy : UpgradeStrategySO
+namespace Santa.Domain.Upgrades
 {
-    public int HealthIncrease = 50;
-
-    public override void Apply(IUpgradeTarget target)
+    [CreateAssetMenu(fileName = "IncreaseMaxHealthStrategy", menuName = "Santa/Upgrades/Strategies/Increase Max Health")]
+    public class IncreaseMaxHealthStrategy : UpgradeStrategySO
     {
-        target.IncreaseMaxHealth(HealthIncrease);
+        public int HealthIncrease = 50;
+
+        public override void Apply(IUpgradeTarget target)
+        {
+            target.IncreaseMaxHealth(HealthIncrease);
+        }
     }
 }

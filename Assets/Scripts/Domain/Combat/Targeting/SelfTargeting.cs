@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SelfTargeting", menuName = "Santa/Abilities/Targeting/Self")]
-public class SelfTargeting : TargetingStrategy
+namespace Santa.Domain.Combat
 {
-    public override TargetingStyle Style => TargetingStyle.Self;
-
-    public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
+    [CreateAssetMenu(fileName = "SelfTargeting", menuName = "Santa/Abilities/Targeting/Self")]
+    public class SelfTargeting : TargetingStrategy
     {
-        if (caster != null)
+        public override TargetingStyle Style => TargetingStyle.Self;
+
+        public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
         {
-            results.Add(caster);
+            if (caster != null)
+            {
+                results.Add(caster);
+            }
         }
     }
 }

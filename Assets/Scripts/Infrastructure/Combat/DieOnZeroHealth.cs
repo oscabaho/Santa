@@ -1,12 +1,16 @@
 using UnityEngine;
 using VContainer;
+using Santa.Core;
+using Santa.Core.Events;
 using Santa.Core.Save;
 
-/// <summary>
-/// Desactiva el GameObject cuando la vida llega a 0 y notifica al EventBus.
-/// </summary>
-[RequireComponent(typeof(HealthComponentBehaviour))]
-public class DieOnZeroHealth : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Desactiva el GameObject cuando la vida llega a 0 y notifica al EventBus.
+    /// </summary>
+    [RequireComponent(typeof(HealthComponentBehaviour))]
+    public class DieOnZeroHealth : MonoBehaviour
 {
     private HealthComponentBehaviour _health;
     private IEventBus _eventBus;
@@ -49,4 +53,5 @@ public class DieOnZeroHealth : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+}
 }

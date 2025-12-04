@@ -1,6 +1,8 @@
 using UnityEngine;
 
-public class DialogueManager : MonoBehaviour
+namespace Santa.Domain.Dialogue
+{
+    public class DialogueManager : MonoBehaviour
 {
     void Start()
     {
@@ -11,4 +13,5 @@ public class DialogueManager : MonoBehaviour
     {
         
     }
+}
 }

@@ -5,21 +5,27 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Domain.Combat;
+using Santa.Presentation.Combat;
 
-/// <summary>
-/// Manages the turn-based combat flow, delegating state storage to a CombatState object.
-/// This class is responsible for the COMBAT FLOW (Planning -> Executing) and coordinating other services.
-/// </summary>
-public class TurnBasedCombatManager : MonoBehaviour, ICombatService
+namespace Santa.Infrastructure.Combat
 {
-    public event Action<CombatPhase> OnPhaseChanged;
-    public event Action OnPlayerTurnStarted;
-    public event Action OnPlayerTurnEnded;
+    /// <summary>
+    /// Manages the turn-based combat flow, delegating state storage to a CombatState object.
+    /// This class is responsible for the COMBAT FLOW (Planning -> Executing) and coordinating other services.
+    /// </summary>
+    public class TurnBasedCombatManager : MonoBehaviour, ICombatService
+    {
+        public event Action<CombatPhase> OnPhaseChanged;
+        public event Action OnPlayerTurnStarted;
+        public event Action OnPlayerTurnEnded;
 
-    public CombatPhase CurrentPhase { get; private set; }
+        public CombatPhase CurrentPhase { get; private set; }
 
-    private readonly CombatState _combatState = new();
-    private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
+        private readonly CombatState _combatState = new();
+        private readonly IWinConditionChecker _winConditionChecker = new DefaultWinConditionChecker();
     private readonly List<EnemyTarget> _enemyTargets = new();
 
     // This list is for sorting and is ephemeral to the execution phase, so it stays here.
@@ -367,23 +373,40 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
 
     private async UniTaskVoid ExecuteTurnAsync()
     {
-        PrepareExecutionPhase();
-
-        foreach (var action in _sortedActions)
+        try
         {
-            CombatResult result = await ProcessActionAsync(action);
-            if (result != CombatResult.Ongoing)
-            {
-                HandleCombatEnd(result);
-                return; // End turn execution
-            }
-        }
+            PrepareExecutionPhase();
 
-        // If the loop completes, it means no one won or lost, so start a new turn.
+            foreach (var action in _sortedActions)
+            {
+                CombatResult result = await ProcessActionAsync(action);
+                if (result != CombatResult.Ongoing)
+                {
+                    HandleCombatEnd(result);
+                    return; // End turn execution
+                }
+            }
+
+            // If the loop completes, it means no one won or lost, so start a new turn.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("Execution phase finished.");
+            GameLog.Log("Execution phase finished.");
 #endif
-        StartNewTurn();
+            StartNewTurn();
+        }
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("TurnBasedCombatManager: Turn execution cancelled.");
+#endif
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"TurnBasedCombatManager.ExecuteTurnAsync: Exception during turn execution: {ex.Message}");
+            GameLog.LogException(ex);
+            // Try to end combat gracefully on error
+            HandleCombatEnd(CombatResult.Defeat);
+        }
     }
 
     private void PrepareExecutionPhase()
@@ -475,5 +498,6 @@ public class TurnBasedCombatManager : MonoBehaviour, ICombatService
         OnPlayerTurnStarted = null;
         OnPlayerTurnEnded = null;
         CombatIsInitialized = false;
+    }
     }
 }

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Santa.Core.Transitions;
 
 /// <summary>
 /// Simple fade-in transition task. Looks for a CanvasGroup on the target and fades alpha from 0 to 1 over duration.

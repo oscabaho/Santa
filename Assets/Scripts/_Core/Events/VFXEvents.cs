@@ -1,19 +1,22 @@
 using UnityEngine;
 
-/// <summary>
-/// Event published to request playing a visual effect from the pool.
-/// </summary>
-public class PlayVFXRequest
+namespace Santa.Core.Events
 {
-    public string Key { get; }
-    public Vector3 Position { get; }
-    public Quaternion Rotation { get; }
-
-    public PlayVFXRequest(string key, Vector3 position, Quaternion? rotation = null)
+    /// <summary>
+    /// Event published to request playing a visual effect from the pool.
+    /// </summary>
+    public class PlayVFXRequest
     {
-        Key = key;
-        Position = position;
-        Rotation = rotation ?? Quaternion.identity;
+        public string Key { get; }
+        public Vector3 Position { get; }
+        public Quaternion Rotation { get; }
+
+        public PlayVFXRequest(string key, Vector3 position, Quaternion? rotation = null)
+        {
+            Key = key;
+            Position = position;
+            Rotation = rotation ?? Quaternion.identity;
+        }
     }
 }
 

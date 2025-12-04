@@ -1,12 +1,15 @@
 using UnityEngine;
 using VContainer;
+using Santa.Presentation.Upgrades;
 
-/// <summary>
-/// Initializes the player's health based on the UpgradeManager's MaxHealth stat.
-/// Should be attached to the Player GameObject.
-/// </summary>
-[RequireComponent(typeof(HealthComponentBehaviour))]
-public class PlayerHealthInitializer : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Initializes the player's health based on the UpgradeManager's MaxHealth stat.
+    /// Should be attached to the Player GameObject.
+    /// </summary>
+    [RequireComponent(typeof(HealthComponentBehaviour))]
+    public class PlayerHealthInitializer : MonoBehaviour
 {
     private UpgradeManager _upgradeManager;
     private HealthComponentBehaviour _healthComponent;
@@ -42,4 +45,5 @@ public class PlayerHealthInitializer : MonoBehaviour
                 GameLog.LogError("PlayerHealthInitializer: UpgradeManager not injected!", this);
         }
     }
+}
 }

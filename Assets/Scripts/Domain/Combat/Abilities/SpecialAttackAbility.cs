@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
 
-/// <summary>
-/// A special, powerful attack that costs energy and has a chance to miss.
-/// Damage and miss chance are determined by the UpgradeService.
-/// </summary>
-[CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
-public class SpecialAttackAbility : Ability
+namespace Santa.Domain.Combat
+{
+    /// <summary>
+    /// A special, powerful attack that costs energy and has a chance to miss.
+    /// Damage and miss chance are determined by the UpgradeService.
+    /// </summary>
+    [CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
+    public class SpecialAttackAbility : Ability
 {
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
@@ -61,4 +64,5 @@ public class SpecialAttackAbility : Ability
     }
 
 
+    }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Santa.Core;
 
 /// <summary>
 /// Bus de eventos global para el proyecto. Permite publicar y suscribirse a eventos de tipo base.

@@ -1,9 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Events;
 using UnityEngine;
 using UnityEngine.Pool;
 using VContainer;
+
+namespace Santa.Infrastructure.VFX
+{
 
 public class VFXManager : MonoBehaviour, IVFXService
 {
@@ -145,16 +150,29 @@ public class VFXManager : MonoBehaviour, IVFXService
 
     private async UniTaskVoid FadeRoutineAsync(GameObject targetObject, float duration)
     {
-        await UniTask.Delay(System.TimeSpan.FromSeconds(duration));
-
-        if (targetObject != null)
+        try
         {
-            // This event could be used by other systems to know when the VFX is done.
-            _eventBus?.Publish(new VFXCompletedEvent(targetObject));
+            await UniTask.Delay(System.TimeSpan.FromSeconds(duration));
 
-            // If the object has a PooledParticleSystem component, its OnEnable coroutine will handle
-            // returning it to the pool. If not, we just deactivate it.
-            targetObject.SetActive(false);
+            if (targetObject != null)
+            {
+                // This event could be used by other systems to know when the VFX is done.
+                _eventBus?.Publish(new VFXCompletedEvent(targetObject));
+
+                // If the object has a PooledParticleSystem component, its OnEnable coroutine will handle
+                // returning it to the pool. If not, we just deactivate it.
+                targetObject.SetActive(false);
+            }
+        }
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"VFXManager.FadeRoutineAsync: Exception: {ex.Message}");
+            GameLog.LogException(ex);
         }
     }
+}
 }

@@ -3,7 +3,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class DialogueScript : MonoBehaviour
+namespace Santa.Domain.Dialogue
+{
+    public class DialogueScript : MonoBehaviour
 {
     // Using `Text` (Unity UI) as a safe fallback when TextMeshPro isn't available.
     // If you prefer TextMeshPro, replace this with `TextMeshProUGUI` and ensure
@@ -68,4 +70,5 @@ public class DialogueScript : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+}
 }

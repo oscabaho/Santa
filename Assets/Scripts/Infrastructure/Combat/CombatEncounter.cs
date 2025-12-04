@@ -1,12 +1,15 @@
 using UnityEngine;
 using VContainer;
+using Santa.Core;
 
-/// <summary>
-/// A data container for a specific combat encounter.
-/// REQUIRED: Configure combatSceneAddress with a valid Addressable address.
-/// Combat arenas MUST be loaded via Addressables for optimal performance and memory management.
-/// </summary>
-public class CombatEncounter : MonoBehaviour, ICombatEncounter
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// A data container for a specific combat encounter.
+    /// REQUIRED: Configure combatSceneAddress with a valid Addressable address.
+    /// Combat arenas MUST be loaded via Addressables for optimal performance and memory management.
+    /// </summary>
+    public class CombatEncounter : MonoBehaviour, ICombatEncounter
 {
     [Header("Scene Setup - Addressables")]
     [Tooltip("Addressable address for this combat scene prefab. The pool will load/instantiate via Addressables. Example: 'CombatArena_Forest', 'CombatArena_Desert'")]
@@ -92,4 +95,5 @@ public class CombatEncounter : MonoBehaviour, ICombatEncounter
         }
     }
 #endif
+}
 }

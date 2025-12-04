@@ -1,8 +1,12 @@
 using System.Collections;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Santa.Domain.Combat;
 using UnityEngine;
 using UnityEngine.Pool;
+
+namespace Santa.Infrastructure.Audio
+{
 
 /// <summary>
 /// Component for an AudioSource managed by an ObjectPool.
@@ -88,16 +92,23 @@ public class PooledAudioSource : MonoBehaviour
 
     private async UniTaskVoid ReturnToPoolWhenFinishedAsync(CancellationToken token)
     {
-        // Wait while playing, checking every frame (PlayerLoopTiming.Update)
-        // If cancelled (Stop called), this throws OperationCanceledException which is handled by UniTaskVoid (logs if not handled, but here it just stops)
-        // Actually UniTaskVoid.Forget() swallows exceptions usually, but cancellation is fine.
-        // To be safe against cancellation throwing, we can try/catch or use SuppressCancellationThrow
-
-        bool canceled = await UniTask.WaitWhile(() => _audioSource != null && _audioSource.isPlaying, PlayerLoopTiming.Update, token).SuppressCancellationThrow();
-
-        if (!canceled)
+        try
         {
-            ReturnToPool();
+            // Wait while playing, checking every frame (PlayerLoopTiming.Update)
+            // If cancelled (Stop called), this throws OperationCanceledException which is handled by UniTaskVoid
+            // We use SuppressCancellationThrow to handle cancellation gracefully
+            bool canceled = await UniTask.WaitWhile(() => _audioSource != null && _audioSource.isPlaying, PlayerLoopTiming.Update, token).SuppressCancellationThrow();
+
+            if (!canceled)
+            {
+                ReturnToPool();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"PooledAudioSource.ReturnToPoolWhenFinishedAsync: Exception: {ex.Message}");
+            GameLog.LogException(ex);
         }
     }
+}
 }

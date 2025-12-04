@@ -1,13 +1,15 @@
 using UnityEngine;
 
-// =============================
-//  CHARACTER AND COMBAT EVENTS
-// =============================
+namespace Santa.Core.Events
+{
+    // =============================
+    //  CHARACTER AND COMBAT EVENTS
+    // =============================
 
-/// <summary>
-/// Event published when the player wins a combat.
-/// </summary>
-public class CombatVictoryEvent
+    /// <summary>
+    /// Event published when the player wins a combat.
+    /// </summary>
+    public class CombatVictoryEvent
 {
     public GameObject Enemy { get; }
     public CombatVictoryEvent(GameObject enemy) { Enemy = enemy; }
@@ -100,8 +102,9 @@ public class InteractableInRangeEvent
 /// <summary>
 /// Published when an interactable object that was in range leaves the range.
 /// </summary>
-public class InteractableOutOfRangeEvent
-{
-    public readonly IInteractable Interactable;
-    public InteractableOutOfRangeEvent(IInteractable interactable) => Interactable = interactable;
+    public class InteractableOutOfRangeEvent
+    {
+        public readonly IInteractable Interactable;
+        public InteractableOutOfRangeEvent(IInteractable interactable) => Interactable = interactable;
+    }
 }

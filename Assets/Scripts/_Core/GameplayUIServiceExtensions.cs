@@ -1,7 +1,10 @@
 using System;
+using Santa.Core;
 using UnityEngine;
 
-public static class GameplayUIServiceExtensions
+namespace Santa.UI
+{
+    public static class GameplayUIServiceExtensions
 {
     /// <summary>
     /// Executes the given action immediately if the gameplay UI is ready, otherwise subscribes
@@ -43,4 +46,5 @@ public static class GameplayUIServiceExtensions
             GameLog.LogError($"GameplayUIServiceExtensions.WhenReady action threw: {ex.Message}");
         }
     }
+}
 }

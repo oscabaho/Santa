@@ -2,17 +2,21 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
+using Santa.Core;
+using Santa.Core.Config;
 #if UNITY_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
 
-/// <summary>
-/// Pool for combat scene prefabs loaded via Addressables. Reuses instances to optimize performance.
-/// Injects VContainer dependencies into all components of instantiated arenas.
-/// </summary>
-public class CombatScenePool : MonoBehaviour
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Pool for combat scene prefabs loaded via Addressables. Reuses instances to optimize performance.
+    /// Injects VContainer dependencies into all components of instantiated arenas.
+    /// </summary>
+    public class CombatScenePool : MonoBehaviour
 {
     private IObjectResolver _resolver;
 
@@ -176,4 +180,5 @@ public class CombatScenePool : MonoBehaviour
             }
         }
     }
+}
 }

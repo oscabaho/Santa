@@ -1,6 +1,8 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Santa.UI;
+using Santa.Core;
+using Santa.Core.Save;
+using Santa.Presentation.Menus;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,9 +78,9 @@ namespace Santa.UI
             if (loadButton != null) loadButton.interactable = hasSave;
         }
 
-        private async void OnSaveClicked()
+        private void OnSaveClicked()
         {
-            await SaveFlow();
+            SaveFlow().Forget();
         }
 
         private async Cysharp.Threading.Tasks.UniTask SaveFlow()
@@ -89,18 +91,23 @@ namespace Santa.UI
             _isSaving = true;
             if (saveButton != null) saveButton.interactable = false; // debounce
 
-            _saveService.Save();
-            // Immediately reflect local device time without waiting for storage
-            UpdateLastSaveLabelWithLocalNow();
+            try
+            {
+                _saveService.Save();
+                // Immediately reflect local device time without waiting for storage
+                UpdateLastSaveLabelWithLocalNow();
 
-            // Wait a frame for storage to flush before checking save existence
-            await Cysharp.Threading.Tasks.UniTask.NextFrame();
-            UpdateLoadButtonVisibility();
+                // Wait a frame for storage to flush before checking save existence
+                await Cysharp.Threading.Tasks.UniTask.NextFrame();
+                UpdateLoadButtonVisibility();
 
-            await ShowToast("Guardado", 1.5f);
-
-            _isSaving = false;
-            RefreshButtons();
+                await ShowToast("Guardado", 1.5f);
+            }
+            finally
+            {
+                _isSaving = false;
+                RefreshButtons();
+            }
         }
 
         private void OnLoadClicked()

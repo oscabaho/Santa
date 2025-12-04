@@ -1,6 +1,11 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Transitions;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+
+namespace Santa.UI
+{
 
 /// <summary>
 /// A transition task that shows a specific UI panel via the UIManager without hiding others.
@@ -32,4 +37,5 @@ public class ShowUIPanelTask : TransitionTask
             GameLog.LogError("ShowUIPanelTask: IUIManager not found in TransitionContext.");
         }
     }
+}
 }

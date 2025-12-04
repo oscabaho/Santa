@@ -1,4 +1,5 @@
 using UnityEngine;
+using Santa.Core;
 
 /// <summary>
 /// MonoBehaviour component exposing and managing a HealthComponent on a GameObject.

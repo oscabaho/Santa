@@ -1,6 +1,10 @@
+using Santa.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using VContainer;
+
+namespace Santa.Presentation.Combat
+{
 
 /// <summary>
 /// This component should be placed on any clickable enemy combatant.
@@ -100,4 +104,5 @@ public class EnemyTarget : MonoBehaviour, IPointerClickHandler
         // Notify the UI that this target has been selected
         _combatUI.OnTargetSelected(gameObject);
     }
+}
 }

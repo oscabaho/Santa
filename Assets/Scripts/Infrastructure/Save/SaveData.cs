@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Santa.Core.Config;
 
 namespace Santa.Core.Save
 {

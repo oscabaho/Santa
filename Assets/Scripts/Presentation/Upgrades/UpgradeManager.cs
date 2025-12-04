@@ -1,6 +1,15 @@
 using System.Collections.Generic;
+using Santa.Core;
+using Santa.Core.Save;
+using Santa.Presentation.Upgrades;
+using Santa.Domain.Upgrades;
+using AbilityUpgrade = Santa.Domain.Combat.AbilityUpgrade;
+using Santa.Domain.Combat;
 using UnityEngine;
 using VContainer;
+
+namespace Santa.Presentation.Upgrades
+{
 
 /// <summary>
 /// Manages the player's permanent progression by applying and saving ability upgrades.
@@ -23,7 +32,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     // Track all acquired upgrades for persistence
     private readonly List<string> _acquiredUpgrades = new List<string>();
 
-    private Santa.Core.Upgrades.UpgradeStatsContainer _stats = new Santa.Core.Upgrades.UpgradeStatsContainer();
+    private Santa.Presentation.Upgrades.UpgradeStatsContainer _stats = new Santa.Presentation.Upgrades.UpgradeStatsContainer();
 
     // Player Stats - Delegated to container
     public int DirectAttackDamage => _stats.DirectAttackDamage;
@@ -138,12 +147,12 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
 
     private void SaveStats()
     {
-        Santa.Core.Security.SecureStorage.SetString(Santa.Core.Config.GameKeys.LastUpgrade, _lastSelectedUpgrade);
+        Santa.Core.Save.SecureStorage.SetString(Santa.Core.Config.GameKeys.LastUpgrade, _lastSelectedUpgrade);
     }
 
     private void LoadStats()
     {
-        if (Santa.Core.Security.SecureStorage.TryGetString(Santa.Core.Config.GameKeys.LastUpgrade, out var stored))
+        if (Santa.Core.Save.SecureStorage.TryGetString(Santa.Core.Config.GameKeys.LastUpgrade, out var stored))
         {
             _lastSelectedUpgrade = stored;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -156,7 +165,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     public void ResetLastSelectedUpgrade()
     {
         _lastSelectedUpgrade = null;
-        Santa.Core.Security.SecureStorage.Delete(Santa.Core.Config.GameKeys.LastUpgrade);
+        Santa.Core.Save.SecureStorage.Delete(Santa.Core.Config.GameKeys.LastUpgrade);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log("Reset last selected upgrade.");
 #endif
@@ -201,4 +210,5 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         }
         _lastSelectedUpgrade = data.lastUpgrade;
     }
+}
 }

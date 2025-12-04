@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
 
-/// <summary>
-/// A concrete Ability that deals a specified amount of damage to its targets.
-/// The damage is determined by the UpgradeService based on the ability type.
-/// </summary>
-[CreateAssetMenu(fileName = "New Damage Ability", menuName = "Santa/Abilities/Damage Ability", order = 52)]
-public class DamageAbility : Ability
+namespace Santa.Domain.Combat
+{
+    /// <summary>
+    /// A concrete Ability that deals a specified amount of damage to its targets.
+    /// The damage is determined by the UpgradeService based on the ability type.
+    /// </summary>
+    [CreateAssetMenu(fileName = "New Damage Ability", menuName = "Santa/Abilities/Damage Ability", order = 52)]
+    public class DamageAbility : Ability
 {
     [Header("Damage Settings")]
     [Tooltip("Type of attack to determine which upgrade stat to use for damage.")]
@@ -142,4 +145,5 @@ public class DamageAbility : Ability
     }
 
 
+    }
 }

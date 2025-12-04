@@ -1,6 +1,11 @@
 using Cysharp.Threading.Tasks;
+using Santa.Core;
+using Santa.Core.Addressables;
 using VContainer;
 using VContainer.Unity;
+
+namespace Santa.Presentation.UI
+{
 
 /// <summary>
 /// Entry point to preload frequently used UI panels to avoid first-use hitches.
@@ -36,4 +41,5 @@ public class PreloadUIPanelsEntryPoint : IStartable
 #endif
         }
     }
+}
 }

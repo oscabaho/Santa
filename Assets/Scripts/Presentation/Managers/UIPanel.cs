@@ -1,6 +1,10 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using Santa.UI;
+using Santa.Presentation.Menus;
+
+namespace Santa.Presentation.UI
+{
 
 /// <summary>
 /// Base component for a UI Panel, using a CanvasGroup for efficient show/hide functionality.
@@ -107,4 +111,5 @@ public class UIPanel : MonoBehaviour
         GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}.", gameObject);
 #endif
     }
+}
 }

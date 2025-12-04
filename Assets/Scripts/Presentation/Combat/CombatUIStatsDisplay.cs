@@ -1,8 +1,14 @@
 using System;
 using System.Collections.Generic;
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Infrastructure.Combat;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
+namespace Santa.Presentation.Combat
+{
 
 /// <summary>
 /// Manages the display of player and enemy stats in the combat UI.
@@ -219,4 +225,5 @@ public class CombatUIStatsDisplay : MonoBehaviour
         UnsubscribeFromPlayer();
         UnsubscribeFromEnemies();
     }
+}
 }

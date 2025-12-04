@@ -1,13 +1,3 @@
-using System.Collections.Generic;
-using UnityEngine;
-
-/// <summary>
-/// Interface for any AI brain (enemies, allies), ensuring it has a method to choose an action.
-/// </summary>
-public interface IBrain
-{
-    PendingAction ChooseAction(
-        PendingAction? playerAction,
-        List<GameObject> allEnemies,
-        List<GameObject> allAllies);
-}
+// Legacy file retained to avoid meta GUID breakages in Unity.
+// The interface `IBrain` now lives in `Assets/Scripts/_Core/Interfaces/IBrain.cs`.
+// This file intentionally contains no type declarations.

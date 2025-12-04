@@ -8,8 +8,10 @@ namespace Santa.UI
     /// </summary>
     public class PlatformSpecificUI : MonoBehaviour
     {
+#pragma warning disable 0414 // Serialized fields used by Unity Inspector
         [SerializeField] private bool showOnMobile = true;
         [SerializeField] private bool showOnStandalone = true;
+#pragma warning restore 0414
         [SerializeField] private bool showOnEditor = true;
 
         private void Start()

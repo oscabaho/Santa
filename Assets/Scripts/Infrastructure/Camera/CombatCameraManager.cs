@@ -1,6 +1,10 @@
+using Santa.Core;
 using Unity.Cinemachine;
 using UnityEngine;
 using VContainer;
+
+namespace Santa.Infrastructure.Camera
+{
 
 public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
 {
@@ -152,4 +156,5 @@ public class CombatCameraManager : MonoBehaviour, ICombatCameraManager
             inactiveCam.Priority = INACTIVE_PRIORITY;
         }
     }
+}
 }

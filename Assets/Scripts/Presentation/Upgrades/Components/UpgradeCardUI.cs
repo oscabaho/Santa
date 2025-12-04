@@ -1,10 +1,14 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Santa.Domain.Combat;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+namespace Santa.Presentation.Upgrades
+{
 
 /// <summary>
 /// Represents an individual upgrade card in the UI.
@@ -126,23 +130,39 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     private async UniTaskVoid AnimateScale(Vector3 targetScale, CancellationToken token)
     {
-        Vector3 startScale = transform.localScale;
-        float elapsed = 0f;
-
-        while (elapsed < animationDuration)
+        try
         {
-            if (token.IsCancellationRequested) return;
+            Vector3 startScale = transform.localScale;
+            float elapsed = 0f;
 
-            elapsed += Time.unscaledDeltaTime;
-            float t = elapsed / animationDuration;
+            while (elapsed < animationDuration)
+            {
+                if (token.IsCancellationRequested) return;
 
-            // Ease-out cubic for a smooth animation
-            t = 1f - Mathf.Pow(1f - t, 3f);
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / animationDuration;
 
-            transform.localScale = Vector3.Lerp(startScale, targetScale, t);
-            await UniTask.Yield(PlayerLoopTiming.Update);
+                // Ease-out cubic for a smooth animation
+                t = 1f - Mathf.Pow(1f - t, 3f);
+
+                transform.localScale = Vector3.Lerp(startScale, targetScale, t);
+                await UniTask.Yield(PlayerLoopTiming.Update);
+            }
+
+            transform.localScale = targetScale;
         }
-
-        transform.localScale = targetScale;
+        catch (System.OperationCanceledException)
+        {
+            // Expected during scene transitions
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeCardUI.AnimateScale: Exception: {ex.Message}");
+            GameLog.LogException(ex);
+            // Reset scale to target
+            if (this != null && transform != null)
+                transform.localScale = targetScale;
+        }
     }
+}
 }

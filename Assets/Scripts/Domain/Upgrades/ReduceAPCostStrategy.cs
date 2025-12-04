@@ -1,12 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ReduceAPCostStrategy", menuName = "Santa/Upgrades/Strategies/Reduce AP Cost")]
-public class ReduceAPCostStrategy : UpgradeStrategySO
+namespace Santa.Domain.Upgrades
 {
-    public int CostReduction = 1;
-
-    public override void Apply(IUpgradeTarget target)
+    [CreateAssetMenu(fileName = "ReduceAPCostStrategy", menuName = "Santa/Upgrades/Strategies/Reduce AP Cost")]
+    public class ReduceAPCostStrategy : UpgradeStrategySO
     {
-        target.IncreaseGlobalAPCostReduction(CostReduction);
+        public int CostReduction = 1;
+
+        public override void Apply(IUpgradeTarget target)
+        {
+            target.IncreaseGlobalAPCostReduction(CostReduction);
+        }
     }
 }

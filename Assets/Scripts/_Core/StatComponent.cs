@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Santa.Core;
 
 [Serializable]
 public abstract class StatComponent : IStatController

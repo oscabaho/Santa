@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Santa.Core;
+using Santa.Core.Config;
+using Santa.Domain.Combat;
+using Santa.Presentation.Combat;
 
-/// <summary>
-/// Manages the state of combat including participants, components, and synchronization.
-/// Separates state management from combat flow logic.
-/// </summary>
-public class CombatStateManager : ICombatStateManager
+namespace Santa.Infrastructure.Combat
+{
+    /// <summary>
+    /// Manages the state of combat including participants, components, and synchronization.
+    /// Separates state management from combat flow logic.
+    /// </summary>
+    public class CombatStateManager : ICombatStateManager
 {
     public CombatState State { get; private set; } = new CombatState();
     public bool IsInitialized { get; private set; }
@@ -125,4 +131,5 @@ public class CombatStateManager : ICombatStateManager
         GameLog.LogVerbose($"CombatStateManager: Initialized successfully. Player: {State.Player.name}, Enemies: {State.Enemies.Count}");
 #endif
     }
+}
 }

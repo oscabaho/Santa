@@ -1,24 +1,28 @@
 using UnityEngine;
+using Santa.Core;
 
-[CreateAssetMenu(fileName = "IncreaseDamageStrategy", menuName = "Santa/Upgrades/Strategies/Increase Damage")]
-public class IncreaseDamageStrategy : UpgradeStrategySO
+namespace Santa.Domain.Upgrades
 {
-    public AbilityType TargetAbility;
-    public int DamageIncrease;
-
-    public override void Apply(IUpgradeTarget target)
+    [CreateAssetMenu(fileName = "IncreaseDamageStrategy", menuName = "Santa/Upgrades/Strategies/Increase Damage")]
+    public class IncreaseDamageStrategy : UpgradeStrategySO
     {
-        switch (TargetAbility)
+        public AbilityType TargetAbility;
+        public int DamageIncrease;
+
+        public override void Apply(IUpgradeTarget target)
         {
-            case AbilityType.DirectAttack:
-                target.IncreaseDirectAttackDamage(DamageIncrease);
-                break;
-            case AbilityType.AreaAttack:
-                target.IncreaseAreaAttackDamage(DamageIncrease);
-                break;
-            case AbilityType.SpecialAttack:
-                target.IncreaseSpecialAttackDamage(DamageIncrease);
-                break;
+            switch (TargetAbility)
+            {
+                case AbilityType.DirectAttack:
+                    target.IncreaseDirectAttackDamage(DamageIncrease);
+                    break;
+                case AbilityType.AreaAttack:
+                    target.IncreaseAreaAttackDamage(DamageIncrease);
+                    break;
+                case AbilityType.SpecialAttack:
+                    target.IncreaseSpecialAttackDamage(DamageIncrease);
+                    break;
+            }
         }
     }
 }

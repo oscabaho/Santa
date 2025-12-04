@@ -5,6 +5,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 #endif
 
+namespace Santa.Presentation.UI
+{
+
 /// <summary>
 /// Ensures the EventSystem is correctly configured for the new Input System UI.
 /// - Adds EventSystem if missing
@@ -74,4 +77,5 @@ public class UIEventSystemConfigurator : MonoBehaviour
 #endif
 #endif
     }
+}
 }
