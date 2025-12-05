@@ -65,6 +65,18 @@ namespace Santa.Core.Save
                 return false;
             }
 
+            // Timestamp should not be from before game was created (2000 is a reasonable minimum)
+            if (savedTime != default && savedTime.Year < 2000)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning($"SaveData.Validate: Save timestamp is unreasonably old: {savedTime}");
+#endif
+                return false;
+            }
+
+            // At least one upgrade should have been acquired or this is a fresh save
+            // (This is not a validation failure, just informational)
+
             // All checks passed
             return true;
         }

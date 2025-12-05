@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Santa.Core.Config;
 
@@ -12,12 +13,9 @@ namespace Santa.Domain.Combat
         public override void ResolveTargets(GameObject caster, GameObject primaryTarget, IReadOnlyList<GameObject> allCombatants, List<GameObject> results, Ability ability)
         {
             var _enemyPool = new List<GameObject>(8);
-            foreach (var combatant in allCombatants)
+            foreach (var combatant in allCombatants.Where(c => c != null && c.CompareTag(GameConstants.Tags.Enemy)))
             {
-                if (combatant != null && combatant.CompareTag(GameConstants.Tags.Enemy))
-                {
-                    _enemyPool.Add(combatant);
-                }
+                _enemyPool.Add(combatant);
             }
 
             if (primaryTarget != null && primaryTarget.activeInHierarchy && _enemyPool.Contains(primaryTarget))

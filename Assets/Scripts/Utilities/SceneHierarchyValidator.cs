@@ -48,7 +48,7 @@ public class SceneHierarchyValidator : MonoBehaviour
         WarnIfMissingComponentInRoot<LevelManager>(managersRoot, nameof(LevelManager));
         WarnIfMissingComponentInRoot<TurnBasedCombatManager>(managersRoot, nameof(TurnBasedCombatManager));
         ValidateGraphicsSettingsManagerPlacement();
-        WarnIfMissingComponentInRoot<Santa.Infrastructure.SaveService>(managersRoot, "SaveService");
+        WarnIfMissingComponentInRoot<Santa.Core.Save.SaveService>(managersRoot, "SaveService");
         WarnIfMissingComponentInRoot<Santa.UI.PauseMenuController>(servicesRoot, "PauseMenuController");
 
         // Directional Light recommendation
