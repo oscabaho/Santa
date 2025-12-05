@@ -95,8 +95,12 @@ namespace Santa.Core.Addressables
         /// </summary>
         public static class Enemies
         {
-            public const string CombatEnemy = "CombatEnemy";
+            public const string CombatEnemy_01 = "CombatEnemy_01";
+            public const string CombatEnemy_02 = "CombatEnemy_02";
+            public const string CombatEnemy_03 = "CombatEnemy_03";
             public const string ExplorationEnemy_01 = "ExplorationEnemy_01";
+            public const string ExplorationEnemy_02 = "ExplorationEnemy_02";
+            public const string ExplorationEnemy_03 = "ExplorationEnemy_03";
         }
 
         /// <summary>
@@ -167,11 +171,33 @@ namespace Santa.Core.Addressables
         /// <summary>
         /// Data assets and large databases loaded via Addressables
         /// </summary>
-        public static class DataAssets
+        public static class Upgrades
         {
             public const string AllUpgrades = "Data_AllUpgrades";
             public const string EnemyDatabase = "Data_EnemyDatabase";
             public const string DialogueDatabase = "Data_Dialogues";
+        }
+
+        public static class Changeables
+        {
+            public const string Decor_Enemy_01 = "Decor_Enemy_01";
+            public const string Decor_Enemy_02 = "Decor_Enemy_02";
+            public const string Decor_Enemy_03 = "Decor_Enemy_03";
+        }
+
+        public static class Stats
+        {
+            public const string NormalStats = "NormalStats";
+        }
+
+        public static class Strategies
+        {
+            public const string Speed = "Speed";
+            public const string Critical = "Critical";
+            public const string Damage = "Damage";
+            public const string MaxHealth = "MaxHealth";
+            public const string CostAP_Reduce = "CostAP_Reduce";
+            public const string MissChance_Reduce = "MissChance_Reduce";
         }
     }
 }
