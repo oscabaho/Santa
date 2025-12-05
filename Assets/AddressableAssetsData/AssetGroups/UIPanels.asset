@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: UIPanels
+  m_EditorClassIdentifier: 
+  m_GroupName: UIPanels
+  m_GUID: d3e9ba0277b2c8347877f14cc5ec9cb8
+  m_SerializeEntries:
+  - m_GUID: 53b97047f39b16f45b9ca746043692af
+    m_Address: UpgradeUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8fdb41386ed321244880f5158026bb21
+    m_Address: PauseMenu
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2d9d3ecc59b62e44b8aec4f43fce92e
+    m_Address: VirtualGamepad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0367b209e1974046a7c5a34f1b75657
+    m_Address: CombatUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 613023ba89c97f548b3e1d5ec62dba32, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ab6489062fcba35478f08e4f5ed8eece, type: 2}
+    - {fileID: 11400000, guid: 0bb0c1b45593afe4287f2937e9c846dc, type: 2}

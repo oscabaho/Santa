@@ -32,7 +32,7 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
     // Track all acquired upgrades for persistence
     private readonly List<string> _acquiredUpgrades = new List<string>();
 
-    private Santa.Presentation.Upgrades.UpgradeStatsContainer _stats = new Santa.Presentation.Upgrades.UpgradeStatsContainer();
+    private readonly Santa.Presentation.Upgrades.UpgradeStatsContainer _stats = new Santa.Presentation.Upgrades.UpgradeStatsContainer();
 
     // Player Stats - Delegated to container
     public int DirectAttackDamage => _stats.DirectAttackDamage;

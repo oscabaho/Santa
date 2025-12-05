@@ -162,7 +162,7 @@ public class GameLifetimeScope : LifetimeScope
         }
 
         // Register SaveService from hierarchy only if it exists (optional for test scenes)
-        var saveService = FindFirstObjectByType<Santa.Infrastructure.SaveService>(FindObjectsInactive.Include);
+        var saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>(FindObjectsInactive.Include);
         if (saveService != null)
         {
             builder.RegisterComponent(saveService).As<Santa.Core.Save.ISaveService>().AsSelf();
@@ -199,7 +199,8 @@ public class GameLifetimeScope : LifetimeScope
 
         TryRegisterOptionalComponent<CombatScenePool>(builder);
 
-        // GraphicsSettings components - optional
+        // GraphicsSettings components - only on PC
+#if UNITY_STANDALONE
         var graphicsSettingsManager = FindFirstObjectByType<GraphicsSettingsManager>(FindObjectsInactive.Include);
         if (graphicsSettingsManager != null)
         {
@@ -207,6 +208,7 @@ public class GameLifetimeScope : LifetimeScope
         }
 
         TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
+#endif
 
         // Save-related optional components
         var decorState = FindFirstObjectByType<Santa.Core.Save.EnvironmentDecorState>(FindObjectsInactive.Include);

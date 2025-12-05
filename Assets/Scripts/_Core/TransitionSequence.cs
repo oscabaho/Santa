@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -15,12 +16,9 @@ namespace Santa.Core.Transitions
 
         public async UniTask Execute(TransitionContext context)
         {
-            foreach (var task in Tasks)
+            foreach (var task in Tasks.Where(t => t != null))
             {
-                if (task != null)
-                {
-                    await task.Execute(context);
-                }
+                await task.Execute(context);
             }
         }
     }

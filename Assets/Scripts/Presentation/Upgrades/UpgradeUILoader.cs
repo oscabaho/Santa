@@ -1,5 +1,4 @@
 using System.Threading;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Santa.Core;
 using Santa.Core.Addressables;
@@ -88,6 +87,7 @@ public class UpgradeUILoader : IUpgradeUI
             }
             else
             {
+                // UI load failed
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
 #endif

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer;
-using VContainer.Unity;
 using Santa.Core;
 using Santa.Core.Config;
 using Santa.Domain.Combat;

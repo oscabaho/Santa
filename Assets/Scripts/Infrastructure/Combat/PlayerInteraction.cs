@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using VContainer;
 using Santa.Core;
@@ -19,6 +20,7 @@ namespace Santa.Infrastructure.Combat
     private IObjectResolver _resolver;
     private bool? _desiredActionVisible; // null = no preference yet
     private bool _readyHooked;
+    private Action _onReadyHandler; // Store handler to properly unsubscribe
     private float _lastNoTriggerLogTime;
     private const float NoTriggerLogCooldown = 2f; // seconds between warning logs
 
@@ -68,13 +70,14 @@ namespace Santa.Infrastructure.Combat
         if (_gameplayUIService != null && !_readyHooked)
         {
             _readyHooked = true;
-            _gameplayUIService.Ready += () =>
+            _onReadyHandler = () =>
             {
                 if (_desiredActionVisible.HasValue)
                 {
                     _gameplayUIService.ShowActionButton(_desiredActionVisible.Value);
                 }
             };
+            _gameplayUIService.Ready += _onReadyHandler;
         }
     }
 
@@ -83,6 +86,12 @@ namespace Santa.Infrastructure.Combat
         if (inputReader != null)
         {
             inputReader.InteractEvent -= OnInteract;
+        }
+
+        // Unsubscribe from gameplay UI ready event
+        if (_gameplayUIService != null && _onReadyHandler != null)
+        {
+            _gameplayUIService.Ready -= _onReadyHandler;
         }
 
         // Unsubscribe from combat end event
