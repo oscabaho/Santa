@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d6c86758a8ea045c893d6daf2e45e0df
+guid: 21608ace4688c430db63e1ffd3d21a38
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -8,42 +8,42 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Car paint
-    second: {fileID: 2100000, guid: 52184da9a3a7e41e288ed70ebb376bec, type: 2}
+    second: {fileID: 2100000, guid: 0d538ea388d4d4ad59deefa38d9a5634, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Flip Flop Paint
-    second: {fileID: 2100000, guid: 26b2fe2ca9ff148cda4a51d0f6b71bb0, type: 2}
+    second: {fileID: 2100000, guid: 3308fbf61f86a43ef89e60f8ef3215e7, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Heavy Scratched Painted Steel
-    second: {fileID: 2100000, guid: 30c01dec136c947efa8677d3dbc053f2, type: 2}
+    second: {fileID: 2100000, guid: 69cc5da9a225e44eab7dd73d17cf97f2, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Soft Brushed Steel
-    second: {fileID: 2100000, guid: b8294e1b9eab743998259de4a0324ade, type: 2}
+    second: {fileID: 2100000, guid: 9cde707f09f144469ae962067c3eef57, type: 2}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: painted_steel_heavy_scratched_04_color
-    second: {fileID: 2800000, guid: 0affbad9bc50d42428d0e15bd737b9fe, type: 3}
+    second: {fileID: 2800000, guid: 0fc9fd7f2eae849588f946ef2573e3a9, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: painted_steel_heavy_scratched_04_metallic
-    second: {fileID: 2800000, guid: 1d3b7d6659f44421bb93933faa8fb566, type: 3}
+    second: {fileID: 2800000, guid: 23dc8ebb1184442148ca681c62548651, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: painted_steel_heavy_scratched_04_normal
-    second: {fileID: 2800000, guid: 1521e70b57bbb4dd580799343aa433c1, type: 3}
+    second: {fileID: 2800000, guid: 97b654bce4be54b01ad19a5d194b9c3d, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: painted_steel_heavy_scratched_04_roughness
-    second: {fileID: 2800000, guid: 3bb3fecbf71ad41d8be3a1595097fcc6, type: 3}
+    second: {fileID: 2800000, guid: d8952a335912e43d2a00c3568c15d8b4, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
