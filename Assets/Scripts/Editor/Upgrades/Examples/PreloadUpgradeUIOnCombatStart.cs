@@ -1,15 +1,19 @@
+using Santa.Presentation.Upgrades;
 using UnityEngine;
 using VContainer;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
+namespace Santa.Editor
+{
+
 /// <summary>
-/// Ejemplo de cómo precargar manualmente la UpgradeUI al inicio de un nivel de combate.
-/// Esto evita delay cuando se muestre la UI después de ganar.
+/// Example of manually preloading the UpgradeUI at the start of a combat level.
+/// This avoids a delay when the UI is shown after winning.
 /// 
-/// INSTRUCCIONES:
-/// 1. Añade este script a un GameObject al inicio de tu nivel de combate
-/// 2. O llámalo desde tu script de inicio de combate
+/// INSTRUCTIONS:
+/// 1. Add this script to a GameObject at the start of your combat level
+/// 2. Or call it from your combat start script
 /// </summary>
 public class PreloadUpgradeUIOnCombatStart : MonoBehaviour
 {
@@ -23,11 +27,11 @@ public class PreloadUpgradeUIOnCombatStart : MonoBehaviour
 
     private async void Start()
     {
-        // Precargar la UI en background al inicio del combate
+        // Preload the UI in background at combat start
         GameLog.Log("PreloadUpgradeUIOnCombatStart: Preloading UpgradeUI...");
         await _upgradeUILoader.PreloadAsync();
         GameLog.Log("PreloadUpgradeUIOnCombatStart: Preload completed.");
     }
 }
-
+}
 #endif

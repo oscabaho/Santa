@@ -1,10 +1,15 @@
+using Santa.Core;
+using Santa.Domain.Combat;
 using UnityEngine;
 using VContainer;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
+namespace Santa.Editor
+{
+
 /// <summary>
-/// Script de testing para probar el Upgrade UI sin tener que completar combates.
+/// Testing script to try the Upgrade UI without having to complete combats.
 /// SOLO PARA DESARROLLO - Eliminar en build final.
 /// </summary>
 public class UpgradeUITester : MonoBehaviour
@@ -39,7 +44,7 @@ public class UpgradeUITester : MonoBehaviour
             TestShowUpgrades();
         }
 
-        // Presiona Escape para ocultar (útil para debugging)
+        // Press Escape to hide (useful for debugging)
         if (Input.GetKeyDown(hideUIKey))
         {
             Debug.Log("Testing: Hiding upgrade UI (if visible)");
@@ -81,5 +86,5 @@ public class UpgradeUITester : MonoBehaviour
         }
     }
 }
-
+}
 #endif

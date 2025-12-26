@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CombatArenas
+  m_EditorClassIdentifier: 
+  m_GroupName: CombatArenas
+  m_GUID: cf178f9dced02564fbdb1ed7d5f7089e
+  m_SerializeEntries:
+  - m_GUID: 8965bab1f989aaa44b08071e18849dd5
+    m_Address: CombatArena_01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 613023ba89c97f548b3e1d5ec62dba32, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ea43d2c5da904f7448d1ed5b1a0f5916, type: 2}
+    - {fileID: 11400000, guid: 9ff73fa41e0828e498c494fe20810d67, type: 2}
