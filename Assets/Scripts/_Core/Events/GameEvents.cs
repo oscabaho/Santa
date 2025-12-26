@@ -1,4 +1,5 @@
 using UnityEngine;
+using Santa.Core.Save;
 
 namespace Santa.Core.Events
 {
@@ -67,6 +68,20 @@ public class PlayerSpawnedEvent
     public PlayerSpawnedEvent(GameObject playerObject)
     {
         PlayerObject = playerObject;
+    }
+}
+
+/// <summary>
+/// Event published when a game save is successfully loaded.
+/// Signals to systems that they should restore state from the loaded save data.
+/// </summary>
+public class GameLoadedEvent
+{
+    public SaveData SaveData { get; }
+
+    public GameLoadedEvent(SaveData saveData)
+    {
+        SaveData = saveData;
     }
 }
 

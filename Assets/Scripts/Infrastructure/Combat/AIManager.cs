@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Santa.Core;
 using Santa.Core.Config;
@@ -32,10 +33,8 @@ namespace Santa.Infrastructure.Combat
 
             // Classify combatants: Allies include anyone tagged "Player" (except player to avoid duplicates)
             // Enemies are anyone tagged "Enemy"
-            foreach (var c in allCombatants)
+            foreach (var c in allCombatants.Where(x => x != null && x != player))
             {
-                if (c == null || c == player) continue; // Skip null and player (already added)
-
                 if (c.CompareTag(GameConstants.Tags.Enemy))
                 {
                     _tempEnemies.Add(c);
@@ -47,10 +46,8 @@ namespace Santa.Infrastructure.Combat
                 }
             }
 
-            foreach (var combatant in allCombatants)
+            foreach (var combatant in allCombatants.Where(x => x != null && x != player && x.activeInHierarchy))
             {
-                if (combatant == null || combatant == player || !combatant.activeInHierarchy) continue;
-
                 if (brainCache.TryGetValue(combatant, out var brain) && apCache.TryGetValue(combatant, out var aiAP))
                 {
                     // CRITICAL: Pass enemies and allies in CORRECT order

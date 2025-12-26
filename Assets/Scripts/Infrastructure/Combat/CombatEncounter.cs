@@ -74,7 +74,7 @@ namespace Santa.Infrastructure.Combat
             // In a real scenario, we might check against the Addressables catalog, but that's async/complex in OnValidate.
             // Here we just check if it matches one of our known constants for safety.
 
-            var fields = typeof(Santa.Core.Addressables.AddressableKeys.CombatArenas)
+            var fields = typeof(Santa.Core.Addressables.AddressableKeys.Environments)
                 .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy);
             
             bool isKnown = false;
@@ -90,7 +90,7 @@ namespace Santa.Infrastructure.Combat
 
             if (!isKnown && !combatSceneAddress.StartsWith("CombatArena_"))
             {
-                Debug.LogWarning($"CombatEncounter '{gameObject.name}': '{combatSceneAddress}' is not a known constant in AddressableKeys.CombatArenas and doesn't follow the 'CombatArena_' naming convention.");
+                Debug.LogWarning($"CombatEncounter '{gameObject.name}': '{combatSceneAddress}' is not a known constant in AddressableKeys.Environments and doesn't follow the 'CombatArena_' naming convention.");
             }
         }
     }

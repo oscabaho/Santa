@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace Santa.Presentation.Menus
+namespace Santa.UI
 {
     /// <summary>
     /// Handles fade in/out animations for the pause menu using a CanvasGroup.

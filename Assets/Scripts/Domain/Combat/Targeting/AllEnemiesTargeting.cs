@@ -17,13 +17,11 @@ namespace Santa.Domain.Combat
 
             foreach (var combatant in allCombatants)
             {
-                if (combatant != null && combatant.activeInHierarchy && combatant.CompareTag(enemyTag))
+                // Only add living enemies to the target list
+                if (combatant != null && combatant.activeInHierarchy && combatant.CompareTag(enemyTag) &&
+                    combatant.TryGetComponent<IHealthController>(out var health) && health.CurrentValue > 0)
                 {
-                    // Only add living enemies to the target list
-                    if (combatant.TryGetComponent<IHealthController>(out var health) && health.CurrentValue > 0)
-                    {
-                        results.Add(combatant);
-                    }
+                    results.Add(combatant);
                 }
             }
         }

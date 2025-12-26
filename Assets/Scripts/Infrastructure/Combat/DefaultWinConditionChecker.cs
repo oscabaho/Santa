@@ -1,5 +1,5 @@
+using System.Linq;
 using Santa.Core;
-using Santa.Core.Config;
 using Santa.Domain.Combat;
 
 namespace Santa.Infrastructure.Combat
@@ -20,15 +20,7 @@ namespace Santa.Infrastructure.Combat
             }
 
             // Check for victory
-            bool allEnemiesDefeated = true;
-            foreach (var enemy in combatState.Enemies)
-            {
-                if (enemy != null && enemy.activeInHierarchy)
-                {
-                    allEnemiesDefeated = false;
-                    break;
-                }
-            }
+            bool allEnemiesDefeated = combatState.Enemies.All(enemy => enemy == null || !enemy.activeInHierarchy);
 
             if (allEnemiesDefeated)
             {

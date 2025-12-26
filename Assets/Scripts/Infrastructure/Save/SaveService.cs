@@ -3,7 +3,6 @@ using Santa.Core;
 using Santa.Core.Config;
 using Santa.Core.Events;
 using Santa.Core.Save;
-using Santa.Infrastructure;
 using Santa.Infrastructure.Combat;
 using Cysharp.Threading.Tasks;
 using System.IO;
@@ -11,7 +10,7 @@ using System.Text;
 using UnityEngine;
 using VContainer;
 
-namespace Santa.Infrastructure
+namespace Santa.Core.Save
 {
     // Mobile-first save service storing small JSON snapshots via SecureStorage
     public class SaveService : MonoBehaviour, ISaveService
@@ -19,21 +18,23 @@ namespace Santa.Infrastructure
         private const string SaveKey = "GameSave";
         private const string ManifestKey = "GameSave_Manifest";
         private const string BackupKeyPrefix = "GameSave_Backup_";
-        private const int MaxBackups = 5;
+        private const int MaxBackups = 2;
 
         private ICombatService _combatService;
         private ISaveContributorRegistry _registry;
         private ISecureStorageService _secureStorage;
         private Santa.Core.Player.IPlayerReference _playerRef;
+        private IEventBus _eventBus;
         private float _lastSaveTime;
 
         [Inject]
-        public void Construct(ICombatService combatService, ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, Santa.Core.Player.IPlayerReference playerRef = null)
+        public void Construct(ICombatService combatService, ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, Santa.Core.Player.IPlayerReference playerRef = null, IEventBus eventBus = null)
         {
             _combatService = combatService;
             _secureStorage = secureStorage;
             _registry = registry;
             _playerRef = playerRef;
+            _eventBus = eventBus;
         }
 
         public bool CanSaveNow()
@@ -121,15 +122,35 @@ namespace Santa.Infrastructure
                 return false;
             }
 
-            // Restore player position
+            // Restore player position to respawn point (not the saved position)
+            // This ensures the player always appears at the designated spawn location
             var playerGo = GetPlayerObject();
             if (playerGo != null)
             {
-                playerGo.transform.position = data.playerPosition;
+                var spawnPoint = FindSpawnPoint();
+                if (spawnPoint != null)
+                {
+                    playerGo.transform.position = spawnPoint.position;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log($"SaveService: Player positioned at respawn point: {spawnPoint.position}");
+#endif
+                }
+                else
+                {
+                    // Fallback: use saved position if no respawn point found
+                    playerGo.transform.position = data.playerPosition;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogWarning("SaveService: No respawn point found. Using saved player position instead.");
+#endif
+                }
             }
 
             // Let contributors restore their state
             ReadContributors(in data);
+
+            // Publish game loaded event to notify all systems that save has been loaded
+            _eventBus?.Publish(new GameLoadedEvent(data));
+
             return true;
         }
 
@@ -183,6 +204,29 @@ namespace Santa.Infrastructure
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogError("SaveService: Player reference not available. Ensure IPlayerReference is registered and present in the base scene.");
 #endif
+            return null;
+        }
+
+        private Transform FindSpawnPoint()
+        {
+            // First, try to find by specific SpawnPoint component type (most efficient)
+            var spawnPointComponent = FindFirstObjectByType<SpawnPoint>(FindObjectsInactive.Include);
+            if (spawnPointComponent != null)
+            {
+                var spawnTransform = spawnPointComponent.GetSpawnTransform();
+                if (spawnTransform != null)
+                {
+                    return spawnTransform;
+                }
+            }
+            
+            // Fallback: Search for GameObject named "SpawnPoint"
+            var spawnObj = GameObject.Find("SpawnPoint");
+            if (spawnObj != null)
+            {
+                return spawnObj.transform;
+            }
+            
             return null;
         }
 
