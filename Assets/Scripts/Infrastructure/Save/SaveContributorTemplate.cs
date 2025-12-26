@@ -149,27 +149,5 @@ namespace Santa.Infrastructure.Save
             GameLog.Log($"SaveContributorTemplate: Loaded {_visitedLocations.Count} visited locations, area liberated: {isAreaLiberated}");
 #endif
         }
-
-        // === HELPER METHODS ===
-
-        /// <summary>
-        /// Helper to find a value in extras by key.
-        /// </summary>
-        private bool TryGetExtra(in SaveData data, string key, out string value)
-        {
-            value = null;
-            if (data.extras == null) return false;
-
-            foreach (var kv in data.extras)
-            {
-                if (kv.key == key)
-                {
-                    value = kv.value;
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

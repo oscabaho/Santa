@@ -116,7 +116,7 @@ namespace Santa.Core.Addressables
         /// <summary>
         /// Decorative assets loaded via Addressables
         /// </summary>
-        public static class Derorations
+        public static class Decorations
         {
             public const string Decor_American_01 = "Decor_American_01";
             public const string Decor_American_02 = "Decor_American_02";

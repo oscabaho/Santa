@@ -209,17 +209,14 @@ namespace Santa.Core.Save
 
         private Transform FindSpawnPoint()
         {
-            // First, try to find by component (ISpawnPoint)
-            var allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var mb in allMonoBehaviours)
+            // First, try to find by specific SpawnPoint component type (most efficient)
+            var spawnPointComponent = FindFirstObjectByType<SpawnPoint>(FindObjectsInactive.Include);
+            if (spawnPointComponent != null)
             {
-                if (mb is ISpawnPoint spawnPoint)
+                var spawnTransform = spawnPointComponent.GetSpawnTransform();
+                if (spawnTransform != null)
                 {
-                    var spawnTransform = spawnPoint.GetSpawnTransform();
-                    if (spawnTransform != null)
-                    {
-                        return spawnTransform;
-                    }
+                    return spawnTransform;
                 }
             }
             
