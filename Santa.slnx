@@ -16,7 +16,6 @@
   <Project Path="Unity.Splines.csproj" />
   <Project Path="Unity.Burst.csproj" />
   <Project Path="Unity.VisualScripting.Flow.Editor.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.ProBuilder.Csg.csproj" />
   <Project Path="Unity.Animation.Rigging.csproj" />
   <Project Path="VContainer.csproj" />
@@ -42,6 +41,7 @@
   <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Splines.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.Formats.Alembic.Runtime.csproj" />
   <Project Path="Unity.Sequences.Editor.csproj" />
   <Project Path="UniTask.Linq.csproj" />
