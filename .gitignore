@@ -81,3 +81,6 @@ crashlytics-build.properties
 .LSOverride
 
 .fake
+ 
+# Unity auto-generated solution files (not tracked)
+*.slnx
