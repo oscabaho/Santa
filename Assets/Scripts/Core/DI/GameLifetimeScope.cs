@@ -199,14 +199,21 @@ public class GameLifetimeScope : LifetimeScope
 
         TryRegisterOptionalComponent<CombatScenePool>(builder);
 
-        // GraphicsSettings components - only on PC
+        // GraphicsSettings components - PC and Mobile
 #if UNITY_STANDALONE
         var graphicsSettingsManager = FindFirstObjectByType<GraphicsSettingsManager>(FindObjectsInactive.Include);
         if (graphicsSettingsManager != null)
         {
             builder.RegisterComponent(graphicsSettingsManager).As<IGraphicsSettingsService>().AsSelf();
         }
-
+        else
+        {
+            builder.Register<IGraphicsSettingsService>(_ => new NullGraphicsSettingsService(), Lifetime.Singleton);
+        }
+        TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
+#else
+        // Mobile platforms: register null graphics service
+        builder.Register<IGraphicsSettingsService>(_ => new NullGraphicsSettingsService(), Lifetime.Singleton);
         TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
 #endif
 
@@ -221,13 +228,23 @@ public class GameLifetimeScope : LifetimeScope
         GameLog.Log("GameLifetimeScope CONFIGURED!");
     }
 
-    // Null object implementation to avoid DI chain failures
+    // Null object implementations to avoid DI chain failures
     private class NullCombatCameraManager : ICombatCameraManager
     {
         public void SwitchToMainCamera() { }
         public void SwitchToTargetSelectionCamera() { }
         public void SetCombatCameras(Unity.Cinemachine.CinemachineCamera main, Unity.Cinemachine.CinemachineCamera target) { }
         public void DeactivateCameras() { }
+    }
+
+    private class NullGraphicsSettingsService : IGraphicsSettingsService
+    {
+        public Resolution[] AvailableResolutions => System.Array.Empty<Resolution>();
+        public int GetCurrentResolutionIndex() => 0;
+        public void SetQuality(int qualityIndex) { }
+        public void SetResolution(int resolutionIndex) { }
+        public void SetFullscreen(bool isFullscreen) { }
+        public void SetVSync(bool isEnabled) { }
     }
 
     /// <summary>
