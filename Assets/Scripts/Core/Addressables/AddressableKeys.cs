@@ -1,5 +1,11 @@
 namespace Santa.Core.Addressables
 {
+    // Conventions (Addressables):
+    // - Address = constant value here; must match Addressables address exactly (case-sensitive).
+    // - Prefix by category: UI_*, VFX_*, SFX_* or clear noun (CombatUI, VirtualGamepad).
+    // - Keep groups named the same way (e.g., Decorations group holds Decor_* entries).
+    // - One source of truth: add/edit keys here when new Addressables are created.
+    // - Avoid spaces; use PascalCase or snake with underscores only when required by legacy assets.
     /// <summary>
     /// Centralized Addressable keys for all assets loaded dynamically.
     /// Prevents hardcoded strings and provides compile-time safety.
