@@ -40,4 +40,4 @@ public static class GameLog
     public static void LogVerbose(object message) { }
     public static void LogVerbose(object message, UnityEngine.Object context) { }
 #endif
-}
+}// Cambio de compañero prueba - 01/09/2026 12:07:17
