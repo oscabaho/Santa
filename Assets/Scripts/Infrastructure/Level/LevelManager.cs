@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Santa.Core;
+using Santa.Core.Decor;
 using Santa.Core.Pooling;
 using Santa.Infrastructure.Input;
 using Unity.Cinemachine;
@@ -343,6 +344,52 @@ namespace Santa.Infrastructure.Level
                     }
                 }
             }
+
+            // Instantiate dynamic decorations
+            foreach (var decorSO in levelData.dynamicDecors)
+            {
+                if (decorSO != null)
+                {
+                    if (decorSO.Prefab == null)
+                    {
+                        Debug.LogWarning($"DecorSO {decorSO.name}: No prefab assigned.");
+                        itemsProcessed++;
+                        if (itemsProcessed % batchSize == 0)
+                        {
+                            await UniTask.Yield();
+                        }
+                        continue;
+                    }
+                    Transform targetParent = parent.Find(decorSO.TargetAreaName);
+                    if (targetParent == null)
+                    {
+                        Debug.LogWarning($"DecorSO {decorSO.name}: Target area '{decorSO.TargetAreaName}' not found under {parent.name}.");
+                        itemsProcessed++;
+                        if (itemsProcessed % batchSize == 0)
+                        {
+                            await UniTask.Yield();
+                        }
+                        continue;
+                    }
+                    GameObject instance;
+                    if (useStaticBatching)
+                    {
+                        instance = Instantiate(decorSO.Prefab, targetParent);
+                    }
+                    else
+                    {
+                        instance = _pool != null
+                            ? _pool.Get(decorSO.Prefab.name, decorSO.Prefab, targetParent.position, targetParent.rotation, targetParent)
+                            : Instantiate(decorSO.Prefab, targetParent);
+                        _activeGentrifiedVisuals.Add(instance);
+                    }
+                    itemsProcessed++;
+                    if (itemsProcessed % batchSize == 0)
+                    {
+                        await UniTask.Yield();
+                    }
+                }
+            }
         }
 
         private async UniTask PrewarmLevelVisualsAsync(LevelData levelData)
@@ -364,6 +411,7 @@ namespace Santa.Infrastructure.Level
 
             for (int i = 0; i < levelData.gentrifiedVisuals.Count; i++) AddCount(levelData.gentrifiedVisuals[i]);
             for (int i = 0; i < levelData.liberatedVisuals.Count; i++) AddCount(levelData.liberatedVisuals[i]);
+            for (int i = 0; i < levelData.dynamicDecors.Count; i++) AddCount(levelData.dynamicDecors[i]?.Prefab);
 
             int processed = 0;
             foreach (var kv in countMap)
