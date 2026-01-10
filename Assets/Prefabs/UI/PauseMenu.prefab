@@ -1022,7 +1022,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3e7d059cb1df274eae6ea48047cae22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroup: {fileID: 7333216112814587700}
   fadeDuration: 0.2
 --- !u!1 &8336476257473138877
 GameObject:
