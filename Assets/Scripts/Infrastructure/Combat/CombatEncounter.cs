@@ -13,6 +13,7 @@ namespace Santa.Infrastructure.Combat
 {
     [Header("Scene Setup - Addressables")]
     [Tooltip("Addressable address for this combat scene prefab. The pool will load/instantiate via Addressables. Example: 'CombatArena_Forest', 'CombatArena_Desert'")]
+    [Santa.Core.Attributes.AddressableKeySelection(typeof(Santa.Core.Addressables.AddressableKeys.Environments))]
     [SerializeField] private string combatSceneAddress;
     public string CombatSceneAddress => combatSceneAddress;
 

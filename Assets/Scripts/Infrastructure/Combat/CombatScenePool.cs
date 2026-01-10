@@ -95,7 +95,7 @@ namespace Santa.Infrastructure.Combat
             GameLog.LogError($"CombatScenePool: No valid CombatSceneAddress configured for key '{key}'. Combat arenas MUST be loaded via Addressables.");
         }
 #else
-    UnityEngine.Debug.LogError($"CombatScenePool: UNITY_ADDRESSABLES is not defined. Combat arenas cannot be loaded. Please ensure the Addressables package is installed and the scripting define is set.");
+        UnityEngine.Debug.LogError($"CombatScenePool: UNITY_ADDRESSABLES is not defined. Combat arenas cannot be loaded. Please ensure the Addressables package is installed and the scripting define is set.");
 #endif
 
         return null;

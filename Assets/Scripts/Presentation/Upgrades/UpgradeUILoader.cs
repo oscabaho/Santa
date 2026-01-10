@@ -9,6 +9,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
 using VContainer.Unity;
+using Santa.Presentation.UI;
 
 namespace Santa.Presentation.Upgrades
 {
@@ -188,7 +189,34 @@ public class UpgradeUILoader : IUpgradeUI
 #endif
                     }
 
-                    Object.DontDestroyOnLoad(instantiatedObject);
+                    // Get parent for UI panels
+                    Transform parent = null;
+                    var uiManager = Object.FindAnyObjectByType<Santa.Presentation.UI.UIManager>();
+                    if (uiManager != null && uiManager.dynamicPanelsParent != null)
+                    {
+                        parent = uiManager.dynamicPanelsParent;
+                    }
+                    else
+                    {
+                        var dynamicPanels = GameObject.Find("DynamicPanels");
+                        if (dynamicPanels != null) parent = dynamicPanels.transform;
+                    }
+
+                    instantiatedObject.transform.SetParent(parent, false);
+                    instantiatedObject.transform.SetAsLastSibling();
+
+                    // Ensure it has a Canvas with high sorting order to appear above Combat UI (5000)
+                    if (!instantiatedObject.TryGetComponent<Canvas>(out var canvas))
+                    {
+                        canvas = instantiatedObject.AddComponent<Canvas>();
+                    }
+                    canvas.overrideSorting = true;
+                    canvas.sortingOrder = 5500;
+
+                    if (!instantiatedObject.TryGetComponent<UnityEngine.UI.GraphicRaycaster>(out _))
+                    {
+                        instantiatedObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                    }
 
                     _isLoaded = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

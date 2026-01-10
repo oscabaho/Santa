@@ -64,8 +64,8 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             closeButton.onClick.AddListener(OnCloseButtonClicked);
 
         // Ensure canvas group exists
-        if (canvasGroup == null)
-            canvasGroup = upgradePanel?.GetComponent<CanvasGroup>();
+        if (canvasGroup == null && upgradePanel != null)
+            canvasGroup = upgradePanel.GetComponent<CanvasGroup>();
 
         // Start hidden
         HideImmediate();
@@ -178,9 +178,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             {
                 if (token.IsCancellationRequested) return;
 
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
+                if (canvasGroup == null) return;
                 canvasGroup.alpha = Mathf.Clamp01(elapsed / fadeInDuration);
                 await UniTask.Yield(PlayerLoopTiming.Update);
+                if (canvasGroup == null) return;
             }
 
             canvasGroup.alpha = 1f;
@@ -213,9 +215,11 @@ public class UpgradeUI : MonoBehaviour, IUpgradeUI
             {
                 if (token.IsCancellationRequested) return;
 
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
+                if (canvasGroup == null) return;
                 canvasGroup.alpha = Mathf.Clamp01(1f - (elapsed / fadeInDuration));
                 await UniTask.Yield(PlayerLoopTiming.Update);
+                if (canvasGroup == null) return;
             }
 
             canvasGroup.alpha = 0f;

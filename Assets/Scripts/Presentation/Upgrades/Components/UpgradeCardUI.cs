@@ -147,6 +147,7 @@ public class UpgradeCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
                 transform.localScale = Vector3.Lerp(startScale, targetScale, t);
                 await UniTask.Yield(PlayerLoopTiming.Update);
+                if (this == null) return; // Added null check
             }
 
             transform.localScale = targetScale;
