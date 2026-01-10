@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Santa.Core
+namespace Santa.Infrastructure.Level
 {
     /// <summary>
     /// Component to mark the anchor point for a level's visuals in the scene hierarchy.
