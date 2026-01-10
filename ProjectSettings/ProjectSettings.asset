@@ -786,6 +786,7 @@ PlayerSettings:
   hmiLogStartupTiming: 0
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
+  scriptingDefineSymbolsForGroup_5: UNITY_ADDRESSABLES
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
