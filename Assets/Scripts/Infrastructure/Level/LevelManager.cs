@@ -273,10 +273,24 @@ namespace Santa.Infrastructure.Level
             }
         }
 
+        private LevelAnchor FindLevelAnchor(string levelName)
+        {
+            LevelAnchor[] anchors = FindObjectsByType<LevelAnchor>(FindObjectsSortMode.None);
+            foreach (var anchor in anchors)
+            {
+                if (anchor.levelName == levelName)
+                {
+                    return anchor;
+                }
+            }
+            return null;
+        }
+
         private async UniTask InstantiateLevelVisualsAsync(LevelData levelData)
         {
-            // Use the specified parent if available, otherwise use this manager's transform.
-            Transform parent = levelVisualsParent != null ? levelVisualsParent : transform;
+            // Find the level anchor in the scene, or fall back to the manager's parent.
+            LevelAnchor anchor = FindLevelAnchor(levelData.levelName);
+            Transform parent = anchor != null ? anchor.transform : (levelVisualsParent != null ? levelVisualsParent : transform);
 
             if (useStaticBatching)
             {
