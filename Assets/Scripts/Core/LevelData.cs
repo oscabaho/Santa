@@ -20,6 +20,13 @@ public class LevelData : ScriptableObject
     public float transitionRadius = 50f;
 
     [Header("Visual State GameObjects")]
-    [Tooltip("All visuals for this level, including static and dynamic decorations.")]
-    public List<DecorSO> visuals;
+    [Tooltip("Visuals to be active when the area is in its initial, 'gentrified' state (e.g., North American Christmas).")]
+    public List<GameObject> gentrifiedVisuals;
+
+    [Tooltip("Visuals to be active when the area is 'liberated' (e.g., Colombian Christmas).")]
+    public List<GameObject> liberatedVisuals;
+
+    [Header("Dynamic Decorations")]
+    [Tooltip("Dynamic decorations to instantiate for this level.")]
+    public List<DecorSO> dynamicDecors;
 }
