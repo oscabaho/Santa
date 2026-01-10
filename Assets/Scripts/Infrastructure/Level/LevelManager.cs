@@ -275,8 +275,8 @@ namespace Santa.Infrastructure.Level
 
         private async UniTask InstantiateLevelVisualsAsync(LevelData levelData)
         {
-            // Use the specified parent if available, otherwise use this manager's transform.
-            Transform parent = levelVisualsParent != null ? levelVisualsParent : transform;
+            // Use the level-specific parent if available, otherwise fall back to the manager's parent or this transform.
+            Transform parent = levelData.levelVisualsParent != null ? levelData.levelVisualsParent : (levelVisualsParent != null ? levelVisualsParent : transform);
 
             if (useStaticBatching)
             {

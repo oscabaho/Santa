@@ -25,8 +25,8 @@ namespace Santa.Core
         [Tooltip("The name of the level or area.")]
         public string levelName;
 
-        [Header("Transition Settings")]
-        [Tooltip("The world position where the liberation wave originates and the camera focuses.")]
+    [Tooltip("The transform in the hierarchy where this level's visuals will be instantiated.")]
+    public Transform levelVisualsParent;
         public Vector3 transitionCenter;
         [Tooltip("The radius of the area to be liberated (how far the wave goes).")]
         public float transitionRadius = 50f;
