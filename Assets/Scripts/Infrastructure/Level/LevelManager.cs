@@ -273,9 +273,9 @@ namespace Santa.Infrastructure.Level
             }
         }
 
-        private LevelAnchor FindLevelAnchor(string levelName)
+        private Santa.Core.LevelAnchor FindLevelAnchor(string levelName)
         {
-            LevelAnchor[] anchors = FindObjectsByType<LevelAnchor>(FindObjectsSortMode.None);
+            Santa.Core.LevelAnchor[] anchors = FindObjectsByType<Santa.Core.LevelAnchor>(FindObjectsSortMode.None);
             foreach (var anchor in anchors)
             {
                 if (anchor.levelName == levelName)
@@ -286,10 +286,10 @@ namespace Santa.Infrastructure.Level
             return null;
         }
 
-        private async UniTask InstantiateLevelVisualsAsync(LevelData levelData)
+        private async UniTask InstantiateLevelVisualsAsync(Santa.Core.LevelData levelData)
         {
             // Find the level anchor in the scene, or fall back to the manager's parent.
-            LevelAnchor anchor = FindLevelAnchor(levelData.levelName);
+            Santa.Core.LevelAnchor anchor = FindLevelAnchor(levelData.levelName);
             Transform parent = anchor != null ? anchor.transform : (levelVisualsParent != null ? levelVisualsParent : transform);
 
             if (useStaticBatching)
