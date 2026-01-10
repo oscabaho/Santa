@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,16 @@ namespace Santa.Core
     [CreateAssetMenu(fileName = "New LevelData", menuName = "Santa/Level Data")]
     public class LevelData : ScriptableObject
     {
+        [Serializable]
+        public struct DynamicDecor
+        {
+            [Tooltip("The prefab to instantiate.")]
+            public GameObject prefab;
+
+            [Tooltip("The name of the area parent under level visuals (e.g., 'Area_01' for Level_01).")]
+            public string targetAreaName;
+        }
+
         [Header("Level Information")]
         [Tooltip("The name of the level or area.")]
         public string levelName;
@@ -29,5 +40,9 @@ namespace Santa.Core
 
         [Tooltip("Visuals to be active when the area is 'liberated' (e.g., Colombian Christmas).")]
         public List<GameObject> liberatedVisuals;
+
+        [Header("Dynamic Decorations")]
+        [Tooltip("Dynamic decorations to instantiate for this level.")]
+        public List<DynamicDecor> dynamicDecors;
     }
 }
