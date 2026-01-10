@@ -275,8 +275,8 @@ namespace Santa.Infrastructure.Level
 
         private async UniTask InstantiateLevelVisualsAsync(LevelData levelData)
         {
-            // Use the level-specific parent if available, otherwise fall back to the manager's parent or this transform.
-            Transform parent = levelData.levelVisualsParent != null ? levelData.levelVisualsParent : (levelVisualsParent != null ? levelVisualsParent : transform);
+            // Use the specified parent if available, otherwise use this manager's transform.
+            Transform parent = levelVisualsParent != null ? levelVisualsParent : transform;
 
             if (useStaticBatching)
             {
@@ -343,42 +343,6 @@ namespace Santa.Infrastructure.Level
                     }
                 }
             }
-
-            // Instantiate dynamic decorations
-            foreach (var decor in levelData.dynamicDecors)
-            {
-                if (decor.prefab != null)
-                {
-                    Transform targetParent = parent.Find(decor.targetAreaName);
-                    if (targetParent == null)
-                    {
-                        Debug.LogWarning($"DynamicDecor: Target area '{decor.targetAreaName}' not found under {parent.name}.");
-                        itemsProcessed++;
-                        if (itemsProcessed % batchSize == 0)
-                        {
-                            await UniTask.Yield();
-                        }
-                        continue;
-                    }
-                    GameObject instance;
-                    if (useStaticBatching)
-                    {
-                        instance = Instantiate(decor.prefab, targetParent);
-                    }
-                    else
-                    {
-                        instance = _pool != null
-                            ? _pool.Get(decor.prefab.name, decor.prefab, targetParent.position, targetParent.rotation, targetParent)
-                            : Instantiate(decor.prefab, targetParent);
-                        _activeGentrifiedVisuals.Add(instance);
-                    }
-                    itemsProcessed++;
-                    if (itemsProcessed % batchSize == 0)
-                    {
-                        await UniTask.Yield();
-                    }
-                }
-            }
         }
 
         private async UniTask PrewarmLevelVisualsAsync(LevelData levelData)
@@ -400,7 +364,6 @@ namespace Santa.Infrastructure.Level
 
             for (int i = 0; i < levelData.gentrifiedVisuals.Count; i++) AddCount(levelData.gentrifiedVisuals[i]);
             for (int i = 0; i < levelData.liberatedVisuals.Count; i++) AddCount(levelData.liberatedVisuals[i]);
-            for (int i = 0; i < levelData.dynamicDecors.Count; i++) AddCount(levelData.dynamicDecors[i].prefab);
 
             int processed = 0;
             foreach (var kv in countMap)
