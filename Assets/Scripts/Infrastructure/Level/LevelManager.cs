@@ -293,60 +293,7 @@ namespace Santa.Infrastructure.Level
             int itemsProcessed = 0;
             const int batchSize = 5; // Process 5 items before yielding
 
-            foreach (var prefab in levelData.gentrifiedVisuals)
-            {
-                if (prefab != null)
-                {
-                    GameObject instance;
-                    if (useStaticBatching)
-                    {
-                        instance = Instantiate(prefab, _gentrifiedContainer.transform);
-                    }
-                    else
-                    {
-                        instance = _pool != null
-                            ? _pool.Get(prefab.name, prefab, parent.position, parent.rotation, parent)
-                            : Instantiate(prefab, parent);
-                        _activeGentrifiedVisuals.Add(instance);
-                    }
-
-                    itemsProcessed++;
-
-                    if (itemsProcessed % batchSize == 0)
-                    {
-                        await UniTask.Yield();
-                    }
-                }
-            }
-            foreach (var prefab in levelData.liberatedVisuals)
-            {
-                if (prefab != null)
-                {
-                    GameObject instance;
-                    if (useStaticBatching)
-                    {
-                        instance = Instantiate(prefab, _liberatedContainer.transform);
-                    }
-                    else
-                    {
-                        instance = _pool != null
-                            ? _pool.Get(prefab.name, prefab, parent.position, parent.rotation, parent)
-                            : Instantiate(prefab, parent);
-                        instance.SetActive(false);
-                        _activeLiberatedVisuals.Add(instance);
-                    }
-
-                    itemsProcessed++;
-
-                    if (itemsProcessed % batchSize == 0)
-                    {
-                        await UniTask.Yield();
-                    }
-                }
-            }
-
-            // Instantiate dynamic decorations
-            foreach (var decorSO in levelData.dynamicDecors)
+            foreach (var decorSO in levelData.visuals)
             {
                 if (decorSO != null)
                 {
@@ -360,17 +307,31 @@ namespace Santa.Infrastructure.Level
                         }
                         continue;
                     }
-                    Transform targetParent = parent.Find(decorSO.TargetAreaName);
-                    if (targetParent == null)
+
+                    Transform targetParent;
+                    if (decorSO.TargetAreaName == "Gentrified")
                     {
-                        Debug.LogWarning($"DecorSO {decorSO.name}: Target area '{decorSO.TargetAreaName}' not found under {parent.name}.");
-                        itemsProcessed++;
-                        if (itemsProcessed % batchSize == 0)
-                        {
-                            await UniTask.Yield();
-                        }
-                        continue;
+                        targetParent = useStaticBatching ? _gentrifiedContainer.transform : parent;
                     }
+                    else if (decorSO.TargetAreaName == "Liberated")
+                    {
+                        targetParent = useStaticBatching ? _liberatedContainer.transform : parent;
+                    }
+                    else
+                    {
+                        targetParent = parent.Find(decorSO.TargetAreaName);
+                        if (targetParent == null)
+                        {
+                            Debug.LogWarning($"DecorSO {decorSO.name}: Target area '{decorSO.TargetAreaName}' not found under {parent.name}.");
+                            itemsProcessed++;
+                            if (itemsProcessed % batchSize == 0)
+                            {
+                                await UniTask.Yield();
+                            }
+                            continue;
+                        }
+                    }
+
                     GameObject instance;
                     if (useStaticBatching)
                     {
@@ -381,8 +342,22 @@ namespace Santa.Infrastructure.Level
                         instance = _pool != null
                             ? _pool.Get(decorSO.Prefab.name, decorSO.Prefab, targetParent.position, targetParent.rotation, targetParent)
                             : Instantiate(decorSO.Prefab, targetParent);
-                        _activeGentrifiedVisuals.Add(instance);
+
+                        if (decorSO.TargetAreaName == "Gentrified")
+                        {
+                            _activeGentrifiedVisuals.Add(instance);
+                        }
+                        else if (decorSO.TargetAreaName == "Liberated")
+                        {
+                            instance.SetActive(false);
+                            _activeLiberatedVisuals.Add(instance);
+                        }
+                        else
+                        {
+                            _activeGentrifiedVisuals.Add(instance);
+                        }
                     }
+
                     itemsProcessed++;
                     if (itemsProcessed % batchSize == 0)
                     {
@@ -409,9 +384,7 @@ namespace Santa.Infrastructure.Level
                 }
             }
 
-            for (int i = 0; i < levelData.gentrifiedVisuals.Count; i++) AddCount(levelData.gentrifiedVisuals[i]);
-            for (int i = 0; i < levelData.liberatedVisuals.Count; i++) AddCount(levelData.liberatedVisuals[i]);
-            for (int i = 0; i < levelData.dynamicDecors.Count; i++) AddCount(levelData.dynamicDecors[i]?.Prefab);
+            for (int i = 0; i < levelData.visuals.Count; i++) AddCount(levelData.visuals[i]?.Prefab);
 
             int processed = 0;
             foreach (var kv in countMap)
