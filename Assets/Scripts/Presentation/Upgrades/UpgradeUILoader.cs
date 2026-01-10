@@ -192,9 +192,9 @@ public class UpgradeUILoader : IUpgradeUI
                     // Get parent for UI panels
                     Transform parent = null;
                     var uiManager = Object.FindAnyObjectByType<Santa.Presentation.UI.UIManager>();
-                    if (uiManager != null && uiManager.dynamicPanelsParent != null)
+                    if (uiManager != null && uiManager.DynamicPanelsParent != null)
                     {
-                        parent = uiManager.dynamicPanelsParent;
+                        parent = uiManager.DynamicPanelsParent;
                     }
                     else
                     {

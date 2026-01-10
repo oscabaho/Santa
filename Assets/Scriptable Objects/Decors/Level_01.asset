@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5304dad955fab24fbacfac9e1042d44, type: 3}
+  m_Name: Level_01
+  m_EditorClassIdentifier: 
+  levelName: Area_01
+  transitionCenter: {x: 30, y: 0, z: 48}
+  transitionRadius: 50
+  gentrifiedVisuals:
+  - {fileID: 1019461515245079698, guid: eba218b21d20db242835843e854ce0ab, type: 3}
+  liberatedVisuals:
+  - {fileID: 3418305607186276362, guid: f7db1480dabcf104e838b020a19b0164, type: 3}

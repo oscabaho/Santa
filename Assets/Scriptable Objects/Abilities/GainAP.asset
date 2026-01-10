@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b084f5263b1d51c4a849b3e8a1e96861, type: 3}
+  m_Name: GainAP
+  m_EditorClassIdentifier: 
+  _abilityName: Ganar
+  _description: 'ganar 50 puntos de accion '
+  _apCost: 0
+  _targeting: {fileID: 11400000, guid: 66dc4bc5c9e6d734b979667e6fedb4c3, type: 2}
+  _targetPercentage: 1
+  _actionSpeed: 1000
+  amountToGain: 50

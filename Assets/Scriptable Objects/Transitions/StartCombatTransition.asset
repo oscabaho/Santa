@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2235f2c7243d01e448512f8b17e9769d, type: 3}
+  m_Name: StartCombatTransition
+  m_EditorClassIdentifier: 
+  Tasks:
+  - {fileID: 11400000, guid: 8385835aa2a97264aa503dfc8fb8b8b3, type: 2}
+  - {fileID: 11400000, guid: da38c4dcf307ae046a84f5aa5203f6a5, type: 2}
+  - {fileID: 11400000, guid: d7d664bc337029d4a8a861f0a1ab14b8, type: 2}
+  - {fileID: 11400000, guid: e496a13a86bde3b4fa7b30c117a7967e, type: 2}

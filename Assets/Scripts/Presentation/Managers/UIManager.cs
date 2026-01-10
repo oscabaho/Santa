@@ -17,6 +17,8 @@ public class UIManager : MonoBehaviour, IUIManager
     private IObjectResolver _resolver;
     [SerializeField] private Transform dynamicPanelsParent; // Optional parent for runtime Addressables panels
 
+    public Transform DynamicPanelsParent => dynamicPanelsParent;
+
     [Inject]
     public void Construct(IObjectResolver resolver)
     {

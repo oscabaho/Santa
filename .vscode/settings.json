@@ -67,5 +67,7 @@
         "*.sln": "*.csproj"
     },
     "dotrush.roslyn.projectOrSolutionFiles": [
-    "Santa.slnx"
-  ]}
+        "Santa.slnx"
+    ],
+    "dotnet.defaultSolution": "Santa.slnx"
+}

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b807b319f29404428fa138af4e311a4, type: 3}
+  m_Name: Direct
+  m_EditorClassIdentifier: 
+  _abilityName: Direct
+  _description: 
+  _apCost: 1
+  _targeting: {fileID: 11400000, guid: 81ab65a2ae5c7914a8d28b05344db663, type: 2}
+  _targetPercentage: 1
+  _actionSpeed: 100
+  _damage: 10
