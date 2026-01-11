@@ -63,7 +63,7 @@ namespace Santa.Core.Addressables
             /// <summary>Self-targeting</summary>
             public const string Self = "SelfTargeting";
         }
-        
+
         /// <summary>
         /// Audio clips and music tracks (if loaded via Addressables)
         /// Currently music is loaded as Resources, but migration to Addressables is recommended
@@ -75,7 +75,7 @@ namespace Santa.Core.Addressables
             public const string ExplorationMusic = "Exploration_Theme";
             public const string BossMusic = "Boss_Theme";
             public const string MenuMusic = "Menu_Theme";
-            
+
             // Sound effects categories
             public const string PlayerAttackSFX = "SFX_Player_Attack";
             public const string EnemyHitSFX = "SFX_Enemy_Hit";
@@ -105,8 +105,6 @@ namespace Santa.Core.Addressables
             public const string CombatEnemy_02 = "CombatEnemy_02";
             public const string CombatEnemy_03 = "CombatEnemy_03";
             public const string ExplorationEnemy_01 = "ExplorationEnemy_01";
-            public const string ExplorationEnemy_02 = "ExplorationEnemy_02";
-            public const string ExplorationEnemy_03 = "ExplorationEnemy_03";
         }
 
         /// <summary>

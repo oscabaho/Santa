@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80b8d72437589784f9d753e84cd22d7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  combatSceneAddress: CombatArena_Forest_01
+  combatSceneAddress: CombatArena_01
   combatCamera: {fileID: 0}
   autoPrewarm: 0
   prewarmCount: 1

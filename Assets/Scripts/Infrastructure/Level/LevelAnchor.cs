@@ -8,7 +8,7 @@ namespace Santa.Infrastructure.Level
     /// </summary>
     public class LevelAnchor : MonoBehaviour
     {
-        [Tooltip("The name of the level this anchor corresponds to.")]
-        public string levelName;
+        [Tooltip("The Level Data asset this anchor corresponds to.")]
+        public Santa.Core.LevelData levelData;
     }
 }

@@ -15,4 +15,7 @@ MonoBehaviour:
   levelName: Area_01
   transitionCenter: {x: 30, y: 0, z: 48}
   transitionRadius: 50
-  visuals: []
+  gentrifiedVisuals:
+  - {fileID: 1019461515245079698, guid: eba218b21d20db242835843e854ce0ab, type: 3}
+  liberatedVisuals:
+  - {fileID: 7573881856739520933, guid: 86086a855848a2043b23b237ec2d2be1, type: 3}

@@ -1,19 +1,19 @@
+using Santa.Core;
+using Santa.Core.Player;
+using Santa.Core.Pooling;
+using Santa.Domain.Upgrades;
+using Santa.Infrastructure.Camera;
+using Santa.Infrastructure.Combat;
+using Santa.Infrastructure.Input;
+using Santa.Infrastructure.Level;
+using Santa.Infrastructure.State;
+using Santa.Presentation.HUD;
+using Santa.Presentation.Menus;
+using Santa.Presentation.UI;
+using Santa.Presentation.Upgrades;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
-using Santa.Core;
-using Santa.Core.Pooling;
-using Santa.Core.Player;
-using Santa.Infrastructure.Input;
-using Santa.Infrastructure.Combat;
-using Santa.Infrastructure.State;
-using Santa.Infrastructure.Level;
-using Santa.Infrastructure.Camera;
-using Santa.Presentation.UI;
-using Santa.Presentation.Upgrades;
-using Santa.Presentation.HUD;
-using Santa.Presentation.Menus;
-using Santa.Domain.Upgrades;
 
 public class GameLifetimeScope : LifetimeScope
 {
@@ -158,7 +158,7 @@ public class GameLifetimeScope : LifetimeScope
             playerRef = go.AddComponent<PlayerReference>();
             DontDestroyOnLoad(go);
             builder.RegisterComponent(playerRef).As<IPlayerReference>().AsSelf();
-            GameLog.LogWarning("GameLifetimeScope: PlayerReference component not found. Created auto-discovery instance. Consider adding PlayerReference to the base scene for reliability.");
+            GameLog.Log("GameLifetimeScope: PlayerReference component not found. Created auto-discovery instance. Consider adding PlayerReference to the base scene for reliability.");
         }
 
         // Register SaveService from hierarchy only if it exists (optional for test scenes)
@@ -179,10 +179,10 @@ public class GameLifetimeScope : LifetimeScope
 
         // PauseMenuController as IPauseMenuService (required for exploration pause)
         var pauseMenuController = FindFirstObjectByType<Santa.UI.PauseMenuController>(FindObjectsInactive.Include);
-           GameLog.Log($"GameLifetimeScope: Searching for PauseMenuController... Found: {pauseMenuController != null}");
+        GameLog.Log($"GameLifetimeScope: Searching for PauseMenuController... Found: {pauseMenuController != null}");
         if (pauseMenuController != null)
         {
-               GameLog.Log($"GameLifetimeScope: Registering PauseMenuController '{pauseMenuController.gameObject.name}' as IPauseMenuService");
+            GameLog.Log($"GameLifetimeScope: Registering PauseMenuController '{pauseMenuController.gameObject.name}' as IPauseMenuService");
             builder.RegisterComponent(pauseMenuController).As<Santa.Core.IPauseMenuService>().AsSelf();
         }
         else
