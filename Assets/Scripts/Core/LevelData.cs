@@ -20,6 +20,9 @@ namespace Santa.Core
         [Tooltip("The radius of the area to be liberated (how far the wave goes).")]
         public float transitionRadius = 50f;
 
+        [Tooltip("Offset relative to transitionCenter for the camera position.")]
+        public Vector3 cameraOffset = new Vector3(5.5f, 4f, 21f);
+
         [Header("Visual State GameObjects")]
         [Tooltip("Visuals to be active when the area is in its initial, 'gentrified' state (e.g., North American Christmas).")]
         public List<GameObject> gentrifiedVisuals;

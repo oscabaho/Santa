@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Dynamic
+  m_EditorClassIdentifier: 
+  m_GroupName: Dynamic
+  m_GUID: 1aa35665cb5a2474caa7060a77859e34
+  m_SerializeEntries:
+  - m_GUID: eba218b21d20db242835843e854ce0ab
+    m_Address: Street_Snow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 613023ba89c97f548b3e1d5ec62dba32, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2322550db738ea8459bbfca9639f4ee8, type: 2}
+    - {fileID: 11400000, guid: b95b789664f30d34a846a8fad8e60a7f, type: 2}
