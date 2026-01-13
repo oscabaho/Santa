@@ -43,14 +43,16 @@ namespace Santa.Infrastructure.Combat
     private IAIManager _aiManager;
     private IUpgradeService _upgradeService;
     private ICombatTransitionService _combatTransitionService;
+    private ICombatLogService _combatLogService;
 
     public static bool CombatIsInitialized { get; private set; } = false;
 
     [Inject]
-    public void Construct(IUpgradeService upgradeService = null, ICombatTransitionService combatTransitionService = null)
+    public void Construct(IUpgradeService upgradeService = null, ICombatTransitionService combatTransitionService = null, ICombatLogService combatLogService = null)
     {
         _upgradeService = upgradeService;
         _combatTransitionService = combatTransitionService;
+        _combatLogService = combatLogService;
     }
 
     private void Awake()
@@ -141,7 +143,17 @@ namespace Santa.Infrastructure.Combat
             }
         }
 
+        // Subscribe to health death events for all combatants
+        foreach (var kvp in _combatState.HealthComponents)
+        {
+            if (kvp.Key.TryGetComponent<HealthComponentBehaviour>(out var healthBehaviour))
+            {
+                healthBehaviour.Health.OnDeath += HandleCombatantDeath;
+            }
+        }
+
         gameObject.SetActive(true);
+        _combatLogService?.LogMessage("Combat started!", CombatLogType.Info);
         StartNewTurn();
         // Log all received participants and their tags
         if (participants == null || participants.Count == 0)
@@ -463,8 +475,9 @@ namespace Santa.Infrastructure.Combat
         if (playerWon)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("--- COMBAT ENDED: VICTORY ---");
+            GameLog.Log("---COMBAT ENDED: VICTORY ---");
 #endif
+            _combatLogService?.LogMessage("=== VICTORY! ===", CombatLogType.Info);
             // Don't deactivate here - let UpgradeUI flow complete
             // TurnBasedCombatManager will be deactivated by CombatTransitionManager after EndCombat
             _upgradeService?.PresentUpgradeOptions();
@@ -474,6 +487,7 @@ namespace Santa.Infrastructure.Combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
 #endif
+            _combatLogService?.LogMessage("=== DEFEAT ===", CombatLogType.Info);
             _combatTransitionService.EndCombat(false);
             // Only deactivate on defeat since no upgrade selection is needed
             gameObject.SetActive(false);
@@ -493,10 +507,28 @@ namespace Santa.Infrastructure.Combat
 
     private void OnDestroy()
     {
+        // Unsubscribe from death events
+        if (_combatState != null)
+        {
+            foreach (var kvp in _combatState.HealthComponents)
+            {
+                if (kvp.Key != null && kvp.Key.TryGetComponent<HealthComponentBehaviour>(out var healthBehaviour))
+                {
+                    healthBehaviour.Health.OnDeath -= HandleCombatantDeath;
+                }
+            }
+        }
+
         OnPhaseChanged = null;
         OnPlayerTurnStarted = null;
         OnPlayerTurnEnded = null;
         CombatIsInitialized = false;
+    }
+
+    private void HandleCombatantDeath(GameObject deadCombatant)
+    {
+        if (deadCombatant == null) return;
+        _combatLogService?.LogMessage($"{deadCombatant.name} has been defeated!", CombatLogType.Death);
     }
     }
 }

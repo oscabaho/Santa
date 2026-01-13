@@ -3,7 +3,12 @@ guid: e07bdee05d80b4ab08b1600f9c02b58a
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rimax1
+    second: {fileID: 2100000, guid: 7a5f414188244ad49b4eeb5e980d16cb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

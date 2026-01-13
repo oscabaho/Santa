@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 959a6cd5ab4b77e49a5fe6137fc48785
+    m_Address: LogEntry
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b2d9d3ecc59b62e44b8aec4f43fce92e
     m_Address: VirtualGamepad
     m_ReadOnly: 0

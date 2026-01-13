@@ -144,6 +144,9 @@ public class GameLifetimeScope : LifetimeScope
         // --- Pooling Service ---
         builder.Register<PoolService>(Lifetime.Singleton).As<IPoolService>();
 
+        // --- Combat Log Service ---
+        builder.Register<CombatLogService>(Lifetime.Singleton).As<ICombatLogService>();
+
         // --- Player Reference ---
         // Prefer component in hierarchy so designers can assign the player explicitly.
         var playerRef = FindFirstObjectByType<PlayerReference>(FindObjectsInactive.Include);

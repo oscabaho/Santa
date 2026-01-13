@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f3d3fb140db06b4793c03995fa498c4, type: 3}
   m_Name: NormalStats
   m_EditorClassIdentifier: 
-  DirectAttackDamage: 25
-  AreaAttackDamage: 10
-  SpecialAttackDamage: 75
-  SpecialAttackMissChance: 0.2
-  APRecoveryAmount: 34
-  MaxActionPoints: 100
+  DirectAttackDamage: 12
+  AreaAttackDamage: 15
+  SpecialAttackDamage: 80
+  SpecialAttackMissChance: 0.3
+  APRecoveryAmount: 20
+  MaxActionPoints: 10
   MaxHealth: 100
   BaseCriticalHitChance: 0.1
   GlobalAPCostReduction: 0

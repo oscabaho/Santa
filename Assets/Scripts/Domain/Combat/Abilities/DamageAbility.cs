@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Santa.Core;
+using VContainer;
 
 namespace Santa.Domain.Combat
 {
@@ -17,6 +18,14 @@ namespace Santa.Domain.Combat
 
     // Static cache to avoid allocations during splash target calculation
     private static readonly List<GameObject> _splashTargetsCache = new List<GameObject>(10);
+
+    private static ICombatLogService _combatLog;
+
+    [Inject]
+    public void Construct(ICombatLogService combatLogService)
+    {
+        _combatLog = combatLogService;
+    }
 
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
@@ -51,6 +60,7 @@ namespace Santa.Domain.Combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"{caster.name} uses {AbilityName}!");
 #endif
+        _combatLog?.LogMessage($"{caster.name} uses {AbilityName}!", CombatLogType.Info);
 
         // Use for loop instead of foreach for mobile performance
         for (int i = 0; i < targets.Count; i++)
@@ -82,6 +92,14 @@ namespace Santa.Domain.Combat
                     GameLog.Log($"{target.name} takes {finalDamage} damage.");
                 }
 #endif
+                if (isCritical)
+                {
+                    _combatLog?.LogMessage($"CRITICAL HIT! {target.name} takes {finalDamage} damage!", CombatLogType.Critical);
+                }
+                else
+                {
+                    _combatLog?.LogMessage($"{target.name} takes {finalDamage} damage.", CombatLogType.Damage);
+                }
             }
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             else
@@ -139,6 +157,7 @@ namespace Santa.Domain.Combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     GameLog.Log($"[SPLASH] {splashTarget.name} takes {splashDamage} area damage!");
 #endif
+                    _combatLog?.LogMessage($"[SPLASH] {splashTarget.name} takes {splashDamage} area damage!", CombatLogType.Damage);
                 }
             }
         }
