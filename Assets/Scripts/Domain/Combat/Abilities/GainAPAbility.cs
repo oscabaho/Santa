@@ -1,12 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Santa.Core;
+using VContainer;
 
 namespace Santa.Domain.Combat
 {
     [CreateAssetMenu(fileName = "New Gain AP Ability", menuName = "Santa/Abilities/Gain AP Ability")]
     public class GainAPAbility : Ability
 {
+    private static ICombatLogService _combatLog;
+
+    [Inject]
+    public void Construct(ICombatLogService combatLogService)
+    {
+        _combatLog = combatLogService;
+    }
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
         // Get energy gained from UpgradeService
@@ -25,6 +33,7 @@ namespace Santa.Domain.Combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"{target.name} gained {amountToGain} AP.");
 #endif
+                _combatLog?.LogMessage($"{target.name} gained {amountToGain} AP.", CombatLogType.ActionPoints);
             }
         }
     }

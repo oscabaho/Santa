@@ -108,12 +108,14 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
+    - _DissolveWidth: 0.5
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _InvertDissolve: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -132,6 +134,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.09417905, g: 0.80002296, b: 0.031634595, a: 1}
     - _Color: {r: 0.09417905, g: 0.80002296, b: 0.031634595, a: 1}
+    - _DissolveColor: {r: 1, g: 0.5, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
   m_BuildTextureStacks: []

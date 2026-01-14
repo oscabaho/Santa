@@ -3,7 +3,12 @@ guid: c2449b74f5e1742b1afcef2a97876d11
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Fresh Snow Ground
+    second: {fileID: 2100000, guid: b220d2ca0c680ef4d99ea157f23ef223, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Santa.Core;
+using VContainer;
 
 namespace Santa.Domain.Combat
 {
@@ -11,11 +12,19 @@ namespace Santa.Domain.Combat
     [CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
     public class SpecialAttackAbility : Ability
 {
+    private static ICombatLogService _combatLog;
+
+    [Inject]
+    public void Construct(ICombatLogService combatLogService)
+    {
+        _combatLog = combatLogService;
+    }
     public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
 #endif
+        _combatLog?.LogMessage($"{caster.name} uses {AbilityName}!", CombatLogType.Info);
 
         // Get miss chance and damage from UpgradeService
         float missChance = upgradeService?.SpecialAttackMissChance ?? 0.2f;
@@ -26,6 +35,7 @@ namespace Santa.Domain.Combat
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log("...but it MISSED!");
 #endif
+            _combatLog?.LogMessage($"{caster.name}'s attack MISSED!", CombatLogType.Miss);
             return;
         }
 
@@ -59,6 +69,14 @@ namespace Santa.Domain.Combat
                     GameLog.Log($"{target.name} takes a massive {finalDamage} damage!");
                 }
 #endif
+                if (isCritical)
+                {
+                    _combatLog?.LogMessage($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!", CombatLogType.Critical);
+                }
+                else
+                {
+                    _combatLog?.LogMessage($"{target.name} takes {finalDamage} damage!", CombatLogType.Damage);
+                }
             }
         }
     }

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Level_01
   m_EditorClassIdentifier: 
   levelName: Area_01
-  transitionCenter: {x: 30, y: 0, z: 48}
+  transitionCenter: {x: 35.5, y: 4, z: 69}
   transitionRadius: 50
+  cameraOffset: {x: 0, y: 10, z: 10}
   gentrifiedVisuals:
   - {fileID: 1019461515245079698, guid: eba218b21d20db242835843e854ce0ab, type: 3}
   liberatedVisuals:

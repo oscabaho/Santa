@@ -25,6 +25,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4fa91a887795d5a4ab2e778f8db1836e
+    m_Address: Upgrade01
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 501c45a0023937a4297b2c7928b00e1b
+    m_Address: Upgrade00
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5d4b8c11eec290b498ec9015021b6007
+    m_Address: Upgrade05
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6e47260b86da2ea4da16417c04da3a96
     m_Address: Speed
     m_ReadOnly: 0
@@ -32,6 +47,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 964847228e7871142bba553f3fe9fbf8
     m_Address: MissChance_Reduce
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbc646aa358d8b14eafcb27887cd9e11
+    m_Address: Upgrade04
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf795702ac2d1954b91113b2cd4ae237
+    m_Address: Upgrade02
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e92961705622b644f8d75eeba7cec7a8
+    m_Address: Upgrade03
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

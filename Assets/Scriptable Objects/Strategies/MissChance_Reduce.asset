@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 498619ee496fd804c9507527647e57ba, type: 3}
   m_Name: MissChance_Reduce
   m_EditorClassIdentifier: 
-  MissChanceReduction: 0
+  MissChanceReduction: 0.15

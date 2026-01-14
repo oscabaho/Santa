@@ -31,6 +31,8 @@ public class HealthComponentBehaviour : MonoBehaviour, IHealthController
     {
         if (health != null)
         {
+            // Set owner for death event
+            health.SetOwner(this.gameObject);
             // Ensure health starts at a valid value; default serialized value is zero.
             health.SetToMax();
         }
