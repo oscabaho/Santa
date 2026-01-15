@@ -70,25 +70,14 @@ namespace Santa.Infrastructure.Combat
         }
     }
 
-    private async UniTask<GameObject> InstantiateNewInstanceAsync(string key, ICombatEncounter encounter)
+    private UniTask<GameObject> InstantiateNewInstanceAsync(string key, ICombatEncounter encounter)
     {
 #if UNITY_ADDRESSABLES
         if (encounter != null && !string.IsNullOrEmpty(encounter.CombatSceneAddress))
         {
             // Instantiates the prefab at the specified offset position
             var handle = Addressables.InstantiateAsync(encounter.CombatSceneAddress, _combatSceneOffset, Quaternion.identity, transform);
-            var inst = await handle.ToUniTask();
-
-            if (handle.Status == AsyncOperationStatus.Succeeded && inst != null)
-            {
-                // Inject VContainer dependencies into all components in the arena
-                InjectDependenciesRecursively(inst);
-                return inst;
-            }
-            else
-            {
-                GameLog.LogError($"Addressables.InstantiateAsync failed for '{encounter.CombatSceneAddress}'");
-            }
+            return InstantiateAndInjectAsync(handle);
         }
         else
         {
@@ -98,8 +87,27 @@ namespace Santa.Infrastructure.Combat
         UnityEngine.Debug.LogError($"CombatScenePool: UNITY_ADDRESSABLES is not defined. Combat arenas cannot be loaded. Please ensure the Addressables package is installed and the scripting define is set.");
 #endif
 
-        return null;
+        return UniTask.FromResult<GameObject>(null);
     }
+
+#if UNITY_ADDRESSABLES
+    private async UniTask<GameObject> InstantiateAndInjectAsync(AsyncOperationHandle<GameObject> handle)
+    {
+        var inst = await handle.ToUniTask();
+
+        if (handle.Status == AsyncOperationStatus.Succeeded && inst != null)
+        {
+            // Inject VContainer dependencies into all components in the arena
+            InjectDependenciesRecursively(inst);
+            return inst;
+        }
+        else
+        {
+            GameLog.LogError($"Addressables.InstantiateAsync failed for '{handle.DebugName}'");
+            return null;
+        }
+    }
+#endif
 
     /// <summary>
     /// Injects VContainer dependencies recursively into all MonoBehaviour components.
