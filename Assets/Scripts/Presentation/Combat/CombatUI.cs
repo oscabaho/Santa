@@ -11,7 +11,7 @@ namespace Santa.Presentation.Combat
 {
 
     /// <summary>
-    /// Orchestrates the combat UI, coordinating between stats display and action buttons.
+    /// Orchestrates the combat UI, coordinating between stats display, action buttons, and the combat log.
     /// Handles combat phase changes and targeting mode coordination.
     /// Refactored to delegate responsibilities to specialized components.
     /// </summary>
@@ -40,9 +40,11 @@ namespace Santa.Presentation.Combat
         // Specialized components
         private CombatUIStatsDisplay _statsDisplay;
         private CombatUIActionButtons _actionButtons;
+        private CombatLogUI _combatLogUI;
 
         // Dependencies
         private ICombatService _combatService;
+        private ICombatLogService _combatLogService;
 
         // Targeting state
         private Ability _pendingAbility;
@@ -59,11 +61,12 @@ namespace Santa.Presentation.Combat
         }
 
         [Inject]
-        public void Construct(ICombatService combatService)
+        public void Construct(ICombatService combatService, ICombatLogService combatLogService)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogVerbose(Santa.Core.Config.LogMessages.CombatUI.ConstructCalled);
 #endif
+            _combatLogService = combatLogService;
             InitializeServiceConnection(combatService);
         }
 
@@ -104,6 +107,27 @@ namespace Santa.Presentation.Combat
 
             // Subscribe to ability requests from buttons
             _actionButtons.OnAbilityRequested += HandleAbilityRequested;
+
+            // Find and initialize Combat Log
+            _combatLogUI = GetComponentInChildren<CombatLogUI>(true);
+            if (_combatLogUI != null)
+            {
+                // Manually inject dependencies if they haven't been injected yet
+                // This ensures it works even if VContainer didn't inject it automatically
+                _combatLogUI.Construct(_combatLogService, _combatService);
+
+                // Ensure the GameObject is active so it can receive events
+                if (!_combatLogUI.gameObject.activeSelf)
+                {
+                    _combatLogUI.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("CombatUI: CombatLogUI component not found in children. Combat log will not be displayed.");
+#endif
+            }
         }
 
         private void OnEnable()

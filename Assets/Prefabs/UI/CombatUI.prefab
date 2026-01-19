@@ -2256,7 +2256,7 @@ MonoBehaviour:
   logEntryPrefab: {fileID: 5855503690247979451, guid: 959a6cd5ab4b77e49a5fe6137fc48785, type: 3}
   maxMessages: 50
   autoScroll: 1
-  infoColor: {r: 1, g: 1, b: 1, a: 1}
+  infoColor: {r: 0, g: 0, b: 0, a: 1}
   damageColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   criticalColor: {r: 1, g: 0.4, b: 0, a: 1}
   missColor: {r: 0, g: 1, b: 1, a: 1}
