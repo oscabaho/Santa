@@ -84,3 +84,5 @@ crashlytics-build.properties
  
 # Unity auto-generated solution files (not tracked)
 *.slnx
+*.blend
+*.spp

@@ -17,10 +17,12 @@ namespace Santa.Core
         /// <param name="allCombatants">All combatants in the encounter for target resolution.</param>
         /// <param name="healthCache">Cached health controllers for performance optimization.</param>
         /// <param name="upgradeService">Service providing player stat modifiers from upgrades.</param>
+        /// <param name="combatLogService">Service for logging combat messages to the UI.</param>
         void Execute(
-            PendingAction action, 
-            IReadOnlyList<GameObject> allCombatants, 
-            IReadOnlyDictionary<GameObject, IHealthController> healthCache, 
-            IUpgradeService upgradeService);
+            PendingAction action,
+            IReadOnlyList<GameObject> allCombatants,
+            IReadOnlyDictionary<GameObject, IHealthController> healthCache,
+            IUpgradeService upgradeService,
+            ICombatLogService combatLogService);
     }
 }

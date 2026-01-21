@@ -67,6 +67,13 @@ namespace Santa.Presentation.Combat
             GameLog.LogVerbose(Santa.Core.Config.LogMessages.CombatUI.ConstructCalled);
 #endif
             _combatLogService = combatLogService;
+
+            // Now that we have dependencies, we can initialize children that might need them
+            if (_combatLogUI != null)
+            {
+                _combatLogUI.Construct(_combatLogService, combatService);
+            }
+
             InitializeServiceConnection(combatService);
         }
 
@@ -112,10 +119,6 @@ namespace Santa.Presentation.Combat
             _combatLogUI = GetComponentInChildren<CombatLogUI>(true);
             if (_combatLogUI != null)
             {
-                // Manually inject dependencies if they haven't been injected yet
-                // This ensures it works even if VContainer didn't inject it automatically
-                _combatLogUI.Construct(_combatLogService, _combatService);
-
                 // Ensure the GameObject is active so it can receive events
                 if (!_combatLogUI.gameObject.activeSelf)
                 {
@@ -240,8 +243,7 @@ namespace Santa.Presentation.Combat
                 return;
             }
 
-            var registry = player.GetComponent<IComponentRegistry>();
-            if (registry == null)
+            if (!player.TryGetComponent(out IComponentRegistry registry))
             {
                 GameLog.LogError(Santa.Core.Config.LogMessages.CombatUI.PlayerMissingRegistry, player);
                 return;

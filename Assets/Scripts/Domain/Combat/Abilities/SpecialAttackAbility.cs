@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Santa.Core;
+using UnityEngine;
 using VContainer;
 
 namespace Santa.Domain.Combat
@@ -11,75 +11,68 @@ namespace Santa.Domain.Combat
     /// </summary>
     [CreateAssetMenu(fileName = "New Special Attack", menuName = "Santa/Abilities/Special Attack Ability", order = 53)]
     public class SpecialAttackAbility : Ability
-{
-    private static ICombatLogService _combatLog;
-
-    [Inject]
-    public void Construct(ICombatLogService combatLogService)
     {
-        _combatLog = combatLogService;
-    }
-    public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants)
-    {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
-#endif
-        _combatLog?.LogMessage($"{caster.name} uses {AbilityName}!", CombatLogType.Info);
-
-        // Get miss chance and damage from UpgradeService
-        float missChance = upgradeService?.SpecialAttackMissChance ?? 0.2f;
-        int baseDamage = upgradeService?.SpecialAttackDamage ?? 75;
-
-        if (Random.value < missChance)
+        public override void Execute(List<GameObject> targets, GameObject caster, IUpgradeService upgradeService, IReadOnlyList<GameObject> allCombatants, ICombatLogService combatLogService)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("...but it MISSED!");
+            GameLog.Log($"{caster.name} attempts a Special Attack: {AbilityName}!");
 #endif
-            _combatLog?.LogMessage($"{caster.name}'s attack MISSED!", CombatLogType.Miss);
-            return;
-        }
+            combatLogService?.LogMessage($"{caster.name} uses {AbilityName}!", CombatLogType.Info);
 
-        if (targets == null) return;
+            // Get miss chance and damage from UpgradeService
+            float missChance = upgradeService?.SpecialAttackMissChance ?? 0.2f;
+            int baseDamage = upgradeService?.SpecialAttackDamage ?? 75;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("It's a direct hit!");
-#endif
-
-        // Use for loop instead of foreach for mobile performance
-        for (int i = 0; i < targets.Count; i++)
-        {
-            GameObject target = targets[i];
-            if (target == null) continue;
-
-            if (target.TryGetComponent<HealthComponentBehaviour>(out var healthComponent))
+            if (Random.value < missChance)
             {
-                // Check for critical hit
-                bool isCritical = RollCriticalHit(upgradeService);
-                int finalDamage = isCritical ? baseDamage * 2 : baseDamage;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("...but it MISSED!");
+#endif
+                combatLogService?.LogMessage($"{caster.name}'s attack MISSED!", CombatLogType.Miss);
+                return;
+            }
 
-                healthComponent.AffectValue(-finalDamage);
+            if (targets == null) return;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                if (isCritical)
-                {
-                    GameLog.Log($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!");
-                }
-                else
-                {
-                    GameLog.Log($"{target.name} takes a massive {finalDamage} damage!");
-                }
+            GameLog.Log("It's a direct hit!");
 #endif
-                if (isCritical)
+
+            // Use for loop instead of foreach for mobile performance
+            for (int i = 0; i < targets.Count; i++)
+            {
+                GameObject target = targets[i];
+                if (target == null) continue;
+
+                if (target.TryGetComponent<HealthComponentBehaviour>(out var healthComponent))
                 {
-                    _combatLog?.LogMessage($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!", CombatLogType.Critical);
-                }
-                else
-                {
-                    _combatLog?.LogMessage($"{target.name} takes {finalDamage} damage!", CombatLogType.Damage);
+                    // Check for critical hit
+                    bool isCritical = RollCriticalHit(upgradeService);
+                    int finalDamage = isCritical ? baseDamage * 2 : baseDamage;
+
+                    healthComponent.AffectValue(-finalDamage);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    if (isCritical)
+                    {
+                        GameLog.Log($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!");
+                    }
+                    else
+                    {
+                        GameLog.Log($"{target.name} takes a massive {finalDamage} damage!");
+                    }
+#endif
+                    if (isCritical)
+                    {
+                        combatLogService?.LogMessage($"DEVASTATING CRITICAL! {target.name} takes {finalDamage} damage!", CombatLogType.Critical);
+                    }
+                    else
+                    {
+                        combatLogService?.LogMessage($"{target.name} takes {finalDamage} damage!", CombatLogType.Damage);
+                    }
                 }
             }
         }
-    }
 
 
     }

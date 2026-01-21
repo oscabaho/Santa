@@ -15,6 +15,21 @@ namespace Santa.Core
     }
 
     /// <summary>
+    /// Represents a single log entry with message and type.
+    /// </summary>
+    public struct CombatLogEntry
+    {
+        public string Message;
+        public CombatLogType Type;
+
+        public CombatLogEntry(string message, CombatLogType type)
+        {
+            Message = message;
+            Type = type;
+        }
+    }
+
+    /// <summary>
     /// Service for broadcasting combat log messages to the UI.
     /// </summary>
     public interface ICombatLogService
@@ -31,6 +46,12 @@ namespace Santa.Core
         /// Listeners receive (message, type).
         /// </summary>
         event System.Action<string, CombatLogType> OnMessageLogged;
+
+        /// <summary>
+        /// Retrieves the most recent log entries.
+        /// Useful for UI components initializing late.
+        /// </summary>
+        System.Collections.Generic.IEnumerable<CombatLogEntry> GetRecentLogs();
 
         /// <summary>
         /// Clear all log messages (useful when starting new combat).
