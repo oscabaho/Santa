@@ -374,20 +374,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 48.75143
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -417,7 +417,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -882,7 +882,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5068
+  m_VersionIndex: 5074
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -1173,20 +1173,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 53.440098
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -1216,7 +1216,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -1703,7 +1703,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 8556
+  m_VersionIndex: 8562
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2491,7 +2491,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4541
+  m_VersionIndex: 4547
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -2880,7 +2880,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -6.713, y: 0.358, z: -4.024}
-  m_LocalScale: {x: 1, y: 0, z: 1}
+  m_LocalScale: {x: 1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 267646985021341877}
@@ -36837,7 +36837,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1177
+  m_VersionIndex: 1183
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -37130,20 +37130,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 36.60903
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -37173,7 +37173,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -37251,20 +37251,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 21.804304
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -37294,7 +37294,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -37551,20 +37551,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 49.84234
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -37594,7 +37594,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -38255,7 +38255,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -38786,7 +38786,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5497
+  m_VersionIndex: 5503
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -39057,20 +39057,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 49.43012
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -39100,7 +39100,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -39309,20 +39309,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -39352,7 +39352,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -39563,7 +39563,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 62.839996, y: -1.926, z: 4.76}
-  m_LocalScale: {x: 2.157891, y: 0, z: 2.7582223}
+  m_LocalScale: {x: 2.157891, y: 0.1, z: 2.7582223}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7618520060711212288}
@@ -39780,7 +39780,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 7081
+  m_VersionIndex: 7087
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -40158,20 +40158,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 26.480022
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -40201,7 +40201,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -40683,7 +40683,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -41361,7 +41361,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 7444
+  m_VersionIndex: 7450
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -41600,20 +41600,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 45.76241
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -41643,7 +41643,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -41926,7 +41926,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6289
+  m_VersionIndex: 6295
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -42846,14 +42846,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 52.08413
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -42889,7 +42889,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -42967,14 +42967,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 34.98
-  m_Range: 4.7456794
-  m_SpotAngle: 113.06145
-  m_InnerSpotAngle: 32.474697
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 51.63787
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -43010,7 +43010,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 11.85
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -44049,20 +44049,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 387.20328
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -44092,7 +44092,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -44428,7 +44428,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -44870,7 +44870,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 5068
+  m_VersionIndex: 5074
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -45148,7 +45148,7 @@ Transform:
   m_GameObject: {fileID: 3588293442724192905}
   serializedVersion: 2
   m_LocalRotation: {x: 0.6618745, y: -0, z: -0, w: 0.7496148}
-  m_LocalPosition: {x: 0, y: 4.13, z: 1.27}
+  m_LocalPosition: {x: 0, y: 3.854, z: 1.304}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45164,20 +45164,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 49.9
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -45207,7 +45207,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -45717,20 +45717,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 134
+  m_SpotAngle: 120
+  m_InnerSpotAngle: 60
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -45760,7 +45760,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -46107,20 +46107,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -46150,7 +46150,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -46543,7 +46543,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 8556
+  m_VersionIndex: 8562
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -46895,7 +46895,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 1441
+  m_VersionIndex: 1447
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -47712,7 +47712,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 8556
+  m_VersionIndex: 8562
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -47950,20 +47950,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -47993,7 +47993,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -48782,7 +48782,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 7994
+  m_VersionIndex: 8000
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -49244,7 +49244,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4452
+  m_VersionIndex: 4458
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -49596,7 +49596,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 7081
+  m_VersionIndex: 7087
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -49948,7 +49948,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6839
+  m_VersionIndex: 6845
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -50300,7 +50300,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6380
+  m_VersionIndex: 6386
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -50848,13 +50848,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5209773021074757936}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.6618745, y: -0, z: -0, w: 0.7496148}
-  m_LocalPosition: {x: 0, y: 4.13, z: 1.27}
+  m_LocalRotation: {x: 0.60573643, y: -0, z: -0, w: 0.79566544}
+  m_LocalPosition: {x: 0, y: 4.13, z: 1.2699966}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1061419231963108457}
-  m_LocalEulerAnglesHint: {x: 82.886, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 74.564, y: 0, z: 0}
 --- !u!108 &5260405053961497615
 Light:
   m_ObjectHideFlags: 0
@@ -50865,20 +50865,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -50908,7 +50908,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -51433,14 +51433,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 12.41
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -51473,10 +51473,10 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 2
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -52350,7 +52350,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6620
+  m_VersionIndex: 6626
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -52621,20 +52621,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 44.135406
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -52664,7 +52664,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -52742,20 +52742,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 29.545923
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -52785,7 +52785,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -52863,14 +52863,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -52906,7 +52906,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -53531,7 +53531,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4452
+  m_VersionIndex: 4458
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -54049,20 +54049,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -54092,7 +54092,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -54890,7 +54890,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 8556
+  m_VersionIndex: 8562
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -62557,7 +62557,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 2803
+  m_VersionIndex: 2809
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -63292,7 +63292,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -64254,7 +64254,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6344
+  m_VersionIndex: 6361
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -64274,7 +64274,7 @@ MonoBehaviour:
   m_Shape:
     rid: 897025970150309889
   m_ShapeRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_UnmodifiedMeshVersion: 6317
+  m_UnmodifiedMeshVersion: 6358
   m_Size: {x: 2, y: 0.45, z: 49.3}
   m_LocalCenter: {x: 0, y: 0, z: 0}
   references:
@@ -64606,7 +64606,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -65011,7 +65011,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6366
+  m_VersionIndex: 6372
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -65663,7 +65663,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -66579,7 +66579,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4453
+  m_VersionIndex: 4459
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -67202,7 +67202,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 7444
+  m_VersionIndex: 7450
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -67439,20 +67439,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -67482,7 +67482,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -67962,7 +67962,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 6366
+  m_VersionIndex: 6372
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -68270,20 +68270,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 19.498787
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -68313,7 +68313,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -68499,20 +68499,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -68542,7 +68542,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -69431,7 +69431,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -69836,7 +69836,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 4343
+  m_VersionIndex: 4349
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -70126,14 +70126,14 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -70169,7 +70169,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
@@ -70373,20 +70373,20 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 0.99215686, g: 0.6875506, b: 0.21176472, a: 0.64705884}
-  m_Intensity: 32
-  m_Range: 5.96
-  m_SpotAngle: 113.6261
-  m_InnerSpotAngle: 91.62523
+  m_Color: {r: 1, g: 0.78, b: 0.35, a: 1}
+  m_Intensity: 40
+  m_Range: 12
+  m_SpotAngle: 150
+  m_InnerSpotAngle: 90
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.0596
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -70416,7 +70416,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 7.1802106, y: 4.53}
-  m_BounceIntensity: 0
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
