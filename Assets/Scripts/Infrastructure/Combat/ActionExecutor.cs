@@ -12,7 +12,7 @@ namespace Santa.Infrastructure.Combat
     public class ActionExecutor : MonoBehaviour, IActionExecutor
     {
         // Reusable list to avoid allocations during Execute
-        private readonly List<GameObject> _targetList = new List<GameObject>(8);
+        private readonly List<GameObject> _targetList = new(8);
 
         public void Execute(PendingAction action, IReadOnlyList<GameObject> allCombatants, IReadOnlyDictionary<GameObject, IHealthController> healthCache, IUpgradeService upgradeService, ICombatLogService combatLogService)
         {
@@ -65,7 +65,7 @@ namespace Santa.Infrastructure.Combat
             {
                 validatedAction.Ability.Targeting.ResolveTargets(validatedAction.Caster, validatedAction.PrimaryTarget, allCombatants, _targetList, validatedAction.Ability);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                System.Text.StringBuilder sb = new();
                 for (int i = 0; i < _targetList.Count; i++)
                 {
                     if (i > 0) sb.Append(", ");
@@ -88,12 +88,20 @@ namespace Santa.Infrastructure.Combat
 
             try
             {
+                // Trigger animation if the caster has a controller
+                if (validatedAction.Caster.TryGetComponent<Santa.Presentation.Combat.CombatAnimationController>(out var animController))
+                {
+                    animController.TriggerAttack();
+                }
+
                 validatedAction.Ability.Execute(_targetList, validatedAction.Caster, upgradeService, allCombatants, combatLogService);
             }
             catch (System.Exception ex)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"Exception while executing ability {validatedAction.Ability.AbilityName} from {validatedAction.Caster.name}: {ex}");
+#else
+                _ = ex;
 #endif
             }
         }

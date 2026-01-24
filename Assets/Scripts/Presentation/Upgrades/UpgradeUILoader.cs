@@ -3,283 +3,285 @@ using Cysharp.Threading.Tasks;
 using Santa.Core;
 using Santa.Core.Addressables;
 using Santa.Domain.Combat;
-using AbilityUpgrade = Santa.Domain.Combat.AbilityUpgrade;
+using Santa.Presentation.UI;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
 using VContainer.Unity;
-using Santa.Presentation.UI;
+using AbilityUpgrade = Santa.Domain.Combat.AbilityUpgrade;
 
 namespace Santa.Presentation.Upgrades
 {
 
-/// <summary>
-/// Loader that manages loading and access to the UpgradeUI via Addressables.
-/// Implements IUpgradeUI to be injected into UpgradeManager.
-/// Follows the pattern established by UIManager in the project.
-/// </summary>
-public class UpgradeUILoader : IUpgradeUI
-{
-    private const string UPGRADE_UI_ADDRESS = Santa.Core.Addressables.AddressableKeys.UIPanels.UpgradeUI; // Addressable name
-
-    private UpgradeUI _upgradeUIInstance;
-    private AsyncOperationHandle<GameObject> _loadHandle;
-    private bool _isLoading;
-    private bool _isLoaded;
-    private CancellationTokenSource _showCancellation;
-
-    private ILevelService _levelService;
-    private ICombatTransitionService _combatTransitionService;
-    private IObjectResolver _resolver;
-
-    [Inject]
-    public void Construct(
-        ILevelService levelService,
-        ICombatTransitionService combatTransitionService,
-        IObjectResolver resolver)
-    {
-        _levelService = levelService;
-        _combatTransitionService = combatTransitionService;
-        _resolver = resolver;
-    }
-
     /// <summary>
-    /// Shows the upgrade UI. Loads the prefab via Addressables if needed.
-    /// Matches IUpgradeUI signature (void) and runs async internally.
+    /// Loader that manages loading and access to the UpgradeUI via Addressables.
+    /// Implements IUpgradeUI to be injected into UpgradeManager.
+    /// Follows the pattern established by UIManager in the project.
     /// </summary>
-    public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
+    public class UpgradeUILoader : IUpgradeUI
     {
-        ShowUpgradesAsync(upgrade1, upgrade2).Forget();
-    }
+        private const string UPGRADE_UI_ADDRESS = Santa.Core.Addressables.AddressableKeys.UIPanels.UpgradeUI; // Addressable name
 
-    private async UniTaskVoid ShowUpgradesAsync(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
-    {
-        try
+        private UpgradeUI _upgradeUIInstance;
+        private AsyncOperationHandle<GameObject> _loadHandle;
+        private bool _isLoading;
+        private bool _isLoaded;
+        private CancellationTokenSource _showCancellation;
+
+        private ILevelService _levelService;
+        private ICombatTransitionService _combatTransitionService;
+        private IObjectResolver _resolver;
+
+        [Inject]
+        public void Construct(
+            ILevelService levelService,
+            ICombatTransitionService combatTransitionService,
+            IObjectResolver resolver)
         {
-            _showCancellation?.Cancel();
-            _showCancellation?.Dispose();
-            _showCancellation = new CancellationTokenSource();
-            var ct = _showCancellation.Token;
+            _levelService = levelService;
+            _combatTransitionService = combatTransitionService;
+            _resolver = resolver;
+        }
 
-            if (_isLoaded && _upgradeUIInstance != null)
+        /// <summary>
+        /// Shows the upgrade UI. Loads the prefab via Addressables if needed.
+        /// Matches IUpgradeUI signature (void) and runs async internally.
+        /// </summary>
+        public void ShowUpgrades(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
+        {
+            ShowUpgradesAsync(upgrade1, upgrade2).Forget();
+        }
+
+        private async UniTaskVoid ShowUpgradesAsync(AbilityUpgrade upgrade1, AbilityUpgrade upgrade2)
+        {
+            try
             {
-                _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                _showCancellation?.Cancel();
+                _showCancellation?.Dispose();
+                _showCancellation = new CancellationTokenSource();
+                var ct = _showCancellation.Token;
+
+                if (_isLoaded && _upgradeUIInstance != null)
+                {
+                    _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                    return;
+                }
+
+                if (_isLoading)
+                {
+                    await WaitForLoad();
+                    if (ct.IsCancellationRequested) return;
+                    if (_upgradeUIInstance != null)
+                    {
+                        _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                    }
+                    return;
+                }
+
+                await LoadUpgradeUI();
+                if (ct.IsCancellationRequested) return;
+
+                if (_upgradeUIInstance != null)
+                {
+                    _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
+                }
+                else
+                {
+                    // UI load failed
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
+#endif
+                }
+            }
+            catch (System.Exception ex)
+            {
+                GameLog.LogError($"UpgradeUILoader.ShowUpgrades: Exception while showing upgrades: {ex.Message}");
+                GameLog.LogException(ex);
+            }
+        }
+
+        /// <summary>
+        /// Preloads the upgrade UI in the background without showing it.
+        /// Useful to call at the start of a combat level to avoid later delay.
+        /// </summary>
+        public async UniTask PreloadAsync()
+        {
+            // Do not overwrite current show cancellation; separate preload lifecycle
+            if (_isLoaded)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
+#endif
                 return;
             }
 
             if (_isLoading)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("UpgradeUILoader: Already loading, waiting...");
+#endif
                 await WaitForLoad();
-                if (ct.IsCancellationRequested) return;
-                if (_upgradeUIInstance != null)
-                {
-                    _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
-                }
                 return;
             }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
+#endif
             await LoadUpgradeUI();
-            if (ct.IsCancellationRequested) return;
 
-            if (_upgradeUIInstance != null)
+            if (_isLoaded)
             {
-                _upgradeUIInstance.ShowUpgrades(upgrade1, upgrade2);
-            }
-            else
-            {
-                // UI load failed
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError("UpgradeUILoader: Failed to load UpgradeUI. Cannot show upgrades.");
+                GameLog.Log("UpgradeUILoader: Preload completed successfully.");
 #endif
             }
         }
-        catch (System.Exception ex)
+
+        private UniTask _loadingTask;
+
+        /// <summary>
+        /// Loads the UpgradeUI prefab via Addressables.
+        /// </summary>
+        private async UniTask LoadUpgradeUI()
         {
-            GameLog.LogError($"UpgradeUILoader.ShowUpgrades: Exception while showing upgrades: {ex.Message}");
-            GameLog.LogException(ex);
-        }
-    }
+            if (_isLoaded) return;
 
-    /// <summary>
-    /// Preloads the upgrade UI in the background without showing it.
-    /// Useful to call at the start of a combat level to avoid later delay.
-    /// </summary>
-    public async UniTask PreloadAsync()
-    {
-        // Do not overwrite current show cancellation; separate preload lifecycle
-        if (_isLoaded)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: UI already loaded, no need to preload.");
-#endif
-            return;
-        }
+            // If already loading, return the existing task
+            if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
+            {
+                await _loadingTask;
+                return;
+            }
 
-        if (_isLoading)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: Already loading, waiting...");
-#endif
-            await WaitForLoad();
-            return;
-        }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.Log("UpgradeUILoader: Preloading UpgradeUI in background...");
-#endif
-        await LoadUpgradeUI();
-
-        if (_isLoaded)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: Preload completed successfully.");
-#endif
-        }
-    }
-
-    private UniTask _loadingTask;
-
-    /// <summary>
-    /// Loads the UpgradeUI prefab via Addressables.
-    /// </summary>
-    private async UniTask LoadUpgradeUI()
-    {
-        if (_isLoaded) return;
-
-        // If already loading, return the existing task
-        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
-        {
+            _isLoading = true;
+            _loadingTask = LoadInternal();
             await _loadingTask;
-            return;
         }
 
-        _isLoading = true;
-        _loadingTask = LoadInternal();
-        await _loadingTask;
-    }
-
-    private async UniTask LoadInternal()
-    {
-        try
+        private async UniTask LoadInternal()
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
-#endif
-
-            // Load and instantiate via Addressables
-            _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
-            await _loadHandle.ToUniTask();
-
-            if (_loadHandle.Status == AsyncOperationStatus.Succeeded)
+            try
             {
-                GameObject instantiatedObject = _loadHandle.Result;
-                _upgradeUIInstance = instantiatedObject.GetComponent<UpgradeUI>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"UpgradeUILoader: Loading UpgradeUI from Addressables ('{UPGRADE_UI_ADDRESS}')...");
+#endif
 
-                if (_upgradeUIInstance != null)
+                // Load and instantiate via Addressables
+                _loadHandle = Addressables.InstantiateAsync(UPGRADE_UI_ADDRESS);
+                await _loadHandle.ToUniTask();
+
+                if (_loadHandle.Status == AsyncOperationStatus.Succeeded)
                 {
-                    if (_resolver != null)
+                    GameObject instantiatedObject = _loadHandle.Result;
+                    _upgradeUIInstance = instantiatedObject.GetComponent<UpgradeUI>();
+
+                    if (_upgradeUIInstance != null)
                     {
-                        _resolver.InjectGameObject(instantiatedObject);
+                        if (_resolver != null)
+                        {
+                            _resolver.InjectGameObject(instantiatedObject);
+                        }
+                        else
+                        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                            GameLog.LogWarning("UpgradeUILoader: IObjectResolver not available, dependencies will not be injected into UpgradeUI instance.");
+#endif
+                        }
+
+                        // Get parent for UI panels
+                        Transform parent = null;
+                        var uiManager = Object.FindAnyObjectByType<Santa.Presentation.UI.UIManager>();
+                        if (uiManager != null && uiManager.DynamicPanelsParent != null)
+                        {
+                            parent = uiManager.DynamicPanelsParent;
+                        }
+                        else
+                        {
+                            var dynamicPanels = GameObject.Find("DynamicPanels");
+                            if (dynamicPanels != null) parent = dynamicPanels.transform;
+                        }
+
+                        instantiatedObject.transform.SetParent(parent, false);
+                        instantiatedObject.transform.SetAsLastSibling();
+
+                        // Ensure it has a Canvas with high sorting order to appear above Combat UI (5000)
+                        if (!instantiatedObject.TryGetComponent<Canvas>(out var canvas))
+                        {
+                            canvas = instantiatedObject.AddComponent<Canvas>();
+                        }
+                        canvas.overrideSorting = true;
+                        canvas.sortingOrder = 5500;
+
+                        if (!instantiatedObject.TryGetComponent<UnityEngine.UI.GraphicRaycaster>(out _))
+                        {
+                            instantiatedObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                        }
+
+                        _isLoaded = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        GameLog.Log("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
+#endif
                     }
                     else
                     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                        GameLog.LogWarning("UpgradeUILoader: IObjectResolver not available, dependencies will not be injected into UpgradeUI instance.");
+                        GameLog.LogError($"UpgradeUILoader: Prefab '{UPGRADE_UI_ADDRESS}' does not have UpgradeUI component.");
 #endif
+                        Addressables.ReleaseInstance(instantiatedObject);
                     }
-
-                    // Get parent for UI panels
-                    Transform parent = null;
-                    var uiManager = Object.FindAnyObjectByType<Santa.Presentation.UI.UIManager>();
-                    if (uiManager != null && uiManager.DynamicPanelsParent != null)
-                    {
-                        parent = uiManager.DynamicPanelsParent;
-                    }
-                    else
-                    {
-                        var dynamicPanels = GameObject.Find("DynamicPanels");
-                        if (dynamicPanels != null) parent = dynamicPanels.transform;
-                    }
-
-                    instantiatedObject.transform.SetParent(parent, false);
-                    instantiatedObject.transform.SetAsLastSibling();
-
-                    // Ensure it has a Canvas with high sorting order to appear above Combat UI (5000)
-                    if (!instantiatedObject.TryGetComponent<Canvas>(out var canvas))
-                    {
-                        canvas = instantiatedObject.AddComponent<Canvas>();
-                    }
-                    canvas.overrideSorting = true;
-                    canvas.sortingOrder = 5500;
-
-                    if (!instantiatedObject.TryGetComponent<UnityEngine.UI.GraphicRaycaster>(out _))
-                    {
-                        instantiatedObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-                    }
-
-                    _isLoaded = true;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.Log("UpgradeUILoader: UpgradeUI loaded successfully via Addressables.");
-#endif
                 }
                 else
                 {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogError($"UpgradeUILoader: Prefab '{UPGRADE_UI_ADDRESS}' does not have UpgradeUI component.");
+                    GameLog.LogError($"UpgradeUILoader: Failed to load '{UPGRADE_UI_ADDRESS}' from Addressables. " +
+                                    $"Status: {_loadHandle.Status}. Make sure the prefab is marked as Addressable.");
 #endif
-                    Addressables.ReleaseInstance(instantiatedObject);
                 }
             }
-            else
+            catch (System.Exception ex)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogError($"UpgradeUILoader: Failed to load '{UPGRADE_UI_ADDRESS}' from Addressables. " +
-                                $"Status: {_loadHandle.Status}. Make sure the prefab is marked as Addressable.");
+                GameLog.LogError($"UpgradeUILoader: Exception while loading UpgradeUI: {ex.Message}");
+#else
+            _ = ex;
+#endif
+            }
+            finally
+            {
+                _isLoading = false;
+                _loadingTask = UniTask.CompletedTask;
+            }
+        }
+
+        /// <summary>
+        /// Waits for the in-progress load to finish.
+        /// </summary>
+        private async UniTask WaitForLoad()
+        {
+            if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
+            {
+                await _loadingTask;
+            }
+        }
+
+        /// <summary>
+        /// Releases Addressables resources when no longer needed.
+        /// </summary>
+        public void Release()
+        {
+            _showCancellation?.Cancel();
+            _showCancellation?.Dispose();
+            _showCancellation = null;
+            if (_isLoaded && _loadHandle.IsValid())
+            {
+                Addressables.ReleaseInstance(_loadHandle.Result);
+                _upgradeUIInstance = null;
+                _isLoaded = false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("UpgradeUILoader: UpgradeUI resources released.");
 #endif
             }
         }
-        catch (System.Exception ex)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError($"UpgradeUILoader: Exception while loading UpgradeUI: {ex.Message}");
-#endif
-        }
-        finally
-        {
-            _isLoading = false;
-            _loadingTask = UniTask.CompletedTask;
-        }
     }
-
-    /// <summary>
-    /// Waits for the in-progress load to finish.
-    /// </summary>
-    private async UniTask WaitForLoad()
-    {
-        if (_isLoading && _loadingTask.Status == UniTaskStatus.Pending)
-        {
-            await _loadingTask;
-        }
-    }
-
-    /// <summary>
-    /// Releases Addressables resources when no longer needed.
-    /// </summary>
-    public void Release()
-    {
-        _showCancellation?.Cancel();
-        _showCancellation?.Dispose();
-        _showCancellation = null;
-        if (_isLoaded && _loadHandle.IsValid())
-        {
-            Addressables.ReleaseInstance(_loadHandle.Result);
-            _upgradeUIInstance = null;
-            _isLoaded = false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log("UpgradeUILoader: UpgradeUI resources released.");
-#endif
-        }
-    }
-}
 }

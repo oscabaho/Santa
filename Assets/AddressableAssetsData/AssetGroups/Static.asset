@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Static
   m_GUID: 31a581cc26b5103428a5a27338f068ef
   m_SerializeEntries:
+  - m_GUID: 585e3c0676d840a4294ff24c76334617
+    m_Address: PrincipalLight_00
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6372b3c250aa50f41a12243290303d3c
     m_Address: Static
     m_ReadOnly: 0

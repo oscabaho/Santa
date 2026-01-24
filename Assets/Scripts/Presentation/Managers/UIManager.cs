@@ -204,6 +204,8 @@ namespace Santa.Presentation.UI
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.LoadException, panelAddress, ex.Message));
+#else
+                _ = ex;
 #endif
             }
         }
@@ -353,6 +355,8 @@ namespace Santa.Presentation.UI
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.PreloadException, panelAddress, ex.Message));
+#else
+                _ = ex;
 #endif
             }
         }

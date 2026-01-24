@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Actors
+  m_EditorClassIdentifier: 
+  m_GroupName: Actors
+  m_GUID: 889d074a881eec147981368570cc8de1
+  m_SerializeEntries:
+  - m_GUID: 3cfca578e7811f342b3c08917852b238
+    m_Address: Assets/Prefabs/Player/Boy_Combat.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f18036e102c9f844b5b7c3f244e5d35
+    m_Address: Enemy_GiftBox_Animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 660a94293810d2041b1fba4efe74b38d
+    m_Address: Boy_Combat_Animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8929c8b20b3f0c64c85c35c96dfd67ed
+    m_Address: Assets/Prefabs/Enemies/Enemy_01.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1af35694a7cc2642aadd089a4bc09f0
+    m_Address: Assets/Prefabs/Player/Boy_Exploration.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ade75458e10bdbb40b26f0ce74233a83
+    m_Address: InputReader
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bde4d6f2918a9044798af901929bc105
+    m_Address: Assets/Prefabs/Enemies/Enemy_00.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9d5ae9e85edfb548a2b0e73769e28dc
+    m_Address: Assets/Prefabs/Enemies/ExplorationEnemy_01.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 613023ba89c97f548b3e1d5ec62dba32, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: a5caad75cb96b4b46b5b05ecf8b741cd, type: 2}
+    - {fileID: 11400000, guid: c3b81f871daf5ca4aa6d0a963aa17edf, type: 2}

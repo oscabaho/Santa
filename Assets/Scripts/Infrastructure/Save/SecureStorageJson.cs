@@ -54,6 +54,8 @@ namespace Santa.Core.Save
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"SecureStorageJson: Failed to save '{key}': {e.Message}");
+#else
+                _ = e;
 #endif
             }
         }
@@ -105,6 +107,8 @@ namespace Santa.Core.Save
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"SecureStorageJson: Failed to parse JSON for '{key}': {e.Message}");
+#else
+                _ = e;
 #endif
                 return false;
             }
@@ -137,6 +141,8 @@ namespace Santa.Core.Save
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"SecureStorageJson: Failed to compute checksum: {e.Message}");
+#else
+                _ = e;
 #endif
                 return string.Empty;
             }

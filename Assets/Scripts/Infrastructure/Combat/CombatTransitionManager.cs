@@ -52,7 +52,7 @@ namespace Santa.Infrastructure.Combat
         {
             // Discover persistent exploration objects
             // Prefer injected player reference
-            _explorationPlayer = (_playerRef != null) ? _playerRef.Player : null;
+            _explorationPlayer = _playerRef?.Player;
             if (_explorationPlayer == null)
             {
                 var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
@@ -120,10 +120,7 @@ namespace Santa.Infrastructure.Combat
             // Ensure we have a PhysicsRaycaster for targeting
             EnsurePhysicsRaycaster();
 
-            if (_sequenceCTS != null)
-            {
-                _sequenceCTS.Cancel();
-            }
+            _sequenceCTS?.Cancel();
             _sequenceCTS = new CancellationTokenSource();
 
             ExecuteStartSequence(_sequenceCTS.Token).Forget();
@@ -139,10 +136,7 @@ namespace Santa.Infrastructure.Combat
                 return;
             }
 
-            if (_sequenceCTS != null)
-            {
-                _sequenceCTS.Cancel();
-            }
+            _sequenceCTS?.Cancel();
             _sequenceCTS = new CancellationTokenSource();
 
             if (endCombatSequence != null)
@@ -166,6 +160,22 @@ namespace Santa.Infrastructure.Combat
             try
             {
                 await startCombatSequence.Execute(_currentContext);
+
+                // Transition complete. Trigger the BattleStart animation on ALL combatants (Player + Enemies).
+                // Since they share the Animator logic (Wait -> BattleStart), everyone needs this signal.
+                var allAnimControllers = Object.FindObjectsByType<Santa.Presentation.Combat.CombatAnimationController>(FindObjectsSortMode.None);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log($"[CombatTransition] Found {allAnimControllers.Length} animation controllers to trigger.");
+#endif
+
+                foreach (var controller in allAnimControllers)
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.Log($"[CombatTransition] Triggering BattleStart on {controller.name}");
+#endif
+                    controller.PlayBattleStart();
+                }
             }
             catch (System.OperationCanceledException)
             {
@@ -196,10 +206,7 @@ namespace Santa.Infrastructure.Combat
 
                 // Deactivate combat cameras explicitly AFTER the visual transition is complete.
                 // This ensures Cinemachine can blend from the active combat camera to the exploration camera.
-                if (_combatCameraManager != null)
-                {
-                    _combatCameraManager.DeactivateCameras();
-                }
+                _combatCameraManager?.DeactivateCameras();
 
                 // Reposition player AFTER the camera transition is complete
                 if (!playerWon)

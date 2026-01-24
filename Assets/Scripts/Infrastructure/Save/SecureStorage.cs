@@ -41,6 +41,8 @@ namespace Santa.Core.Save
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"SecureStorage: Failed to decrypt '{key}': {e.Message}. Deleting corrupted entry.");
+#else
+                _ = e;
 #endif
                 // Corrupted or incompatible data; delete to self-heal
                 Delete(key);
@@ -50,6 +52,8 @@ namespace Santa.Core.Save
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogWarning($"SecureStorage: Failed to read '{key}': {e.Message}");
+#else
+                _ = e;
 #endif
                 return false;
             }

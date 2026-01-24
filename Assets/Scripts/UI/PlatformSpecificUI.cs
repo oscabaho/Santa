@@ -12,7 +12,9 @@ namespace Santa.UI
         [SerializeField] private bool showOnMobile = true;
         [SerializeField] private bool showOnStandalone = true;
 #pragma warning restore 0414
+#if UNITY_EDITOR
         [SerializeField] private bool showOnEditor = true;
+#endif
 
         private void Start()
         {

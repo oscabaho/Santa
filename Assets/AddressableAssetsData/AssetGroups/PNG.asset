@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: PNG
+  m_EditorClassIdentifier: 
+  m_GroupName: PNG
+  m_GUID: 92d3778c4c60c2b46bc4af72a0860df5
+  m_SerializeEntries:
+  - m_GUID: 21207bdd979e0974a95da4b03993fde4
+    m_Address: Base_Base_color
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4772b2b72c2786448bc673269bbb6615
+    m_Address: Pavement_Normal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ca78e53b8c10d546bb88467c52ae365
+    m_Address: BoyLOW_Boy_Normal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 64715e259f373064585f925212124b89
+    m_Address: PanPot_Base_color
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65761c68968542d4983bb7a688582789
+    m_Address: PanPot_Roughness
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7407d73a62bba1a4b8b183b3caf851c3
+    m_Address: Pavement_AlbedoGloss
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7bab85206aa7e564aaccc8f9d99afc1b
+    m_Address: Base_Roughness
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92600ce3976bf434d9664e1022a84b47
+    m_Address: PanPot_Metallic
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7228c7d3d1c7ad449a5cb28d5155221
+    m_Address: Base_Metallic
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6965f645dee5474dbf7e5f73826aeba
+    m_Address: BoyLOW_PotPAN_Normal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 613023ba89c97f548b3e1d5ec62dba32, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2370a1961dc204e4cb45eb7bccfed2f6, type: 2}
+    - {fileID: 11400000, guid: 4a4ca6ff2c3cc734f8dbc119bce3971f, type: 2}

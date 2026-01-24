@@ -96,12 +96,16 @@ namespace Santa.Presentation.Combat
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"CombatUIActionButtons: Failed to load abilities via Addressables. Operation failed: {ex.Message}");
+#else
+                _ = ex;
 #endif
             }
             catch (Exception ex)
             {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.LogError($"CombatUIActionButtons: Unexpected error while loading abilities. {ex.Message}");
+#else
+                _ = ex;
 #endif
             }
         }

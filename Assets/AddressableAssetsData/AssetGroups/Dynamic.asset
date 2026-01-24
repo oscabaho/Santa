@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: 1aa35665cb5a2474caa7060a77859e34
   m_SerializeEntries:
   - m_GUID: 131a2e8f19cf24dfa99e8dee7859949a
-    m_Address: Assets/FBX/comida_abuela_ok.fbx
+    m_Address: comida_abuela_ok
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

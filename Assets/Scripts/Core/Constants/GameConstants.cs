@@ -58,7 +58,7 @@ namespace Santa.Core.Config
     public static class CombatScene
     {
         // Combat scene pool configuration
-        public const float OffsetY = -2000f;
+        public const float OffsetY = -20f;
     }
 
     public static class PlayerStats
