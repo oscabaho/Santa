@@ -31,23 +31,29 @@ namespace Santa.UI
         private Santa.Core.IPauseMenuService _pauseService;
         private PauseMenuAnimator _animator;
 
-        [Inject]
-        public void Construct(Santa.Core.Save.ISaveService saveService, Santa.Core.IPauseMenuService pauseService)
-        {
-            _saveService = saveService;
-            _pauseService = pauseService;
-            _animator = GetComponent<PauseMenuAnimator>();
-        }
+        // [Inject] removed to support dynamic instantiation without strict scoping
 
         private void OnEnable()
         {
+            if (_saveService == null)
+            {
+                _saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>();
+            }
+            if (_animator == null)
+            {
+                _animator = GetComponent<PauseMenuAnimator>();
+            }
+
+            if (_pauseService == null)
+            {
+                var ctrl = FindFirstObjectByType<Santa.UI.PauseMenuController>();
+                if (ctrl != null) _pauseService = ctrl;
+            }
+
             RefreshButtons();
             UpdateLastSaveLabel();
             UpdateLoadButtonVisibility();
-            if (_animator != null)
-            {
-                _animator.FadeIn().Forget();
-            }
+
             if (saveButton != null) saveButton.onClick.AddListener(OnSaveClicked);
             if (loadButton != null) loadButton.onClick.AddListener(OnLoadClicked);
             if (resumeButton != null) resumeButton.onClick.AddListener(OnResumeClicked);
@@ -132,7 +138,21 @@ namespace Santa.UI
             {
                 _animator.FadeOut().Forget();
             }
-            _pauseService?.Resume();
+
+            if (_pauseService == null)
+            {
+                _pauseService = FindFirstObjectByType<Santa.UI.PauseMenuController>();
+                GameLog.Log($"PauseMenuUI.OnResumeClicked: Late lookup of PauseMenuController -> {(_pauseService != null ? "FOUND" : "NOT FOUND")}");
+            }
+
+            if (_pauseService != null)
+            {
+                _pauseService.Resume();
+            }
+            else
+            {
+                GameLog.LogError("PauseMenuUI: Cannot Resume! PauseMenuController not found.");
+            }
         }
 
         private void UpdateLastSaveLabel()

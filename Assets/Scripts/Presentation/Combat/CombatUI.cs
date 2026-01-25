@@ -60,23 +60,8 @@ namespace Santa.Presentation.Combat
             InitializeComponents();
         }
 
-        [Inject]
-        public void Construct(ICombatService combatService, ICombatLogService combatLogService)
-        {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogVerbose(Santa.Core.Config.LogMessages.CombatUI.ConstructCalled);
-#endif
-            _combatLogService = combatLogService;
-
-            // Now that we have dependencies, we can initialize children that might need them
-            if (_combatLogUI != null)
-            {
-                _combatLogUI.Construct(_combatLogService, combatService);
-            }
-
-            InitializeServiceConnection(combatService);
-        }
-
+        // Dependency injection removed to support runtime instantiation flexibility
+        
         private void InitializeServiceConnection(ICombatService combatService)
         {
             _combatService = combatService;
@@ -135,6 +120,23 @@ namespace Santa.Presentation.Combat
 
         private void OnEnable()
         {
+            if (_combatService == null)
+            {
+                var manager = FindFirstObjectByType<Santa.Infrastructure.Combat.TurnBasedCombatManager>();
+                if (manager != null)
+                {
+                    _combatService = manager;
+                }
+            }
+
+            // Fallback: Find Combat Log Service if not injected
+            if (_combatLogService == null)
+            {
+                _combatLogService = FindFirstObjectByType<Santa.Infrastructure.Combat.CombatLogService>();
+            }
+
+            // Construct call removed as CombatLogUI now self-initializes
+
             if (_combatService != null)
             {
                 _combatService.OnPhaseChanged += HandlePhaseChanged;

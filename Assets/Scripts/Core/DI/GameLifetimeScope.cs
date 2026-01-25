@@ -23,9 +23,6 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private UIManager uiManagerInstance;
 
-    [SerializeField]
-    private TurnBasedCombatManager turnBasedCombatManagerInstance;
-
     // TODO: Uncomment when the audio system is implemented
     // [SerializeField]
     // private AudioManager audioManagerInstance;
@@ -42,26 +39,42 @@ public class GameLifetimeScope : LifetimeScope
     [SerializeField]
     private GameStateManager gameStateManagerInstance;
 
-    [SerializeField]
-    private GameplayUIManager gameplayUIManagerInstance;
-
-    [SerializeField]
-    private LevelManager levelManagerInstance;
-
-    [SerializeField]
-    private CombatCameraManager combatCameraManagerInstance;
-
     // TODO: Uncomment when the VFX system is implemented
     // [SerializeField]
     // private VFXManager vfxManagerInstance;
 
+    private static GameLifetimeScope _instance;
+    public static GameLifetimeScope Instance => _instance;
+
     protected override void Awake()
     {
+        // Singleton check to prevent duplicates when reloading scenes
+        if (_instance != null && _instance != this)
+        {
+            GameLog.LogWarning("GameLifetimeScope: Duplicate detected. Destroying new instance.");
+            Destroy(gameObject);
+            return; // IMPORTANT: Do not call base.Awake() to prevent VContainer from building this duplicate scope
+        }
+
+        _instance = this;
+
+        // Ensure critical managers persist by reparenting them to this DDOL object
+        // if they are currently separate root objects.
+        // Managers moved to GameplayScope, so no need to reparent here.
+
         // First, run base Awake logic (LifetimeScope)
         base.Awake();
 
         // Then mark this GameObject as persistent across scene loads
         DontDestroyOnLoad(this.gameObject);
+    }
+
+    private void ReparentToPreserve(Component component)
+    {
+        if (component != null && component.transform.parent != transform)
+        {
+            component.transform.SetParent(transform);
+        }
     }
 
     protected override void Configure(IContainerBuilder builder)
@@ -76,16 +89,8 @@ public class GameLifetimeScope : LifetimeScope
             GameLog.Log("GameLifetimeScope: InputReader asset not assigned. Ensure consumers reference the same asset.");
         }
 
-        // Register services using helper method to reduce duplication
-        RegisterService<IUIManager, UIManager>(builder, uiManagerInstance);
-        RegisterService<ICombatService, TurnBasedCombatManager>(builder, turnBasedCombatManagerInstance);
-
         // TODO: Uncomment when the audio system is implemented
         // RegisterService<IAudioService, AudioManager>(builder, audioManagerInstance);
-
-        RegisterService<ICombatTransitionService, CombatTransitionManager>(builder, combatTransitionManagerInstance);
-        RegisterService<ICombatEncounterManager, CombatEncounterManager>(builder, combatEncounterManagerInstance);
-        RegisterServiceWithMultipleInterfaces(builder, upgradeManagerInstance);
 
         // Registramos GameEventBus como Singleton
         builder.Register<GameEventBus>(Lifetime.Singleton).As<IEventBus>();
@@ -100,69 +105,37 @@ public class GameLifetimeScope : LifetimeScope
             .As<Santa.Core.Save.ISaveContributorRegistry>()
             .AsSelf();
 
-        RegisterService<IGameStateService, GameStateManager>(builder, gameStateManagerInstance);
-        RegisterService<IGameplayUIService, GameplayUIManager>(builder, gameplayUIManagerInstance);
-        RegisterService<ILevelService, LevelManager>(builder, levelManagerInstance);
-        // CombatCameraManager is critical for CombatTransitionManager; provide Null object if missing.
-        if (combatCameraManagerInstance != null)
-        {
-            builder.RegisterComponent(combatCameraManagerInstance).As<ICombatCameraManager>().AsSelf();
-        }
-        else
-        {
-            var found = FindFirstObjectByType<CombatCameraManager>(FindObjectsInactive.Include);
-            if (found != null)
-            {
-                builder.RegisterComponent(found).As<ICombatCameraManager>().AsSelf();
-                GameLog.Log("GameLifetimeScope: CombatCameraManager found in hierarchy.");
-            }
-            else
-            {
-                builder.Register<NullCombatCameraManager>(Lifetime.Singleton).As<ICombatCameraManager>().AsSelf();
-                GameLog.LogWarning("GameLifetimeScope: CombatCameraManager missing. Registered NullCombatCameraManager placeholder.");
-            }
-        }
+        // GameStateManager moved to GameplayScope
 
         // TODO: Uncomment when the VFX system is implemented
         // RegisterService<IVFXService, VFXManager>(builder, vfxManagerInstance);
 
         // --- Dynamic UI via Addressables ---
-        // UpgradeUI loads via Addressables like other UIs.
-        // Its instance is managed by UpgradeUILoader registered as IUpgradeUI.
-        builder.Register<UpgradeUILoader>(Lifetime.Singleton)
-            .As<IUpgradeUI>()
-            .WithParameter(typeof(ILevelService), resolver => resolver.Resolve<ILevelService>())
-            .WithParameter(typeof(ICombatTransitionService), resolver => resolver.Resolve<ICombatTransitionService>())
-            .AsSelf();
+        // UpgradeUI moved to GameplayScope.
+        // See GameplayLifetimeScope.cs for registration.
 
-        // Register lifecycle manager (OPTIONAL) for automatic preload & release.
-        // Comment out if you prefer manual preload/release control.
-        builder.RegisterEntryPoint<UpgradeUILifecycleManager>();
-        // Preload frequently used panels like CombatUI at startup
-        builder.RegisterEntryPoint<PreloadUIPanelsEntryPoint>();
+        // PreloadUIPanelsEntryPoint moved to GameplayScope
+
+        // PreloadUIPanelsEntryPoint moved to GameplayScope
 
         // --- Pooling Service ---
-        builder.Register<PoolService>(Lifetime.Singleton).As<IPoolService>();
+        // Register as component (creates one on this GameObject if not found in scene)
+        var poolService = FindFirstObjectByType<Santa.Core.Pooling.PoolService>();
+        if (poolService == null)
+        {
+            poolService = gameObject.AddComponent<Santa.Core.Pooling.PoolService>();
+        }
+        builder.RegisterComponent(poolService).As<IPoolService>().AsSelf();
 
         // --- Combat Log Service ---
-        builder.Register<CombatLogService>(Lifetime.Singleton).As<ICombatLogService>();
-
-        // --- Player Reference ---
-        // Prefer component in hierarchy so designers can assign the player explicitly.
-        var playerRef = FindFirstObjectByType<PlayerReference>(FindObjectsInactive.Include);
-        if (playerRef != null)
+        // --- Combat Log Service ---
+        // Register as component (creates one on this GameObject if not found in scene)
+        var combatLog = FindFirstObjectByType<Santa.Infrastructure.Combat.CombatLogService>();
+        if (combatLog == null)
         {
-            builder.RegisterComponent(playerRef).As<IPlayerReference>().AsSelf();
+            combatLog = gameObject.AddComponent<Santa.Infrastructure.Combat.CombatLogService>();
         }
-        else
-        {
-            // Create a scene GameObject with PlayerReference if missing
-            var go = new GameObject("[Auto] PlayerReference");
-            playerRef = go.AddComponent<PlayerReference>();
-            DontDestroyOnLoad(go);
-            builder.RegisterComponent(playerRef).As<IPlayerReference>().AsSelf();
-            GameLog.Log("GameLifetimeScope: PlayerReference component not found. Created auto-discovery instance. Consider adding PlayerReference to the base scene for reliability.");
-        }
+        builder.RegisterComponent(combatLog).As<ICombatLogService>().AsSelf();
 
         // Register SaveService from hierarchy only if it exists (optional for test scenes)
         var saveService = FindFirstObjectByType<Santa.Core.Save.SaveService>(FindObjectsInactive.Include);
@@ -178,41 +151,16 @@ public class GameLifetimeScope : LifetimeScope
         // --- Hierarchy Components (Optional Registrations) ---
         // These components are optional and will be registered only if found in the scene
         TryRegisterOptionalComponent<GameInitializer>(builder);
-        TryRegisterOptionalComponent<PlayerInteraction>(builder);
-
-        // PauseMenuController as IPauseMenuService (required for exploration pause)
-        var pauseMenuController = FindFirstObjectByType<Santa.UI.PauseMenuController>(FindObjectsInactive.Include);
-        GameLog.Log($"GameLifetimeScope: Searching for PauseMenuController... Found: {pauseMenuController != null}");
-        if (pauseMenuController != null)
-        {
-            GameLog.Log($"GameLifetimeScope: Registering PauseMenuController '{pauseMenuController.gameObject.name}' as IPauseMenuService");
-            builder.RegisterComponent(pauseMenuController).As<Santa.Core.IPauseMenuService>().AsSelf();
-        }
-        else
-        {
-            GameLog.LogWarning("GameLifetimeScope: PauseMenuController not found. Pause functionality disabled.");
-        }
-
-        // Legacy binder removed; Pause is driven by IPauseMenuService + Addressables
-        // TryRegisterOptionalComponent<Santa.UI.VirtualPauseMenuBinder>(builder);
         TryRegisterOptionalComponent<Santa.Presentation.HUD.VirtualPauseButton>(builder);
 
-        // NOTE: CombatUI and UpgradeUI are instantiated dynamically via Addressables (see UIManager)
-        // They should not be registered here nor in the base scene.
-
-        TryRegisterOptionalComponent<CombatScenePool>(builder);
-
         // GraphicsSettings components - PC and Mobile
-#if UNITY_STANDALONE
-        var graphicsSettingsManager = FindFirstObjectByType<GraphicsSettingsManager>(FindObjectsInactive.Include);
-        if (graphicsSettingsManager != null)
+#if UNITY_STANDALONE || UNITY_EDITOR
+        var graphicsSettingsManager = FindFirstObjectByType<Santa.Presentation.Menus.GraphicsSettingsManager>(FindObjectsInactive.Include);
+        if (graphicsSettingsManager == null)
         {
-            builder.RegisterComponent(graphicsSettingsManager).As<IGraphicsSettingsService>().AsSelf();
+            graphicsSettingsManager = gameObject.AddComponent<Santa.Presentation.Menus.GraphicsSettingsManager>();
         }
-        else
-        {
-            builder.Register<IGraphicsSettingsService>(_ => new NullGraphicsSettingsService(), Lifetime.Singleton);
-        }
+        builder.RegisterComponent(graphicsSettingsManager).As<IGraphicsSettingsService>().AsSelf();
         TryRegisterOptionalComponent<GraphicsSettingsController>(builder);
 #else
         // Mobile platforms: register null graphics service

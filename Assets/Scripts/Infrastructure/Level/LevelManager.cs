@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Santa.Core;
@@ -37,17 +38,16 @@ namespace Santa.Infrastructure.Level
         private GameObject _liberatedContainer;
         private Santa.Core.Save.EnvironmentDecorState _decorState;
         private IPoolService _pool;
-        private InputReader _inputReader;
+        [Header("Dependencies")]
+        [Tooltip("InputReader asset. If null, tries to find in Resources.")]
+        [SerializeField] private InputReader inputReaderAsset;
+
         private CinemachineCamera _currentLiberationCamera;
         private readonly HashSet<LevelData> _prewarmedLevels = new();
         private CancellationTokenSource _levelChangeCancellation;
 
-        [VContainer.Inject]
-        public void Construct(IPoolService pool, InputReader inputReader)
-        {
-            _pool = pool;
-            _inputReader = inputReader;
-        }
+        // [VContainer.Inject] Removed to prevent resolution errors
+        // public void Construct(...) {}
 
         private void Start()
         {
@@ -57,6 +57,12 @@ namespace Santa.Infrastructure.Level
             }
             // Ensure shader starts clean
             dissolveController?.ResetShaders();
+            if (_pool == null)
+            {
+                var poolImpl = FindFirstObjectByType<Santa.Core.Pooling.PoolService>();
+                if (poolImpl != null) _pool = poolImpl;
+            }
+
             // Locate EnvironmentDecorState to persist liberation changes (optional, uses scene search)
             _decorState = FindFirstObjectByType<Santa.Core.Save.EnvironmentDecorState>(FindObjectsInactive.Include);
             if (_decorState == null)
@@ -108,10 +114,16 @@ namespace Santa.Infrastructure.Level
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.Log($"Liberating level: {currentLevel.levelName} (Sequence Started)");
 #endif
-            // 1. Block Input
-            if (_inputReader != null)
+            if (inputReaderAsset == null)
             {
-                _inputReader.DisableGameplayInput();
+                // Fallback: Find in Resources or Global Scope
+                inputReaderAsset = Resources.FindObjectsOfTypeAll<InputReader>().FirstOrDefault();
+            }
+
+            // 1. Block Input
+            if (inputReaderAsset != null)
+            {
+                inputReaderAsset.DisableGameplayInput();
             }
 
             // 2. Setup Camera
@@ -178,9 +190,9 @@ namespace Santa.Infrastructure.Level
                 _currentLiberationCamera.gameObject.SetActive(false);
             }
 
-            if (_inputReader != null)
+            if (inputReaderAsset != null)
             {
-                _inputReader.EnableGameplayInput();
+                inputReaderAsset.EnableGameplayInput();
             }
 
             // Record liberation

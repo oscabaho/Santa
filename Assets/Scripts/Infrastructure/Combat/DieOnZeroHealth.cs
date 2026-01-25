@@ -16,16 +16,17 @@ namespace Santa.Infrastructure.Combat
     private IEventBus _eventBus;
     // Tracker is event-driven; no direct reference needed.
 
-    [Inject]
-    public void Construct(IEventBus eventBus)
-    {
-        _eventBus = eventBus;
-    }
+    // [Inject] removed
+    // public void Construct(IEventBus eventBus) ...
 
     private void Awake()
     {
         _health = GetComponent<HealthComponentBehaviour>();
-        // Tracker subscribes to CharacterDeathEvent; no lookup required.
+        if (_eventBus == null)
+        {
+             // Use the global static instance since we cannot Inject/Find it as component
+             _eventBus = GameEventBus.Instance;
+        }
     }
 
     private void OnEnable()

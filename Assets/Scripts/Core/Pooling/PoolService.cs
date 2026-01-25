@@ -4,21 +4,16 @@ using UnityEngine;
 
 namespace Santa.Core.Pooling
 {
-    /// <summary>
-    /// Simple, fast GameObject pooling service.
-    /// - One queue per key
-    /// - Pre-allocated lists
-    /// - No LINQ
-    /// </summary>
-    public class PoolService : IPoolService
+    public class PoolService : MonoBehaviour, IPoolService
     {
         private readonly Dictionary<string, Queue<GameObject>> _pools = new Dictionary<string, Queue<GameObject>>(32);
-        private readonly Transform _root;
+        private Transform _root;
 
-        public PoolService()
+        private void Awake()
         {
+            // Use a child object as pool root to keep hierarchy clean
             var rootGo = new GameObject("[PoolRoot]");
-            Object.DontDestroyOnLoad(rootGo);
+            rootGo.transform.SetParent(transform);
             _root = rootGo.transform;
         }
 

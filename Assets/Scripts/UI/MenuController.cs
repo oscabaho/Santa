@@ -11,7 +11,7 @@ public class MenuController : MonoBehaviour
 
     public void IrASalida()
     {
-        SceneManager.LoadScene("Menu Principal");
+        SceneManager.LoadScene("Menu");
     }
 
     public void SalirDelJuego()

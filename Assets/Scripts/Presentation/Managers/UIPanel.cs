@@ -111,5 +111,22 @@ public class UIPanel : MonoBehaviour
         GameLog.Log($"UIPanel.Hide() finished for {gameObject.name}.", gameObject);
 #endif
     }
+    /// <summary>
+    /// Hides the panel immediately without animation (used for preloading).
+    /// </summary>
+    public virtual void HideImmediate()
+    {
+        if (CanvasGroup == null)
+        {
+            CanvasGroup = GetComponent<CanvasGroup>();
+        }
+
+        if (CanvasGroup != null)
+        {
+            CanvasGroup.alpha = 0f;
+            CanvasGroup.interactable = false;
+            CanvasGroup.blocksRaycasts = false;
+        }
+    }
 }
 }

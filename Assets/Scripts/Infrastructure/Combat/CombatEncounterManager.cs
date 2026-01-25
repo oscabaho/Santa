@@ -15,18 +15,22 @@ namespace Santa.Infrastructure.Combat
     private CombatScenePool _combatScenePool;
     private ICombatService _combatService;
 
-    [Inject]
-    public void Construct(
-        IGameStateService gameStateService,
-        ICombatTransitionService combatTransitionService,
-        CombatScenePool combatScenePool,
-        ICombatService combatService)
-    {
-        _gameStateService = gameStateService;
-        _combatTransitionService = combatTransitionService;
-        _combatScenePool = combatScenePool;
-        _combatService = combatService;
-    }
+        // [Inject] removed to support safe runtime discovery
+        // public void Construct(...) ...
+
+        private void EnsureDependencies()
+        {
+            if (_gameStateService == null)
+            {
+               var manager = FindFirstObjectByType<Santa.Infrastructure.State.GameStateManager>();
+               if (manager != null) _gameStateService = manager;
+            }
+            if (_combatTransitionService == null)
+            {
+                var trans = FindFirstObjectByType<CombatTransitionManager>();
+                if (trans != null) _combatTransitionService = trans;
+            }
+        }
 
     public async UniTask<bool> StartEncounterAsync(CombatEncounter encounter)
     {
@@ -39,8 +43,29 @@ namespace Santa.Infrastructure.Combat
         var poolKey = encounter.GetPoolKey();
         GameObject activeInstance = null;
 
+        // Ensure we have dependencies before proceeding
+        EnsureDependencies();
+
+        if (_gameStateService == null || _combatTransitionService == null)
+        {
+             GameLog.LogError("CombatEncounterManager: Critical dependencies (GameStateService or CombatTransitionService) not found.");
+             return false;
+        }
+
         try
         {
+            // 0. Ensure CombatScenePool is found (It lives in Gameplay scene)
+            if (_combatScenePool == null)
+            {
+                _combatScenePool = FindFirstObjectByType<CombatScenePool>();
+            }
+
+            if (_combatScenePool == null)
+            {
+                 GameLog.LogError("CombatEncounterManager: CombatScenePool not found in scene. Cannot start encounter.");
+                 return false;
+            }
+
             // 1. Get Instance from Pool
             activeInstance = await _combatScenePool.GetInstanceAsync(poolKey, encounter);
             if (activeInstance == null)
@@ -82,6 +107,20 @@ namespace Santa.Infrastructure.Combat
             }
 
             _gameStateService.OnCombatEnded += OnCombatEnded;
+
+            if (_combatService == null)
+            {
+                 // Find the Combat Service (Local in Gameplay)
+                 var combatManager = FindFirstObjectByType<TurnBasedCombatManager>();
+                 if (combatManager != null) _combatService = combatManager;
+            }
+
+            if (_combatService == null)
+            {
+                GameLog.LogError("CombatEncounterManager: CombatService not found (Local dependency missing in Global scope).");
+                ReleaseInstance(poolKey, activeInstance, encounter);
+                return false;
+            }
 
             _combatTransitionService.StartCombat(activeInstance);
             _combatService.StartCombat(participants);

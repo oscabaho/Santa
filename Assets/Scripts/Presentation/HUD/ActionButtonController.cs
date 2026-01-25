@@ -18,7 +18,7 @@ namespace Santa.Presentation.HUD
 /// - Keeps logic isolated from VirtualGamepadUI (sticks, other controls)
 /// </summary>
 [RequireComponent(typeof(Button))]
-public class ActionButtonController : MonoBehaviour
+public class ActionButtonController : MonoBehaviour, IPointerDownHandler
 {
     [Tooltip("Shared InputReader asset used across gameplay. Injected if available; can be assigned in Inspector as fallback.")]
     [SerializeField] private InputReader inputReader;
@@ -26,23 +26,10 @@ public class ActionButtonController : MonoBehaviour
     private IGameplayUIService _gameplayUIService;
     private Button _button;
     private bool _registered;
+    private float _lastInteractionTime;
+    private const float InteractionCooldown = 0.2f;
 
-    [Inject]
-    public void Construct(IGameplayUIService gameplayUIService, InputReader injectedInputReader)
-    {
-        _gameplayUIService = gameplayUIService;
-        if (injectedInputReader != null)
-        {
-            inputReader = injectedInputReader;
-        }
-
-        // If DI completes after OnEnable, try to register immediately
-        if (!_registered && isActiveAndEnabled && _gameplayUIService != null)
-        {
-            _gameplayUIService.RegisterActionButton(gameObject);
-            _registered = true;
-        }
-    }
+    // [Inject] removed to support runtime instantiation flexibility
 
     private void Awake()
     {
@@ -71,7 +58,11 @@ public class ActionButtonController : MonoBehaviour
 #endif
             }
         }
+        
+        // Default to hidden handled by GameplayUIManager upon registration. 
+        // We MUST remain active here so OnEnable runs and registers us.
     }
+
 
     private void OnEnable()
     {
@@ -83,8 +74,7 @@ public class ActionButtonController : MonoBehaviour
 #endif
         }
 
-        // Editor convenience / safety: auto-acquire InputReader if DI has not yet injected it.
-#if UNITY_EDITOR
+        // Auto-acquire InputReader if not assigned (Runtime & Editor)
         if (inputReader == null)
         {
             var readers = Resources.FindObjectsOfTypeAll<InputReader>();
@@ -92,11 +82,10 @@ public class ActionButtonController : MonoBehaviour
             {
                 inputReader = readers[0];
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogVerbose("ActionButtonController: Auto-acquired InputReader in Editor (fallback).", this);
+                GameLog.LogVerbose("ActionButtonController: Auto-acquired InputReader from Resources (fallback).", this);
 #endif
             }
         }
-#endif
 
         // Validate EventSystem & input module; auto-fix common misconfiguration at runtime (safe in dev/testing)
         var es = EventSystem.current;
@@ -150,10 +139,37 @@ public class ActionButtonController : MonoBehaviour
             }
         }
 
+        if (_gameplayUIService == null)
+        {
+            var ui = FindFirstObjectByType<Santa.Presentation.UI.GameplayUIManager>();
+            if (ui != null) _gameplayUIService = ui;
+        }
+
         if (_gameplayUIService != null && !_registered)
         {
             _gameplayUIService.RegisterActionButton(gameObject);
             _registered = true;
+        }
+    }
+
+    private void Update()
+    {
+        // Retry registration if failed in OnEnable (e.g., manager loaded late)
+        if (!_registered)
+        {
+            if (_gameplayUIService == null)
+            {
+                _gameplayUIService = FindFirstObjectByType<Santa.Presentation.UI.GameplayUIManager>();
+            }
+
+            if (_gameplayUIService != null)
+            {
+                _gameplayUIService.RegisterActionButton(gameObject);
+                _registered = true;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("ActionButtonController: Late registration effective.", this);
+#endif
+            }
         }
     }
 
@@ -176,6 +192,21 @@ public class ActionButtonController : MonoBehaviour
 
     private void OnButtonClicked()
     {
+        // Handled by OnPointerDown for better responsiveness, but kept as fallback
+        TriggerInteraction();
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (_button != null && !_button.interactable) return;
+        TriggerInteraction();
+    }
+
+    private void TriggerInteraction()
+    {
+        if (Time.unscaledTime - _lastInteractionTime < InteractionCooldown) return;
+        _lastInteractionTime = Time.unscaledTime;
+
         if (inputReader == null)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -185,7 +216,7 @@ public class ActionButtonController : MonoBehaviour
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        GameLog.LogVerbose($"ActionButtonController: Click -> RaiseInteract on '{inputReader.name}'.", this);
+        GameLog.LogVerbose($"ActionButtonController: Input Triggered -> RaiseInteract on '{inputReader.name}'.", this);
 #endif
         inputReader.RaiseInteract();
     }

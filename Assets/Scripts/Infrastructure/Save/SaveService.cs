@@ -20,35 +20,23 @@ namespace Santa.Core.Save
         private const string BackupKeyPrefix = "GameSave_Backup_";
         private const int MaxBackups = 2;
 
-        private ICombatService _combatService;
         private ISaveContributorRegistry _registry;
         private ISecureStorageService _secureStorage;
-        private Santa.Core.Player.IPlayerReference _playerRef;
         private IEventBus _eventBus;
         private float _lastSaveTime;
 
         [Inject]
-        public void Construct(ICombatService combatService, ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, Santa.Core.Player.IPlayerReference playerRef = null, IEventBus eventBus = null)
+        public void Construct(ISecureStorageService secureStorage, ISaveContributorRegistry registry = null, IEventBus eventBus = null)
         {
-            _combatService = combatService;
             _secureStorage = secureStorage;
             _registry = registry;
-            _playerRef = playerRef;
             _eventBus = eventBus;
         }
 
         public bool CanSaveNow()
         {
             // Allow saving only when NOT in combat.
-            // Exploration is considered when there is no combat service
-            // or when the combat manager reports not initialized.
-            if (_combatService == null)
-            {
-                return true;
-            }
-
-            // If a TurnBasedCombatManager is present, rely on its initialized flag.
-            // This avoids guessing phases and cleanly distinguishes exploration.
+            // Check for TurnBasedCombatManager logic directly
             return !TurnBasedCombatManager.CombatIsInitialized;
         }
 
@@ -56,7 +44,7 @@ namespace Santa.Core.Save
         {
             if (!CanSaveNow())
             {
-                Debug.LogWarning("SaveService: Save is disabled during combat.");
+                UnityEngine.Debug.LogWarning("SaveService: Save is disabled during combat.");
                 return;
             }
             var data = new SaveData
@@ -191,18 +179,28 @@ namespace Santa.Core.Save
 
         private GameObject GetPlayerObject()
         {
-            // Prefer combat service player if available
-            if (_combatService != null && _combatService.Player != null)
+            // 1. Try Combat Service first (if in combat)
+            // Use runtime lookup since SaveService is global and CombatService is local
+            var combatService = FindFirstObjectByType<TurnBasedCombatManager>(); 
+            if (combatService != null && combatService.Player != null)
             {
-                return _combatService.Player;
+                return combatService.Player;
             }
-            // Use injected player reference if available
-            if (_playerRef != null && _playerRef.Player != null)
+
+            // 2. Try Exploration Player (via PlayerReference or identifier)
+            // Use FindFirstObjectByType for interface implementation on MonoBehaviour
+            var playerRef = FindFirstObjectByType<Santa.Core.Player.PlayerReference>();
+            if (playerRef != null && playerRef.Player != null)
             {
-                return _playerRef.Player;
+                return playerRef.Player;
             }
+            
+            // Fallback to searching by identifier directly if manager missing
+            var explorationId = FindFirstObjectByType<ExplorationPlayerIdentifier>();
+            if (explorationId != null) return explorationId.gameObject;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.LogError("SaveService: Player reference not available. Ensure IPlayerReference is registered and present in the base scene.");
+            GameLog.LogWarning("SaveService: Player reference not available.");
 #endif
             return null;
         }

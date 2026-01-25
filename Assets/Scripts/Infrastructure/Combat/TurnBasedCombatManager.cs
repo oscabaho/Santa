@@ -47,16 +47,14 @@ namespace Santa.Infrastructure.Combat
 
         public static bool CombatIsInitialized { get; private set; } = false;
 
-        [Inject]
-        public void Construct(IUpgradeService upgradeService = null, ICombatTransitionService combatTransitionService = null, ICombatLogService combatLogService = null)
-        {
-            _upgradeService = upgradeService;
-            _combatTransitionService = combatTransitionService;
-            _combatLogService = combatLogService;
-        }
+        // [Inject] - Removed to avoid VContainer resolution errors across scopes.
+        // public void Construct(...) { } 
 
         private void Awake()
         {
+            // Resolve dependencies manually/lazily
+            _combatLogService = FindFirstObjectByType<CombatLogService>();
+            
             _actionExecutor = GetComponentInChildren<IActionExecutor>();
             _aiManager = GetComponentInChildren<IAIManager>();
 
@@ -101,6 +99,19 @@ namespace Santa.Infrastructure.Combat
                 GameLog.LogError("Combat cannot start without a player!");
 #endif
                 return;
+            }
+
+            if (_upgradeService == null)
+            {
+                 // Late resolve upgrade service (Global)
+                 var upg = FindFirstObjectByType<Santa.Presentation.Upgrades.UpgradeManager>();
+                 if (upg != null) _upgradeService = upg;
+            }
+
+            if (_combatTransitionService == null)
+            {
+                 var transition = FindFirstObjectByType<CombatTransitionManager>();
+                 if (transition != null) _combatTransitionService = transition;
             }
 
             // Sync Player AP with UpgradeService
@@ -488,7 +499,14 @@ namespace Santa.Infrastructure.Combat
                 GameLog.Log("--- COMBAT ENDED: DEFEAT ---");
 #endif
                 _combatLogService?.LogMessage("=== DEFEAT ===", CombatLogType.Info);
-                _combatTransitionService.EndCombat(false);
+                if (_combatTransitionService != null)
+                {
+                    _combatTransitionService.EndCombat(false);
+                }
+                else
+                {
+                    GameLog.LogError("TurnBasedCombatManager: CombatTransitionService missing. Cannot transition out of combat.");
+                }
                 // Only deactivate on defeat since no upgrade selection is needed
                 gameObject.SetActive(false);
             }

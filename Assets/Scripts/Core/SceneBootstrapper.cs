@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SceneBootstrapper : MonoBehaviour
 {
-    [SerializeField] private string _defaultSceneToLoad = "MainMenu"; // Fallback for builds
+    [SerializeField] private string _defaultSceneToLoad = "Menu"; // Fallback for builds
 
 #if UNITY_EDITOR
     // This static field will be set by the editor script before entering play mode.

@@ -13,7 +13,6 @@ namespace Santa.UI
     /// </summary>
     public class PauseMenuController : MonoBehaviour, Santa.Core.IPauseMenuService
     {
-        private VContainer.IObjectResolver _resolver;
         private IUIManager _uiManager;
         private ICombatService _combatService;
         private InputReader _input;
@@ -21,26 +20,48 @@ namespace Santa.UI
 
         public bool IsPaused { get; private set; }
 
-        // Lazy resolve UIManager to break circular dependency (UIManager injects IPauseMenuService)
-        private IUIManager UIManager => _uiManager ??= _resolver.Resolve<IUIManager>();
-
-        [Inject]
-        public void Construct(IObjectResolver resolver, ICombatService combatService, InputReader inputReader = null)
+        // Lazy resolve UIManager from scene to avoid circular dependency and injection issues
+        private IUIManager UIManager
         {
-            _resolver = resolver;
-            _input = inputReader;
-            _combatService = combatService;
+            get
+            {
+                 if (_uiManager == null)
+                 {
+                     _uiManager = FindFirstObjectByType<Santa.Presentation.UI.UIManager>();
+                     if (_uiManager == null)
+                     {
+                         // Last ditch effort: Try to find by interface
+                         _uiManager = (IUIManager)FindFirstObjectByType(typeof(Santa.Presentation.UI.UIManager));
+                     }
+                 }
+                 
+                 if (_uiManager == null)
+                 {
+                     GameLog.LogError("PauseMenuController: CRITICAL - UIManager not found in scene!");
+                 }
 
+                 return _uiManager;
+            }
+        }
+
+        // [Inject] removed to support safe runtime discovery
+        // public void Construct(...) ...
+
+        private void EnsureInputReader()
+        {
             if (_input == null)
             {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogWarning("PauseMenuController: InputReader not assigned. Pause via Escape key will not work.");
-#endif
+                 var readers = Resources.FindObjectsOfTypeAll<InputReader>();
+                 if (readers != null && readers.Length > 0)
+                 {
+                     _input = readers[0];
+                 }
             }
         }
 
         private void OnEnable()
         {
+            EnsureInputReader();
             if (_input != null)
             {
                 _input.PauseEvent += OnPauseInput;
@@ -85,6 +106,12 @@ namespace Santa.UI
             GameLog.Log("PauseMenuController.ShowPauseMenu: Setting Time.timeScale = 0");
             IsPaused = true;
             Time.timeScale = 0f;
+            if (UIManager == null)
+            {
+                GameLog.LogError("PauseMenuController.ShowPauseMenu: Cannot show pause menu because UIManager is null.");
+                return;
+            }
+
             GameLog.Log($"PauseMenuController.ShowPauseMenu: Calling UIManager.ShowPanel({PauseMenuAddress})");
             await UIManager.ShowPanel(PauseMenuAddress);
             // Hide exploration HUD while paused (VirtualGamepad)
@@ -99,10 +126,13 @@ namespace Santa.UI
             IsPaused = false;
             Time.timeScale = 1f;
 
-            // Hide the pause menu panel via UIManager (CanvasGroup-based)
-            UIManager.HidePanel(PauseMenuAddress);
-            // Restore exploration HUD (VirtualGamepad)
-            UIManager.ShowPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.VirtualGamepad).Forget();
+            if (UIManager != null)
+            {
+                // Hide the pause menu panel via UIManager (CanvasGroup-based)
+                UIManager.HidePanel(PauseMenuAddress);
+                // Restore exploration HUD (VirtualGamepad)
+                UIManager.ShowPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.VirtualGamepad).Forget();
+            }
         }
 
         public async UniTask TogglePause()

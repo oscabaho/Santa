@@ -28,21 +28,26 @@ namespace Santa.Presentation.UI
         private void Awake()
         {
             // Auto-find UI/DynamicPanels if not assigned, to avoid manual setup
-            if (dynamicPanelsParent == null)
+            FindDynamicPanelsParent();
+        }
+
+        private void FindDynamicPanelsParent()
+        {
+            if (dynamicPanelsParent != null) return;
+
+             // Prefer an object named exactly "DynamicPanels"
+            var allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < allTransforms.Length; i++)
             {
-                // Prefer an object named exactly "DynamicPanels"
-                var allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-                for (int i = 0; i < allTransforms.Length; i++)
+                var t = allTransforms[i];
+                if (t != null && t.name == GameConstants.Hierarchy.DynamicPanels)
                 {
-                    var t = allTransforms[i];
-                    if (t != null && t.name == GameConstants.Hierarchy.DynamicPanels)
-                    {
-                        dynamicPanelsParent = t;
-                        break;
-                    }
+                    dynamicPanelsParent = t;
+                    break;
                 }
             }
         }
+
 
         private static void EnsureUnderCanvas(GameObject instance)
         {
@@ -86,9 +91,9 @@ namespace Santa.Presentation.UI
             if (instance.TryGetComponent<Canvas>(out var selfCanvas))
             {
                 selfCanvas.overrideSorting = true;
-                // Use different orders to guarantee PauseMenu above HUD
-                var isPauseMenu = instance.name.StartsWith("PauseMenu");
-                var targetOrder = isPauseMenu ? 6000 : 5000;
+                // Use different orders to guarantee PauseMenu/UpgradeUI above HUD
+                var isOverlay = instance.name.StartsWith("PauseMenu") || instance.name.StartsWith("UpgradeUI");
+                var targetOrder = isOverlay ? 6000 : 5000;
                 if (selfCanvas.sortingOrder != targetOrder)
                     selfCanvas.sortingOrder = targetOrder;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -137,21 +142,29 @@ namespace Santa.Presentation.UI
                 return;
             }
 
-            // If panel is already cached, just show it.
+            // If panel is already cached, verify it still exists (it might have been destroyed on scene load)
             if (_addressToInstanceMap.TryGetValue(panelAddress, out var panelInstance))
             {
-                if (panelInstance.TryGetComponent<UIPanel>(out var panelComponent))
+                if (panelInstance == null)
                 {
-                    BringToFront(panelInstance);
-                    panelComponent.Show();
+                    // Stale reference (destroyed), remove from cache and proceed to reload.
+                    _addressToInstanceMap.Remove(panelAddress);
                 }
                 else
                 {
+                    if (panelInstance.TryGetComponent<UIPanel>(out var panelComponent))
+                    {
+                        BringToFront(panelInstance);
+                        panelComponent.Show();
+                    }
+                    else
+                    {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.CachedPanelMissingComponent, panelAddress));
+                        GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.UI.CachedPanelMissingComponent, panelAddress));
 #endif
+                    }
+                    return;
                 }
-                return;
             }
 
             // If not cached, verify key exists, then load and instantiate it.
@@ -159,6 +172,11 @@ namespace Santa.Presentation.UI
             {
                 if (!await IsAddressableKeyValid(panelAddress, "load")) return;
 
+                if (dynamicPanelsParent == null)
+                {
+                   // Try to find it again if it was lost (e.g. scene change)
+                   FindDynamicPanelsParent();
+                }
                 var parent = dynamicPanelsParent != null ? dynamicPanelsParent : transform;
                 var handle = Addressables.InstantiateAsync(panelAddress, parent);
                 await handle.ToUniTask();
@@ -331,8 +349,8 @@ namespace Santa.Presentation.UI
 
                     if (instance.TryGetComponent<UIPanel>(out var panel))
                     {
-                        // Ensure the panel remains hidden after preload
-                        panel.Hide();
+                        // Ensure the panel remains hidden logic (Immediate to prevent flicker)
+                        panel.HideImmediate();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                         GameLog.Log(string.Format(Santa.Core.Config.LogMessages.UI.PanelPreloaded, panelAddress));
 #endif

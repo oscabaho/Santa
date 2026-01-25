@@ -11,6 +11,13 @@ public class GameEventBus : IEventBus
     private readonly Dictionary<Type, List<Delegate>> _subscribers = new Dictionary<Type, List<Delegate>>();
     private readonly object _lock = new object();
 
+    public static IEventBus Instance { get; private set; }
+
+    public GameEventBus()
+    {
+        Instance = this;
+    }
+
     /// <summary>
     /// Publica un evento a todos los suscriptores del tipo correspondiente.
     /// </summary>

@@ -35,19 +35,8 @@ namespace Santa.Presentation.Combat
         private ICombatService _combatService;
         private readonly Queue<GameObject> _logEntries = new Queue<GameObject>();
 
-        [Inject]
-        public void Construct(ICombatLogService combatLogService, ICombatService combatService)
-        {
-            _combatLogService = combatLogService;
-            _combatService = combatService;
-
-            // If we're already active, we missed the OnEnable subscription (or it failed due to null deps),
-            // so we should subscribe now.
-            if (isActiveAndEnabled)
-            {
-                SubscribeToCombatLog();
-            }
-        }
+        // [Inject] public void Construct... removed
+        // Dependencies are resolved in OnEnable via FindFirstObjectByType
 
         private void SubscribeToCombatLog()
         {
@@ -92,8 +81,18 @@ namespace Santa.Presentation.Combat
 
         private void OnEnable()
         {
+            if (_combatLogService == null)
+            {
+                _combatLogService = FindFirstObjectByType<Santa.Infrastructure.Combat.CombatLogService>();
+            }
+
             SubscribeToCombatLog();
 
+            if (_combatService == null)
+            {
+                var mgr = FindFirstObjectByType<Santa.Infrastructure.Combat.TurnBasedCombatManager>();
+                if (mgr != null) _combatService = mgr;
+            }
 
             if (_combatService != null)
             {

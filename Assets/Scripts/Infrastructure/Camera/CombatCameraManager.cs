@@ -19,11 +19,14 @@ namespace Santa.Infrastructure.Camera
         private const int ACTIVE_PRIORITY = 1000;
         private const int INACTIVE_PRIORITY = 0;
 
-        [Inject]
-        public void Construct(IGameStateService gameStateService, IObjectResolver resolver)
+        private void Start()
         {
-            _gameStateService = gameStateService;
-            _resolver = resolver;
+            if (_gameStateService == null)
+            {
+               // Helper to find global manager
+               var global = FindFirstObjectByType<Santa.Infrastructure.State.GameStateManager>();
+               if (global != null) _gameStateService = global;
+            }
 
             if (_gameStateService != null)
             {
@@ -67,23 +70,15 @@ namespace Santa.Infrastructure.Camera
             _inCombat = true;
 
             // Lazily resolve the combat service when combat starts to avoid DI cycles
-            if (_combatService == null && _resolver != null)
+            // Lazily resolve the combat service when combat starts to avoid DI cycles
+            if (_combatService == null)
             {
-                try
+                var combatManager = FindFirstObjectByType<Santa.Infrastructure.Combat.TurnBasedCombatManager>();
+                if (combatManager != null) _combatService = combatManager;
+
+                if (_combatService != null)
                 {
-                    _combatService = _resolver.Resolve<ICombatService>();
-                    if (_combatService != null)
-                    {
-                        _combatService.OnPhaseChanged += HandlePhaseChanged;
-                    }
-                }
-                catch (System.Exception ex)
-                {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.CombatCamera.FailedToResolveCombatService, ex.Message));
-#else
-                _ = ex;
-#endif
+                    _combatService.OnPhaseChanged += HandlePhaseChanged;
                 }
             }
 

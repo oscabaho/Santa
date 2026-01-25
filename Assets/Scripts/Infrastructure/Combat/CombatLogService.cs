@@ -1,11 +1,13 @@
 using Santa.Core;
+using UnityEngine;
 
 namespace Santa.Infrastructure.Combat
 {
     /// <summary>
     /// Implementation of ICombatLogService for broadcasting combat messages.
+    /// Converted to MonoBehaviour to support FindFirstObjectByType lookup.
     /// </summary>
-    public class CombatLogService : ICombatLogService
+    public class CombatLogService : MonoBehaviour, ICombatLogService
     {
         public event System.Action<string, CombatLogType> OnMessageLogged;
 

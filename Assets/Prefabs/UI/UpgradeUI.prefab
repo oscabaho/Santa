@@ -135,7 +135,7 @@ MonoBehaviour:
   option2Card: {fileID: 5481225567883026614}
   titleText: {fileID: 1164904590477611538}
   closeButton: {fileID: 0}
-  fadeInDuration: 0.3
+  fadeInDuration: 1
 --- !u!1 &468084059027022274
 GameObject:
   m_ObjectHideFlags: 0

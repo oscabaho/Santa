@@ -52,11 +52,21 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         _stats.InitializeFromConfig(baseStatsConfig);
     }
 
-    [Inject]
-    public void Construct(IUpgradeUI upgradeUI, ICombatTransitionService combatTransitionService)
+    // [Inject] removed to avoid VContainer reliability issues
+    // public void Construct(...) ...
+
+    private void EnsureDependencies()
     {
-        _upgradeUI = upgradeUI;
-        _combatTransitionService = combatTransitionService;
+        if (_upgradeUI == null)
+        {
+            var ui = FindFirstObjectByType<Santa.Presentation.Upgrades.UpgradeUI>();
+            if (ui != null) _upgradeUI = ui;
+        }
+        if (_combatTransitionService == null)
+        {
+            var transition = FindFirstObjectByType<Santa.Infrastructure.Combat.CombatTransitionManager>();
+            if (transition != null) _combatTransitionService = transition;
+        }
     }
 
     private void Start()
@@ -64,8 +74,10 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
         LoadStats();
     }
 
-    public void PresentUpgradeOptions()
+    public async void PresentUpgradeOptions()
     {
+        EnsureDependencies();
+
         if (allPossibleUpgrades == null || allPossibleUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -81,13 +93,11 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
             availableUpgrades.RemoveAll(u => u.UpgradeName == _lastSelectedUpgrade);
         }
 
-        // Ensure there are at least two upgrades to choose from to prevent an infinite loop.
         if (availableUpgrades.Count < 2)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             GameLog.LogWarning($"Not enough unique upgrades to offer a choice. Only {availableUpgrades.Count} available.");
 #endif
-            // If there's at least one, we could offer it, but for now, we just end combat gracefully.
             _combatTransitionService?.EndCombat(true);
             return;
         }
@@ -106,7 +116,44 @@ public class UpgradeManager : MonoBehaviour, IUpgradeService, IUpgradeTarget, Sa
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.Log($"Offering upgrades: {option1.UpgradeName} vs {option2.UpgradeName}");
 #endif
-        _upgradeUI.ShowUpgrades(option1, option2);
+
+        try
+        {
+            // Dynamic check: If UI is not found, try to load it via UIManager
+            if (_upgradeUI == null)
+            {
+                var uiManager = FindFirstObjectByType<Santa.Presentation.UI.UIManager>();
+                if (uiManager != null)
+                {
+                    // Request UIManager to load/show the panel. This is async but returns void-like UniTask.
+                    await uiManager.ShowPanel(Santa.Core.Addressables.AddressableKeys.UIPanels.UpgradeUI);
+                    
+                    // After loading, the panel should be in the scene. Find it.
+                    // We search even inactive ones just in case ShowPanel didn't activate it for some reason (though it should).
+                    var ui = FindFirstObjectByType<Santa.Presentation.Upgrades.UpgradeUI>(FindObjectsInactive.Include);
+                    if (ui != null)
+                    {
+                        _upgradeUI = ui;
+                    }
+                }
+            }
+
+            if (_upgradeUI != null)
+            {
+                _upgradeUI.ShowUpgrades(option1, option2);
+            }
+            else
+            {
+                GameLog.LogError("UpgradeManager: UpgradeUI could not be loaded or found after request. Skipping to EndCombat.");
+                _combatTransitionService?.EndCombat(true);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            GameLog.LogError($"UpgradeManager: Exception showing upgrades: {ex.Message}. Skipping to EndCombat(Victory).");
+            GameLog.LogException(ex);
+            _combatTransitionService?.EndCombat(true);
+        }
     }
 
     public void ApplyUpgrade(AbilityUpgrade upgrade)

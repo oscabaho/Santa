@@ -67,9 +67,17 @@ namespace Santa.Infrastructure.Input
         /// </summary>
         public void RaiseInteract()
         {
+            int subscriberCount = InteractEvent?.GetInvocationList()?.Length ?? 0;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            GameLog.Log($"InputReader '{name}': RaiseInteract invoked.");
+            GameLog.Log($"InputReader '{name}': RaiseInteract invoked. Subscribers={subscriberCount}");
+#else
+            // CRITICAL: Log subscriber count even in Release for APK debugging
+            GameLog.Log($"InputReader: RaiseInteract -> Subscribers={subscriberCount}");
 #endif
+            if (subscriberCount == 0)
+            {
+                GameLog.LogError("InputReader: No subscribers to InteractEvent! PlayerInteraction may not be active.");
+            }
             InteractEvent?.Invoke();
         }
 

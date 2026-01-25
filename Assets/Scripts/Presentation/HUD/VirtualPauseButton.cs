@@ -19,12 +19,19 @@ namespace Santa.Presentation.HUD
         private Button _button;
         private bool _wired;
 
-        [Inject]
-        public void Construct(InputReader input, Santa.Core.IPauseMenuService pauseService = null)
+        // [Inject] removed to support safe runtime discovery
+        // public void Construct(...) ...
+
+        private void EnsureInputReader()
         {
-            GameLog.Log($"VirtualPauseButton.Construct: pauseService = {(pauseService != null ? "INJECTED" : "NULL")}");
-            _input = input;
-            _pauseService = pauseService; // may be null if controller not in scene
+            if (_input == null)
+            {
+                 var readers = Resources.FindObjectsOfTypeAll<InputReader>();
+                 if (readers != null && readers.Length > 0)
+                 {
+                     _input = readers[0];
+                 }
+            }
         }
 
         private void Awake()
@@ -39,6 +46,7 @@ namespace Santa.Presentation.HUD
 
         private void OnEnable()
         {
+            EnsureInputReader();
             if (_button != null && !_wired)
             {
                 _button.onClick.AddListener(OnPauseClicked);
@@ -61,6 +69,13 @@ namespace Santa.Presentation.HUD
             GameLog.Log($"VirtualPauseButton.OnPauseClicked: _pauseService = {(_pauseService != null ? "Available" : "NULL")}");
 
             // Toggle via service if available
+            if (_pauseService == null)
+            {
+                // Fallback: Lazy find in scene (since controller is local in Gameplay)
+                var found = FindFirstObjectByType<Santa.UI.PauseMenuController>();
+                if (found != null) _pauseService = found;
+            }
+
             if (_pauseService != null)
             {
                 _pauseService.TogglePause().Forget();

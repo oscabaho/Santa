@@ -1,5 +1,6 @@
 using Santa.Core;
 using Santa.Infrastructure.Input;
+using Santa.Presentation.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -22,22 +23,8 @@ public class VirtualGamepadUI : MonoBehaviour
 
     private IGameplayUIService _gameplayUIService;
 
-    [Inject]
-    public void Construct(IGameplayUIService gameplayUIService, InputReader injectedInputReader)
-    {
-        _gameplayUIService = gameplayUIService;
-        if (injectedInputReader != null)
-        {
-            inputReader = injectedInputReader; // Prefer injected shared asset
-        }
+    // [Inject] removed to avoid VContainer resolution errors on dynamic instantiation
 
-        // If DI completes after OnEnable already ran, try to register immediately here.
-        if (!_registered && actionButton != null && isActiveAndEnabled && _gameplayUIService != null)
-        {
-            _gameplayUIService.RegisterActionButton(actionButton);
-            _registered = true;
-        }
-    }
 
     private bool _registered;
     private Button _actionBtn; // legacy wiring fallback
@@ -79,8 +66,7 @@ public class VirtualGamepadUI : MonoBehaviour
             }
         }
 
-#if UNITY_EDITOR
-        // Editor convenience: try to auto-acquire InputReader if not assigned
+        // Try to auto-acquire InputReader if not assigned
         if (inputReader == null)
         {
             var readers = Resources.FindObjectsOfTypeAll<InputReader>();
@@ -88,11 +74,10 @@ public class VirtualGamepadUI : MonoBehaviour
             {
                 inputReader = readers[0];
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogVerbose("VirtualGamepadUI: Auto-acquired InputReader in Editor.", this);
+                GameLog.LogVerbose("VirtualGamepadUI: Auto-acquired InputReader from Resources.", this);
 #endif
             }
         }
-#endif
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         GameLog.LogVerbose($"VirtualGamepadUI: OnEnable complete. InputReader={(inputReader != null ? inputReader.name : "NULL")}, GameplayUIService={(_gameplayUIService != null ? "SET" : "NULL")}", this);
@@ -122,17 +107,16 @@ public class VirtualGamepadUI : MonoBehaviour
 
         if (_externalController == null)
         {
+            if (_gameplayUIService == null)
+            {
+                var ui = FindFirstObjectByType<GameplayUIManager>();
+                if (ui != null) _gameplayUIService = ui;
+            }
+
             if (_gameplayUIService != null && !_registered)
             {
                 _gameplayUIService.RegisterActionButton(actionButton);
                 _registered = true;
-            }
-            else if (_gameplayUIService == null)
-            {
-                // Late injection: UIManager injects after instantiating the prefab
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-                GameLog.LogVerbose("VirtualGamepadUI: Waiting for DI to complete (IGameplayUIService not yet injected).", this);
-#endif
             }
         }
     }

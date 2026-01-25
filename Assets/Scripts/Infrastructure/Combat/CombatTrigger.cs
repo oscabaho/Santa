@@ -18,11 +18,8 @@ namespace Santa.Infrastructure.Combat
         private Collider _interactionCollider;
         private CancellationTokenSource _loadCancellation;
 
-        [Inject]
-        public void Construct(ICombatEncounterManager encounterManager)
-        {
-            _encounterManager = encounterManager;
-        }
+        // [Inject] removed to support safe runtime discovery
+        // public void Construct(ICombatEncounterManager encounterManager) ...
 
         private void Awake()
         {
@@ -65,6 +62,13 @@ namespace Santa.Infrastructure.Combat
                 if (_interactionCollider != null)
                 {
                     _interactionCollider.enabled = false;
+                }
+
+                if (_encounterManager == null)
+                {
+                    // Lazy lookup
+                    var manager = FindFirstObjectByType<CombatEncounterManager>();
+                    if (manager != null) _encounterManager = manager;
                 }
 
                 if (_encounterManager == null)

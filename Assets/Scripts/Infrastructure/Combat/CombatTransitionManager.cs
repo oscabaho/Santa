@@ -21,8 +21,16 @@ namespace Santa.Infrastructure.Combat
         [SerializeField] private TransitionSequence endCombatSequence;
 
         [Header("Respawn Settings")]
-        [Tooltip("The transform where the player should respawn upon defeat.")]
+        [Tooltip("The transform where the player should respawn upon defeat. Can be assigned by LevelManager at runtime.")]
         [SerializeField] private Transform respawnPoint;
+
+        public void RegisterRespawnPoint(Transform point)
+        {
+            respawnPoint = point;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log($"CombatTransitionManager: Respawn point registered: {(point != null ? point.name : "NULL")}");
+#endif
+        }
 
         // --- Injected References ---
         private IUIManager _uiManager;
@@ -32,27 +40,24 @@ namespace Santa.Infrastructure.Combat
         // --- Discovered References ---
         private GameObject _explorationCamera;
         private GameObject _explorationPlayer;
-        private Santa.Core.Player.IPlayerReference _playerRef;
 
         // --- Runtime State ---
         private GameObject _currentCombatSceneParent;
         private TransitionContext _currentContext;
         private CancellationTokenSource _sequenceCTS;
 
-        [Inject]
-        public void Construct(IUIManager uiManager, IGameStateService gameStateService, ICombatCameraManager combatCameraManager = null, Santa.Core.Player.IPlayerReference playerRef = null)
-        {
-            _uiManager = uiManager;
-            _gameStateService = gameStateService;
-            _combatCameraManager = combatCameraManager; // May be null; will log on use.
-            _playerRef = playerRef;
-        }
+        // [Inject] removed to allow safer runtime discovery
+        // public void Construct(IGameStateService gameStateService) ...
 
         private void Awake()
         {
+            if (_gameStateService == null)
+            {
+                var manager = FindFirstObjectByType<Santa.Infrastructure.State.GameStateManager>();
+                if (manager != null) _gameStateService = manager;
+            }
             // Discover persistent exploration objects
-            // Prefer injected player reference
-            _explorationPlayer = _playerRef?.Player;
+            // Prefer injected player reference logic is removed as we cannot inject scene objects into global scope safely.
             if (_explorationPlayer == null)
             {
                 var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
@@ -60,15 +65,18 @@ namespace Santa.Infrastructure.Combat
             }
             _explorationCamera = UnityEngine.Camera.main != null ? UnityEngine.Camera.main.gameObject : null;
 
+            // In Menu scene, these might be missing. Don't disable the component, just log info.
             if (_explorationPlayer == null)
             {
-                GameLog.LogError(Santa.Core.Config.LogMessages.CombatTransition.ExplorationPlayerNotFound, this);
-                enabled = false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("CombatTransitionManager: Exploration Player not found (Normal in Menu).");
+#endif
             }
             if (_explorationCamera == null)
             {
-                GameLog.LogError(Santa.Core.Config.LogMessages.CombatTransition.MainCameraNotFound, this);
-                enabled = false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.Log("CombatTransitionManager: Main Camera not found (Normal in Menu).");
+#endif
             }
         }
 
@@ -83,6 +91,31 @@ namespace Santa.Infrastructure.Combat
             {
                 GameLog.LogError(string.Format(Santa.Core.Config.LogMessages.CombatTransition.CombatPlayerNotFound, _currentCombatSceneParent.name), this);
                 return;
+            }
+
+            // Lazy find CombatCameraManager if not injected (since it lives in Gameplay scope)
+            if (_combatCameraManager == null)
+            {
+                var foundCam = FindFirstObjectByType<CombatCameraManager>();
+                if (foundCam != null) _combatCameraManager = foundCam;
+            }
+
+            // Refresh Exploration Player and Camera references (since they might be stale from Menu scene or destroyed)
+            if (_explorationPlayer == null)
+            {
+                var playerIdentifier = FindFirstObjectByType<ExplorationPlayerIdentifier>();
+                if (playerIdentifier != null) _explorationPlayer = playerIdentifier.gameObject;
+            }
+            if (_explorationPlayer == null)
+            {
+                // Fallback: Try PlayerReference directly
+                var pRef = FindFirstObjectByType<Santa.Core.Player.PlayerReference>();
+                if (pRef != null) _explorationPlayer = pRef.Player;
+            }
+
+            if (_explorationCamera == null)
+            {
+                _explorationCamera = UnityEngine.Camera.main != null ? UnityEngine.Camera.main.gameObject : null;
             }
 
             // --- DYNAMIC CAMERA ASSIGNMENT ---
@@ -109,6 +142,11 @@ namespace Santa.Infrastructure.Combat
             _currentContext.AddTarget(TargetId.ExplorationPlayer, _explorationPlayer);
             _currentContext.AddTarget(TargetId.CombatPlayer, combatPlayer);
             _currentContext.AddTarget(TargetId.CombatSceneParent, _currentCombatSceneParent);
+            if (_uiManager == null)
+            {
+                _uiManager = FindFirstObjectByType<Santa.Presentation.UI.UIManager>();
+            }
+
             _currentContext.AddToContext("UIManager", _uiManager);
             _currentContext.AddToContext("GameStateService", _gameStateService);
 
