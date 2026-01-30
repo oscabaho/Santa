@@ -13,7 +13,7 @@ namespace Santa.Core
         /// Gets whether the gameplay UI is fully ready for interaction.
         /// </summary>
         bool IsReady { get; }
-        
+
         /// <summary>
         /// Event fired when the gameplay UI becomes ready for interaction.
         /// </summary>
@@ -23,14 +23,15 @@ namespace Santa.Core
         /// Shows or hides the action button.
         /// </summary>
         /// <param name="show">True to show the action button, false to hide it.</param>
-        void ShowActionButton(bool show);
-        
+        /// <param name="onAction">The callback to execute when the button is clicked (optional).</param>
+        void ShowActionButton(bool show, Action onAction = null);
+
         /// <summary>
         /// Registers an action button GameObject with the service.
         /// </summary>
         /// <param name="button">The button GameObject to register.</param>
         void RegisterActionButton(GameObject button);
-        
+
         /// <summary>
         /// Unregisters a previously registered action button.
         /// </summary>

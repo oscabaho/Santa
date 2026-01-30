@@ -2,9 +2,13 @@ using Santa.Core;
 using Santa.Core.Player;
 using Santa.Infrastructure.Camera;
 using Santa.Infrastructure.Combat;
+using Santa.Infrastructure.Input;
 using Santa.Infrastructure.Level;
 using Santa.Presentation.UI;
+using Santa.Presentation.Upgrades;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 
@@ -13,13 +17,23 @@ namespace Santa.Core.DI
     /// <summary>
     /// LifetimeScope specific to the Gameplay scene.
     /// Manages dependencies that only exist during gameplay (Combat, Level, Player, Camera).
+    /// 
+    /// Also ensures critical UI systems are initialized if Gameplay is loaded independently.
+    /// 
+    /// NOTE: UIManager is NOW registered here (Gameplay) since the UI is specific to Gameplay.
+    /// Menu scene has its own independent UI.
+    /// 
     /// Inherits from the parent GameLifetimeScope automatically if set up correctly in the Inspector.
     /// </summary>
     public class GameplayLifetimeScope : LifetimeScope
     {
-        [Header("Gameplay Specific Assignments")]
+        [Header("Gameplay Combat")]
         [SerializeField]
         private TurnBasedCombatManager turnBasedCombatManagerInstance;
+
+        [Header("Gameplay UI Management")]
+        [SerializeField]
+        private UIManager uiManagerInstance;
 
         [SerializeField]
         private LevelManager levelManagerInstance;
@@ -39,6 +53,41 @@ namespace Santa.Core.DI
 
         [SerializeField]
         private Santa.UI.PauseMenuController pauseMenuControllerInstance;
+
+        protected override void Awake()
+        {
+            // If Gameplay is loaded independently (not from Menu), ensure UI Event System is initialized
+            EnsureUIEventSystemInitialized();
+            
+            base.Awake();
+        }
+
+        /// <summary>
+        /// Ensures EventSystem is configured even if Gameplay loads independently.
+        /// This replicates the initialization from GameLifetimeScope if needed.
+        /// </summary>
+        private void EnsureUIEventSystemInitialized()
+        {
+            var eventSystem = FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>();
+            if (eventSystem == null)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogWarning("GameplayLifetimeScope: EventSystem not found. Creating one for independent Gameplay load.", this);
+#endif
+                var eventSystemGO = new GameObject("EventSystem");
+                eventSystem = eventSystemGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            }
+
+            // Ensure InputSystemUIInputModule
+            var uiInputModule = eventSystem.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            if (uiInputModule == null)
+            {
+                uiInputModule = eventSystem.gameObject.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("GameplayLifetimeScope: Added InputSystemUIInputModule for mobile support.", this);
+#endif
+            }
+        }
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -184,6 +233,39 @@ namespace Santa.Core.DI
                 {
                     builder.RegisterComponent(foundPause).As<IPauseMenuService>().AsSelf();
                 }
+            }
+
+            // --- Game State Manager (Gameplay-specific state management) ---
+            var gameState = FindFirstObjectByType<Santa.Infrastructure.State.GameStateManager>(FindObjectsInactive.Include);
+            if (gameState != null)
+            {
+                builder.RegisterComponent(gameState).As<IGameStateService>().AsSelf();
+            }
+            else
+            {
+                GameLog.LogWarning("GameplayLifetimeScope: GameStateManager not found in scene!");
+            }
+
+            // --- Combat Encounter Manager (Manages combat encounters) ---
+            var combatEncounter = FindFirstObjectByType<Santa.Infrastructure.Combat.CombatEncounterManager>(FindObjectsInactive.Include);
+            if (combatEncounter != null)
+            {
+                builder.RegisterComponent(combatEncounter).AsSelf();
+            }
+            else
+            {
+                GameLog.LogWarning("GameplayLifetimeScope: CombatEncounterManager not found in scene!");
+            }
+
+            // --- Upgrade Manager ---
+            var upgradeManager = FindFirstObjectByType<Santa.Presentation.Upgrades.UpgradeManager>(FindObjectsInactive.Include);
+            if (upgradeManager != null)
+            {
+                builder.RegisterComponent(upgradeManager).As<IUpgradeService>().AsSelf();
+            }
+            else
+            {
+                GameLog.LogWarning("GameplayLifetimeScope: UpgradeManager not found in scene!");
             }
 
             GameLog.Log("GameplayLifetimeScope CONFIGURED!");

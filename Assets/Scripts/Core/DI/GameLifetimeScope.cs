@@ -12,36 +12,32 @@ using Santa.Presentation.Menus;
 using Santa.Presentation.UI;
 using Santa.Presentation.Upgrades;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 
 public class GameLifetimeScope : LifetimeScope
 {
-    [Header("Shared Assets")]
+    [Header("Shared Assets - Global/Persistent Services")]
     [SerializeField]
     private InputReader inputReaderAsset;
-    [SerializeField]
-    private UIManager uiManagerInstance;
 
     // TODO: Uncomment when the audio system is implemented
     // [SerializeField]
     // private AudioManager audioManagerInstance;
 
-    [SerializeField]
-    private CombatTransitionManager combatTransitionManagerInstance;
-
-    [SerializeField]
-    private CombatEncounterManager combatEncounterManagerInstance;
-
-    [SerializeField]
-    private UpgradeManager upgradeManagerInstance;
-
-    [SerializeField]
-    private GameStateManager gameStateManagerInstance;
-
     // TODO: Uncomment when the VFX system is implemented
     // [SerializeField]
     // private VFXManager vfxManagerInstance;
+
+    // NOTE: Services below have been moved to GameplayLifetimeScope
+    // as they are only used during Gameplay, not in Menu.
+    // If they are needed globally, uncomment and assign in Menu scene.
+    // [SerializeField] private CombatTransitionManager combatTransitionManagerInstance;
+    // [SerializeField] private CombatEncounterManager combatEncounterManagerInstance;
+    // [SerializeField] private UpgradeManager upgradeManagerInstance;
+    // [SerializeField] private GameStateManager gameStateManagerInstance;
 
     private static GameLifetimeScope _instance;
     public static GameLifetimeScope Instance => _instance;
@@ -77,8 +73,98 @@ public class GameLifetimeScope : LifetimeScope
         }
     }
 
+    /// <summary>
+    /// CRITICAL FOR MOBILE: Initialize the UI Event System with proper input module configuration.
+    /// This must run before any UI components are initialized to ensure mobile touch input works.
+    /// 
+    /// Configures:
+    /// - EventSystem (creates if missing)
+    /// - InputSystemUIInputModule (replaces legacy StandaloneInputModule)
+    /// - GraphicRaycaster on Canvas (if needed)
+    /// - Camera.main for ScreenSpaceCamera Canvas
+    /// </summary>
+    private void InitializeUIEventSystem()
+    {
+        // Step 1: Ensure EventSystem exists
+        var eventSystem = FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>();
+        if (eventSystem == null)
+        {
+            GameLog.LogError("GameLifetimeScope: EventSystem NOT FOUND! Creating one now.", this);
+            var eventSystemGO = new GameObject("EventSystem");
+            eventSystem = eventSystemGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.LogVerbose("GameLifetimeScope: EventSystem verified.", this);
+#endif
+
+        // Step 2: Remove legacy StandaloneInputModule if present (Old Input System)
+        var legacyModule = eventSystem.GetComponent<StandaloneInputModule>();
+        if (legacyModule != null)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.LogWarning("GameLifetimeScope: Removing legacy StandaloneInputModule (Old Input System).", this);
+#endif
+            Destroy(legacyModule);
+        }
+
+        // Step 3: Ensure InputSystemUIInputModule exists (New Input System - CRITICAL for mobile)
+        var uiInputModule = eventSystem.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+        if (uiInputModule == null)
+        {
+            uiInputModule = eventSystem.gameObject.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            GameLog.Log("GameLifetimeScope: Added InputSystemUIInputModule (New Input System) for mobile touch support.", this);
+#else
+            GameLog.Log("GameLifetimeScope: InputSystemUIInputModule configured for mobile input.");
+#endif
+        }
+
+        // Step 4: Verify Canvas configuration
+        var canvas = FindFirstObjectByType<Canvas>();
+        if (canvas != null)
+        {
+            // Ensure Canvas has GraphicRaycaster
+            var raycaster = canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>();
+            if (raycaster == null)
+            {
+                canvas.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                GameLog.LogVerbose("GameLifetimeScope: Added GraphicRaycaster to Canvas.", this);
+#endif
+            }
+
+            // Validate Camera for ScreenSpaceCamera mode
+            if (canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
+            {
+                var mainCam = UnityEngine.Camera.main;
+                if (mainCam != null)
+                {
+                    canvas.worldCamera = mainCam;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    GameLog.LogVerbose("GameLifetimeScope: Assigned Camera.main to Canvas.worldCamera.", this);
+#endif
+                }
+                else
+                {
+                    GameLog.LogError("GameLifetimeScope: Canvas is ScreenSpaceCamera but Camera.main is NULL! Ensure main camera is tagged 'MainCamera'.", this);
+                }
+            }
+        }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        GameLog.Log("GameLifetimeScope: UI Event System initialized successfully.", this);
+#else
+        GameLog.Log("GameLifetimeScope: UI Event System ready for mobile input.");
+#endif
+    }
+
     protected override void Configure(IContainerBuilder builder)
     {
+        // CRITICAL: Initialize UI Event System first (before any UI components)
+        // This ensures EventSystem and InputSystemUIInputModule are ready for mobile
+        InitializeUIEventSystem();
+
         // Register shared InputReader if assigned (prevents desync between UI and gameplay)
         if (inputReaderAsset != null)
         {
@@ -105,7 +191,7 @@ public class GameLifetimeScope : LifetimeScope
             .As<Santa.Core.Save.ISaveContributorRegistry>()
             .AsSelf();
 
-        // GameStateManager moved to GameplayScope
+        // NOTE: GameStateManager moved to GameplayScope
 
         // TODO: Uncomment when the VFX system is implemented
         // RegisterService<IVFXService, VFXManager>(builder, vfxManagerInstance);

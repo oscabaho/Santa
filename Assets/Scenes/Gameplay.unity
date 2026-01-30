@@ -1553,6 +1553,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   turnBasedCombatManagerInstance: {fileID: 1288056520}
+  uiManagerInstance: {fileID: 426898261}
   levelManagerInstance: {fileID: 80191392}
   combatCameraManagerInstance: {fileID: 443836301}
   gameplayUIManagerInstance: {fileID: 2060780106}

@@ -47,9 +47,6 @@ namespace Santa.Infrastructure.Combat
 
         public static bool CombatIsInitialized { get; private set; } = false;
 
-        // [Inject] - Removed to avoid VContainer resolution errors across scopes.
-        // public void Construct(...) { } 
-
         private void Awake()
         {
             // Resolve dependencies manually/lazily

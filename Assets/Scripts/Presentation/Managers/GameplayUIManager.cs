@@ -68,11 +68,21 @@ namespace Santa.Presentation.UI
             }
         }
 
-        public void ShowActionButton(bool show)
+        public void ShowActionButton(bool show, Action onAction = null)
         {
             _lastRequestedShowState = show; // Always record latest intent.
             if (actionButtonGameObject != null)
             {
+                // If the button is ready, pass the callback if provided
+                if (show && onAction != null)
+                {
+                    var controller = actionButtonGameObject.GetComponent<Santa.Presentation.HUD.ActionButtonController>();
+                    if (controller != null)
+                    {
+                        controller.SetActionCallback(onAction);
+                    }
+                }
+
                 // If the button is ready, just set its state directly.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 GameLog.Log($"GameplayUIManager: ShowActionButton({show}).", this);
